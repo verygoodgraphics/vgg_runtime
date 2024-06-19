@@ -165,7 +165,7 @@ public:
     return m_inv;
   }
 
-  Transform operator*(const Transform& other)
+  Transform operator*(const Transform& other) const
   {
     return Transform(this->matrix() * other.matrix());
   }

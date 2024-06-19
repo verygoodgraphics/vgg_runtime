@@ -69,19 +69,17 @@ public:
   EOverflow      overflow{ OF_HIDDEN };
   EWindingType   windingRule{ WR_EVEN_ODD };
   ContextSetting contextSetting;
-  EObjectType    type;
-  bool           visible{ true };
   ContourData    contour;
   ContourOption  maskOption;
+  bool           visible{ true };
 
-  const int uniqueID{ 0 };
-
+  const EObjectType  type;
+  const int          uniqueID{ 0 };
   const ERenderTrait renderTrait{ ERenderTraitBits::RT_DEFAULT };
 
   PaintNode::EventHandler paintNodeEventHandler;
-
-  std::optional<VShape> path;
-  Bounds                bounds;
+  std::optional<VShape>   path;
+  Bounds                  bounds;
 
   std::array<float, 4> frameRadius{ 0, 0, 0, 0 };
   float                cornerSmooth{ 0 };
@@ -89,6 +87,7 @@ public:
   Ref<StyleItem>            renderNode;
   ShapeAttribute*           shapeItem{ nullptr };
   Ref<TransformAttribute>   transformAttr;
+  Ref<TransformAttribute>   childTransform;
   std::unique_ptr<Accessor> accessor;
 
   PaintNode__pImpl(
@@ -103,7 +102,9 @@ public:
     , renderTrait(renderTrait)
   {
     transformAttr = TransformAttribute::Make();
+    childTransform = TransformAttribute::Make();
     api->observe(transformAttr);
+    api->observe(childTransform);
 
     if (initBase)
     {
@@ -130,11 +131,11 @@ public:
     auto p = q_ptr->parent();
     if (!p)
     {
-      mat *= q_ptr->transform().matrix();
+      mat *= q_ptr->getTransform().matrix();
       return;
     }
     p.get()->d_ptr->worldTransform(mat);
-    mat *= q_ptr->transform().matrix();
+    mat *= q_ptr->getTransform().matrix();
   }
 };
 
@@ -160,6 +161,11 @@ PaintNode::PaintNode(
 int PaintNode::uniqueID() const
 {
   return d_ptr->uniqueID;
+}
+
+EObjectType PaintNode::type() const
+{
+  return d_ptr->type;
 }
 
 void PaintNode::setContextSettings(const ContextSetting& settings)
@@ -206,14 +212,14 @@ Transform PaintNode::mapTransform(const PaintNode* node) const
     return Transform(mat);
   for (std::size_t i = 0; i < path1.size() && path1[i] != lca; i++)
   {
-    auto skm = path1[i]->transform().matrix();
+    auto skm = path1[i]->getTransform().matrix();
     auto inv = glm::inverse(skm);
     mat = mat * inv;
   }
 
   for (int i = lcaIdx - 1; i >= 0; i--)
   {
-    const auto m = path2[i]->transform().matrix();
+    const auto m = path2[i]->getTransform().matrix();
     mat = mat * m;
   }
   return Transform(mat);
@@ -232,7 +238,7 @@ void PaintNode::render(Renderer* renderer)
       [&](SkCanvas* canvas, const SkPaint& p) { canvas->saveLayer(0, &p); });
     {
       SkAutoCanvasRestore acr(canvas, true);
-      canvas->concat(toSkMatrix(transform().matrix()));
+      canvas->concat(toSkMatrix(d_ptr->transformAttr->getTransform().matrix()));
 
       if (_->renderTrait & ERenderTraitBits::RT_RENDER_SELF)
       {
@@ -240,6 +246,8 @@ void PaintNode::render(Renderer* renderer)
       }
       if (_->renderTrait & ERenderTraitBits::RT_RENDER_CHILDREN)
       {
+        SkAutoCanvasRestore acr(canvas, true);
+        canvas->concat(toSkMatrix(d_ptr->childTransform->getTransform().matrix()));
         paintChildren(renderer);
       }
     }
@@ -260,12 +268,12 @@ void PaintNode::debug(Renderer* render)
   auto canvas = render->canvas();
   ASSERT(canvas);
   SkAutoCanvasRestore acr(canvas, true);
-  canvas->concat(toSkMatrix(transform().matrix()));
+  canvas->concat(toSkMatrix(getTransform().matrix()));
   SkPaint strokePen;
   strokePen.setStyle(SkPaint::kStroke_Style);
   strokePen.setColor(SK_ColorRED);
   strokePen.setStrokeWidth(2);
-  canvas->drawRect(toSkRect(bounds().map(transform().inverse())), strokePen);
+  canvas->drawRect(toSkRect(bounds().map(getTransform().inverse())), strokePen);
   if (hoverBounds && d_ptr->renderNode && (d_ptr->renderTrait & ERenderTraitBits::RT_RENDER_SELF))
     d_ptr->renderNode->debug(render);
   for (const auto& e : m_children)
@@ -293,7 +301,7 @@ void PaintNode::nodeAt(int x, int y, NodeVisitor visitor, void* userData)
     return;
   if (bounds().contains(x, y))
   {
-    auto local = transform().inverse() * glm::vec3(x, y, 1);
+    auto local = getTransform().inverse() * glm::vec3(x, y, 1);
     for (auto c = rbegin(); c != rend(); ++c)
     {
       (*c)->nodeAt(local.x, local.y, visitor, userData);
@@ -331,15 +339,17 @@ VShape PaintNode::childPolyOperation() const
   }
   if (m_children.size() == 1)
   {
-    auto paintNode = m_children.front().get();
-    return paintNode->asVisualShape(&paintNode->transform());
+    auto       paintNode = m_children.front().get();
+    const auto t = paintNode->getTransform();
+    return paintNode->asVisualShape(&t);
   }
 
   std::vector<std::pair<VShape, EBoolOp>> ct;
   for (auto it = m_children.begin(); it != m_children.end(); ++it)
   {
-    auto paintNode = it->get();
-    auto childMask = paintNode->asVisualShape(&paintNode->transform());
+    auto       paintNode = it->get();
+    const auto t = paintNode->getTransform();
+    auto       childMask = paintNode->asVisualShape(&t);
     ct.emplace_back(childMask, paintNode->clipOperator());
   }
 
@@ -355,7 +365,6 @@ VShape PaintNode::childPolyOperation() const
     {
       rhs = ct[i].first;
       skPath.op(rhs, op);
-      // Op(skPath, rhs, skop, &skPath);
     }
     else
     {
@@ -374,13 +383,12 @@ VShape PaintNode::childPolyOperation() const
   return VShape(path);
 }
 
-VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
+VShape PaintNode::makeContour(ContourOption option, const Transform* mat)
 {
   VGG_IMPL(PaintNode);
   VShape path;
   if (_->contour)
   {
-    // OPTIMIZE: cache the path to avoid recreate for everytime
     std::visit(
       Overloaded{
         [&](const Ellipse& c) { path.setOval(c); },
@@ -391,13 +399,12 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
         [&](const VectorNetwork& p) {},
       },
       *_->contour);
-    // auto p = layer::makePath(*_->contour);
-    if (mat)
-    {
-      VShape res;
-      path.transform(res, toSkMatrix(mat->matrix()));
-      return res;
-    }
+    // if (mat)
+    // {
+    //   VShape res;
+    //   path.transform(res, toSkMatrix(mat->matrix()));
+    //   return res;
+    // }
     return path;
   }
 
@@ -405,9 +412,11 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
   {
     for (auto it = begin(); it != end(); ++it)
     {
-      auto paintNode = it->get();
-      auto childMask = paintNode->makeContourImpl(option, &paintNode->transform());
-      path.op(childMask, op);
+      auto       paintNode = it->get();
+      // auto child = paintNode->makeContour(option, &paintNode->transform());
+      const auto currentTransform = paintNode->getTransform();
+      auto       child = paintNode->asVisualShape(&currentTransform);
+      path.op(child, op);
     }
   };
 
@@ -430,19 +439,17 @@ VShape PaintNode::makeContourImpl(ContourOption option, const Transform* mat)
       path = childPolyOperation();
       break;
   }
-  if (mat)
-  {
-    VShape res;
-    path.transform(res, toSkMatrix(mat->matrix()));
-    return res;
-  }
   return path;
 }
 
 VShape PaintNode::asVisualShape(const Transform* mat)
 {
   VShape mask;
-  mask = makeContourImpl(maskOption(), mat);
+  mask = makeContour(maskOption(), mat);
+  if (mat)
+  {
+    mask.transform(mask, toSkMatrix(mat->matrix()));
+  }
   mask.setFillType(childWindingType());
   return mask;
 }
@@ -548,9 +555,20 @@ void PaintNode::setTransform(const Transform& transform)
   _->transformAttr->setTransform(transform);
 }
 
-const Transform& PaintNode::transform() const
+Transform PaintNode::getTransform() const
 {
-  return d_ptr->transformAttr->getTransform();
+  return d_ptr->transformAttr->getTransform() * d_ptr->childTransform->getTransform();
+}
+
+void PaintNode::setContentTransform(const Transform& transform)
+{
+  VGG_IMPL(PaintNode);
+  _->childTransform->setTransform(transform);
+}
+
+Transform PaintNode::getContentTransform() const
+{
+  return d_ptr->childTransform->getTransform();
 }
 
 Transform PaintNode::globalTransform() const
@@ -584,21 +602,18 @@ Bounds PaintNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 
   VGG_PAINTNODE_DUMP(STD_FORMAT("{} - {} childs:{}", name(), guid(), m_children.size()));
   _->transformAttr->revalidate();
+  _->childTransform->revalidate();
 
-  const auto ctm = mat * _->transformAttr->getTransform().matrix();
+  const auto ctm = mat * getTransform().matrix();
   for (const auto& e : m_children)
   {
     e->revalidate(inv, ctm);
   }
 
   Bounds bounds = d_ptr->bounds;
-
-  if (overflow() == OF_VISIBLE)
+  for (const auto& e : m_children)
   {
-    for (const auto& e : m_children)
-    {
-      bounds.unionWith(e->bounds());
-    }
+    bounds.unionWith(e->bounds());
   }
 
   if (_->renderTrait & ERenderTraitBits::RT_RENDER_SELF)
@@ -609,7 +624,12 @@ Bounds PaintNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
     bounds.unionWith(currentNodeBounds);
   }
 
-  return bounds.bounds(transform());
+  if (overflow() == OF_HIDDEN || overflow() == OF_SCROLL)
+  {
+    bounds.intersectWith(d_ptr->bounds);
+  }
+
+  return bounds.bounds(getTransform());
 }
 const std::string& PaintNode::guid() const
 {

@@ -246,9 +246,18 @@ void PaintNode::render(Renderer* renderer)
       }
       if (_->renderTrait & ERenderTraitBits::RT_RENDER_CHILDREN)
       {
-        SkAutoCanvasRestore acr(canvas, true);
-        canvas->concat(toSkMatrix(d_ptr->childTransform->getTransform().matrix()));
-        paintChildren(renderer);
+        const auto clip = (overflow() == OF_HIDDEN || overflow() == OF_SCROLL);
+        {
+          auto                canvas = renderer->canvas();
+          SkAutoCanvasRestore acr(canvas, clip);
+          if (clip)
+          {
+            auto boundsPath = makeBoundsPath();
+            boundsPath.clip(canvas, SkClipOp::kIntersect);
+            canvas->concat(toSkMatrix(d_ptr->childTransform->getTransform().matrix()));
+          }
+          paintChildren(renderer);
+        }
       }
     }
   }
@@ -626,7 +635,8 @@ Bounds PaintNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 
   if (overflow() == OF_HIDDEN || overflow() == OF_SCROLL)
   {
-    bounds.intersectWith(d_ptr->bounds);
+    bounds = d_ptr->bounds;
+    return bounds.map(_->transformAttr->getTransform().matrix());
   }
 
   return bounds.bounds(getTransform());
@@ -703,18 +713,18 @@ void PaintNode::paintChildren(Renderer* renderer)
     }
   };
 
-  const auto clip = (overflow() == OF_HIDDEN || overflow() == OF_SCROLL);
-  {
-    auto                canvas = renderer->canvas();
-    SkAutoCanvasRestore acr(canvas, clip);
-    if (clip)
-    {
-      auto boundsPath = makeBoundsPath();
-      boundsPath.clip(canvas, SkClipOp::kIntersect);
-    }
-    paintCall(masked);
-    paintCall(noneMasked);
-  }
+  // const auto clip = (overflow() == OF_HIDDEN || overflow() == OF_SCROLL);
+  // {
+  //   auto                canvas = renderer->canvas();
+  //   SkAutoCanvasRestore acr(canvas, clip);
+  //   if (clip)
+  //   {
+  //     auto boundsPath = makeBoundsPath();
+  //     boundsPath.clip(canvas, SkClipOp::kIntersect);
+  //   }
+  paintCall(masked);
+  paintCall(noneMasked);
+  //}
 }
 
 Accessor* PaintNode::attributeAccessor()

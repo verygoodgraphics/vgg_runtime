@@ -39,7 +39,7 @@ Blob MemoryResourceProvider::readData(std::string_view guid)
 {
   if (auto it = m_data.find(guid.data()); it != m_data.end())
   {
-    return SkData::MakeWithoutCopy(it->second.data(), it->second.size());
+    return SkData::MakeWithCopy(it->second.data(), it->second.size());
   }
   return nullptr;
 }

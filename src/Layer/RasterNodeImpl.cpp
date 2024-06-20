@@ -86,6 +86,33 @@ enum EMatrixChanged
   }
   return changed;
 }
+
+std::pair<int, int> evalTileSize(float w, float h, const Bounds& clipRect)
+{
+  ASSERT(w > 0 && h > 0);
+  int  newTileHeight = 0;
+  int  newTileWidth = 0;
+  auto length = [](float l, int v, int n)
+  {
+    constexpr int MAX_TILE_SIZE = 3072;
+    constexpr int MIN_TILE_SIZE = 768;
+    const int     a = std::max(std::floor(n * l / (v + 10)), 1.f);
+    return std::ceil(std::max(std::min(MAX_TILE_SIZE, int(l / a)), MIN_TILE_SIZE));
+  };
+  newTileWidth = length(w, clipRect.width(), 2);
+  newTileHeight = length(h, clipRect.height(), 4);
+  auto tileWidth = newTileWidth;
+  auto tileHeight = newTileHeight;
+  if (w / h > 3)
+  {
+    tileWidth = newTileHeight;
+    tileHeight = newTileWidth;
+  }
+  tileWidth = w < clipRect.width() ? std::ceil(w) : tileWidth;
+  tileHeight = h < clipRect.height() ? std::ceil(h) : tileHeight;
+  ASSERT(tileHeight > 0 && tileWidth > 0);
+  return { tileWidth, tileHeight };
+}
 } // namespace
 
 namespace VGG::layer
@@ -104,10 +131,10 @@ RasterNodeImpl::RasterNodeImpl(
       std::move(viewport),
       std::move(zoomer),
       std::move(child),
-      EDamageTraitBits::BUBBLE_DAMAGE)
+      ENABLE_TILE ? EDamageTraitBits::BUBBLE_DAMAGE : 0)
 {
 
-  m_rasterMananger = std::make_unique<RasterManager>(2048, 512, executor);
+  m_rasterMananger = std::make_unique<RasterManager>(executor);
 #ifdef VGG_LAYER_DEBUG
   dbgInfo = "DamageRedrawNode";
 #endif
@@ -136,44 +163,33 @@ void RasterNodeImpl::render(Renderer* renderer)
     }
     else
     {
-      TileIterator it(
-        toSkRect(viewportBoundsInRasterSpace()),
-        m_rasterMananger->width(),
-        m_rasterMananger->height(),
-        toSkRect(worldBoundsInRasterSpace()));
+      TileIter it(viewportBoundsInRasterSpace(), m_tw, m_th, worldBoundsInRasterSpace());
 
-      std::vector<std::pair<std::pair<int, int>, sk_sp<SkImage>>> images;
+      canvas->concat(toSkMatrix(getLocalMatrix()));
       while (auto tile = it.next())
       {
-        const auto key = it.index(tile->first, tile->second);
+        const auto key = tile->key();
         if (auto res = m_rasterMananger->query(key); res)
         {
-          images.push_back({ it.pos(tile->first, tile->second), res->surf->makeImageSnapshot() });
+          canvas->drawImage(res->surf->makeImageSnapshot(), tile->pos().first, tile->pos().second);
         }
         else
-
         {
-          std::vector<TileTask::Where> where{ TileTask::Where{
-            .dst = { 0, 0 },
-            .src = Bounds{ (float)tile->first * it.tileWidth,
-                           (float)tile->second * it.tileHeight,
-                           (float)m_rasterMananger->width(),
-                           (float)m_rasterMananger->height() } } };
-          auto                         t = std::make_unique<TileTask>(
+          std::vector<TileTask::Where> where{
+            TileTask::Where{ .dst = { 0, 0 }, .src = tile->bounds().toFloatBounds() }
+          };
+          auto t = std::make_unique<TileTask>(
             m_rasterMananger.get(),
             key,
+            m_tw,
+            m_th,
             std::move(where),
             getRasterMatrix(),
             sk_ref_sp(c->picture()),
             nullptr);
           auto r = m_rasterMananger->syncExecuteRasterTask(std::move(t));
-          images.push_back({ it.pos(tile->first, tile->second), r.surf->makeImageSnapshot() });
+          canvas->drawImage(r.surf->makeImageSnapshot(), tile->pos().first, tile->pos().second);
         }
-      }
-      canvas->concat(toSkMatrix(getLocalMatrix()));
-      for (const auto& [pos, img] : images)
-      {
-        canvas->drawImage(img, pos.first, pos.second);
       }
     }
     canvas->restore();
@@ -195,11 +211,7 @@ void RasterNodeImpl::debug(Renderer* render)
     }
     {
       SkAutoCanvasRestore acr(render->canvas(), true);
-      TileIterator        it(
-        toSkRect(viewportBoundsInRasterSpace()),
-        m_rasterMananger->width(),
-        m_rasterMananger->height(),
-        toSkRect(worldBoundsInRasterSpace()));
+      TileIter            it(viewportBoundsInRasterSpace(), m_tw, m_th, worldBoundsInRasterSpace());
       render->canvas()->concat(toSkMatrix(getLocalMatrix()));
       SkPaint p;
       p.setColor(SK_ColorBLUE);
@@ -258,18 +270,18 @@ std::vector<Bounds> mergeBounds(std::vector<Bounds> bounds)
 void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
 {
   ASSERT(!isInvalid());
-
   auto c = getChild();
   ASSERT(c);
   auto pic = c->picture();
   ASSERT(pic);
-
-  // bool contentChanged = false;
-  // if (m_pictureUniqueID != pic->uniqueID())
-  // {
-  //   m_pictureUniqueID = pic->uniqueID();
-  //   contentChanged = true;
-  // }
+  const auto vb = viewport()->bounds();
+  const auto wr = worldBoundsInRasterSpace();
+  if (m_viewportBounds != vb || m_rasterBounds != wr)
+  {
+    m_viewportBounds = vb;
+    m_rasterBounds = wr;
+    std::tie(m_tw, m_th) = evalTileSize(wr.width(), wr.height(), vb);
+  }
 
   if (!ENABLE_TILE)
   {
@@ -308,25 +320,24 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
   {
     const auto reason = changeReason(m_prevMatrix, getTransform()->getMatrix());
     m_prevMatrix = getTransform()->getMatrix();
-    if (reason & EMatrixChanged::SCALE)
+    if ((reason & EMatrixChanged::SCALE && !(reason & EMatrixChanged::TRANSLATE)))
     {
       DEBUG("force update");
       std::vector<std::unique_ptr<RasterManager::RasterTask>> tasks;
 
-      TileIterator it(
-        toSkRect(viewportBoundsInRasterSpace()),
-        m_rasterMananger->width(),
-        m_rasterMananger->height(),
-        toSkRect(worldBoundsInRasterSpace()));
+      TileIter it(viewportBoundsInRasterSpace(), m_tw, m_th, worldBoundsInRasterSpace());
       while (auto tile = it.next())
       {
-        const int                    k = it.index(tile->first, tile->second);
-        const auto                   src = it.bounds(tile->first, tile->second).toFloatBounds();
-        std::vector<TileTask::Where> where = { TileTask::Where{ .dst = { 0, 0 }, .src = src } };
+        const auto                   k = tile->key();
+        std::vector<TileTask::Where> where = {
+          TileTask::Where{ .dst = { 0, 0 }, .src = tile->bounds().toFloatBounds() }
+        };
 
         auto task = std::make_unique<TileTask>(
           m_rasterMananger.get(),
           k,
+          m_tw,
+          m_th,
           std::move(where),
           getRasterMatrix(),
           sk_ref_sp(pic),
@@ -344,8 +355,13 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
       {
         rb = rb.map(getInversedLocalMatrix()); // Convert to raster space, refactor later
       }
-      m_rasterMananger
-        ->updateDamage(rasterDamageBounds, getRasterMatrix(), c->bounds(), sk_ref_sp(pic));
+      m_rasterMananger->updateDamage(
+        m_tw,
+        m_th,
+        rasterDamageBounds,
+        getRasterMatrix(),
+        c->bounds(),
+        sk_ref_sp(pic));
     }
     else
     {
@@ -356,7 +372,8 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
 
 Bounds RasterNodeImpl::onRevalidate(Revalidation* inv, const glm::mat3& ctm)
 {
-  return RasterNode::onRevalidate(inv, ctm);
+  const auto bounds = RasterNode::onRevalidate(inv, ctm);
+  return bounds;
   // Bounds bounds;
   // if (getTransform())
   // {

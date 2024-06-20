@@ -42,7 +42,9 @@ public:
   };
   TileTask(
     RasterManager*     mgr,
-    int                index,
+    size_t             index,
+    int                tw,
+    int                th,
     std::vector<Where> where,
     const glm::mat3&   matrix,
     sk_sp<SkPicture>   picture,
@@ -50,6 +52,8 @@ public:
     : RasterTask(index)
     , matrix(matrix)
     , damage(std::move(where))
+    , tw(tw)
+    , th(th)
     , picture(std::move(picture))
     , surf(std::move(surf))
     , mgr(mgr)
@@ -59,6 +63,7 @@ public:
   SkColor            bgColor;
   glm::mat3          matrix;
   std::vector<Where> damage;
+  int                tw, th;
   sk_sp<SkPicture>   picture;
   sk_sp<SkSurface>   surf; // optional, null indicates this is a new surface
   RasterManager*     mgr;
@@ -66,8 +71,8 @@ public:
   RasterManager::RasterResult execute(GrRecordingContext* context) override
   {
     using RR = RasterManager::RasterResult;
-    const auto width = mgr->width();
-    const auto height = mgr->height();
+    const int width = tw;
+    const int height = th;
     if (!surf || surf->width() != width || surf->height() != height)
     {
       auto rasterSurface = [](GrRecordingContext* context, int w, int h)

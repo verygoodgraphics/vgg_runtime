@@ -18,14 +18,13 @@
 #include "VSkia.hpp"
 #include "TileIterator.hpp"
 #include "Layer/Core/VBounds.hpp"
-#include "Layer/Core/VNode.hpp"
 #include "Layer/LRUCache.hpp"
 
 #include <core/SkImage.h>
 #include <core/SkSurface.h>
 #include <core/SkCanvas.h>
 #include <core/SkPicture.h>
-
+#include <queue>
 #include <future>
 
 class GrRecordingContext;
@@ -37,12 +36,13 @@ class RasterExecutor;
 class RasterManager
 {
 public:
+  using Key = size_t;
   class RasterResult
   {
   public:
     using Future = std::future<RasterResult>;
     RasterResult() = default;
-    RasterResult(RasterManager* mgr, sk_sp<SkSurface> surf, int index)
+    RasterResult(RasterManager* mgr, sk_sp<SkSurface> surf, Key index)
       : surf(std::move(surf))
       , m_mgr(mgr)
       , m_index(index)
@@ -54,7 +54,7 @@ public:
       return { m_rx, m_ry };
     }
 
-    int index() const
+    Key index() const
     {
       return m_index;
     }
@@ -64,24 +64,24 @@ public:
   private:
     RasterManager* m_mgr = nullptr;
     int            m_rx = 0, m_ry = 0;
-    int            m_index = -1;
+    Key            m_index = 0;
   };
 
   class RasterTask
   {
   public:
-    RasterTask(int index)
+    RasterTask(Key index)
       : m_index(index)
     {
     }
-    int index() const
+    Key index() const
     {
       return m_index;
     }
     virtual RasterResult execute(GrRecordingContext* context) = 0;
 
   private:
-    int m_index;
+    Key m_index;
   };
 
   class RasterExecutor : public Executor
@@ -91,10 +91,8 @@ public:
       std::unique_ptr<RasterManager::RasterTask> task) = 0;
   };
 
-  RasterManager(int tileWidth, int tileHeight, RasterExecutor* executor)
+  RasterManager(RasterExecutor* executor)
     : m_executor(executor)
-    , m_tileWidth(tileWidth)
-    , m_tileHeight(tileHeight)
     , m_cache(40)
   {
   }
@@ -102,34 +100,9 @@ public:
   RasterManager(const RasterManager&) = delete;
   RasterManager& operator=(const RasterManager&) = delete;
 
-  std::pair<int, int> size() const
-  {
-    return { m_tileWidth, m_tileHeight };
-  }
-
-  int width() const
-  {
-    return m_tileWidth;
-  }
-
-  int height() const
-  {
-    return m_tileHeight;
-  }
-
-  void setTileSize(int w, int h)
-  {
-    m_tileWidth = w;
-    m_tileHeight = h;
-    m_cache.purge();
-  }
-
-  TileIterator hitTiles(const Bounds& rasterHitBounds, const Bounds& rasterBounds) const
-  {
-    return TileIterator(toSkRect(rasterHitBounds), width(), height(), toSkRect(rasterBounds));
-  }
-
   void updateDamage(
+    int                 tw,
+    int                 th,
     std::vector<Bounds> damageBounds,
     const glm::mat3&    rasterMatrix,
     const Bounds&       worldBounds,
@@ -141,15 +114,14 @@ public:
 
   RasterResult syncExecuteRasterTask(std::unique_ptr<RasterTask> task);
 
-  void query(const std::vector<int>& query, std::vector<RasterResult>& result);
-  std::optional<RasterResult> query(int index);
+  void query(const std::vector<Key>& query, std::vector<RasterResult>& result);
+  std::optional<RasterResult> query(Key index);
 
 private:
-  using ResultCache = LRUCache<int, RasterResult>;
-  using TaskQueue = std::queue<std::pair<int, std::future<RasterResult>>>;
+  using ResultCache = LRUCache<Key, RasterResult>;
+  using TaskQueue = std::queue<std::pair<Key, std::future<RasterResult>>>;
   void            wait();
   RasterExecutor* m_executor;
-  int             m_tileWidth, m_tileHeight;
   ResultCache     m_cache;
   TaskQueue       m_tasks;
 };

@@ -79,6 +79,123 @@ struct TileIterator
     return r;
   }
 
+  bool contains(int x, int y) const
+  {
+    return x >= beginX && x < endX && y >= beginY && y < endY;
+  }
+
+  bool operator==(const TileIterator& other) const
+  {
+    return tileWidth == other.tileWidth && tileHeight == other.tileHeight &&
+           beginX == other.beginX && beginY == other.beginY && endX == other.endX &&
+           endY == other.endY;
+  }
+
+  const int tileWidth, tileHeight;
+  const int beginX, beginY;
+  const int endX, endY;
+  const int column;
+
+private:
+  int m_x, m_y;
+};
+
+struct TileIter
+{
+  TileIter(const Bounds& clip, int tileW, int tileH, const Bounds& bounds)
+    : tileWidth(tileW)
+    , tileHeight(tileH)
+    , beginX(std::max(0, int((clip.x() - bounds.x()) / tileW)))
+    , beginY(std::max(0, int((clip.y() - bounds.y()) / tileH)))
+    , endX(
+        std::min(std::ceil(bounds.width() / tileW), std::ceil((clip.right() - bounds.x()) / tileW)))
+    , endY(std::min(
+        std::ceil(bounds.height() / tileH),
+        std::ceil((clip.bottom() - bounds.y()) / tileH)))
+    , column(std::ceil(bounds.width() / tileW))
+  {
+    m_x = beginX;
+    m_y = beginY;
+  }
+
+  TileIter(TileIter&&) = default;
+  TileIter(const TileIter&) = default;
+  TileIter& operator=(TileIter&&) = delete;
+  TileIter& operator=(const TileIter&) = delete;
+
+  TileIter()
+    : tileWidth(0)
+    , tileHeight(0)
+    , beginX(0)
+    , beginY(0)
+    , endX(0)
+    , endY(0)
+    , column(0)
+    , m_x(0)
+    , m_y(0)
+  {
+  }
+
+  bool valid() const
+  {
+    return m_x < endX && m_y < endY;
+  }
+
+  struct Result
+  {
+    const TileIter& iterator;
+    const int       r;
+    const int       c;
+    Result(TileIter& it, int r, int c)
+      : iterator(it)
+      , r(r)
+      , c(c)
+    {
+    }
+
+    int index() const
+    {
+      return r * iterator.column + c;
+    }
+
+    size_t key() const
+    {
+      // static_assert(sizeof(size_t) == 8, "size_t must be 8 bytes");
+      // return (((size_t)iterator.tileWidth & 0xffff) << 48) +
+      //        (((size_t)iterator.tileHeight & 0xffff) << 32) + (size_t)index();
+      return index();
+    }
+
+    std::pair<int, int> pos() const
+    {
+      return { r * iterator.tileWidth, c * iterator.tileHeight };
+    }
+
+    Boundsi bounds() const
+    {
+      return Boundsi{ r * iterator.tileWidth,
+                      c * iterator.tileHeight,
+                      iterator.tileWidth,
+                      iterator.tileHeight };
+    }
+  };
+
+  std::optional<Result> next()
+  {
+    if (m_x >= endX)
+    {
+      m_x = beginX;
+      m_y++;
+    }
+    if (m_y >= endY)
+    {
+      return std::nullopt;
+    }
+    auto r = Result(*this, m_x, m_y);
+    m_x++;
+    return r;
+  }
+
   int col() const
   {
     return column;
@@ -89,27 +206,12 @@ struct TileIterator
     return endY - beginY;
   }
 
-  int index(int x, int y) const
-  {
-    return x + y * column;
-  }
-
-  std::pair<int, int> pos(int x, int y) const
-  {
-    return std::make_pair(x * tileWidth, y * tileHeight);
-  }
-
-  Boundsi bounds(int x, int y) const
-  {
-    return Boundsi{ x * tileWidth, y * tileHeight, tileWidth, tileHeight };
-  }
-
   bool contains(int x, int y) const
   {
     return x >= beginX && x < endX && y >= beginY && y < endY;
   }
 
-  bool operator==(const TileIterator& other) const
+  bool operator==(const TileIter& other) const
   {
     return tileWidth == other.tileWidth && tileHeight == other.tileHeight &&
            beginX == other.beginX && beginY == other.beginY && endX == other.endX &&

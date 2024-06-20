@@ -91,6 +91,26 @@ public:
     return m_topLeft.y;
   }
 
+  T left() const
+  {
+    return m_topLeft.x;
+  }
+
+  T top() const
+  {
+    return m_topLeft.y;
+  }
+
+  T right() const
+  {
+    return m_bottomRight.x;
+  }
+
+  T bottom() const
+  {
+    return m_bottomRight.y;
+  }
+
   Vec2T bottomRight() const
   {
     return m_bottomRight;

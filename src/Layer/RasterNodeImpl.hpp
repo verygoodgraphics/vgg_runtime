@@ -43,6 +43,11 @@ public:
   void debug(Renderer* render) override;
 #endif
 
+  std::pair<int, int> tileSize() const
+  {
+    return { m_tw, m_th };
+  }
+
   Bounds effectBounds() const override
   {
     return Bounds();
@@ -54,6 +59,8 @@ protected:
 private:
   std::unique_ptr<RasterManager> m_rasterMananger;
   glm::mat3                      m_prevMatrix;
-  uint32_t                       m_pictureUniqueID = -1;
+  int                            m_tw, m_th;
+  Bounds                         m_viewportBounds;
+  Bounds                         m_rasterBounds;
 };
 } // namespace VGG::layer

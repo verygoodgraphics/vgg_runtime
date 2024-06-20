@@ -117,6 +117,15 @@ public:
     std::shared_ptr<ReplaceNodeAnimate> animate = {},
     bool                                createNewPaintNode = false);
 
+  // Add newNode to containerPaintNode, not change container and newNode.
+  // index equal -1 means push back.
+  bool addChild(
+    const std::shared_ptr<LayoutNode> container,
+    const std::shared_ptr<LayoutNode> newNode,
+    layer::PaintNode*                 containerPaintNode,
+    size_t                            index = -1,
+    std::shared_ptr<NumberAnimate>    animate = {});
+
   // Note: oldValue and newValue: [x, y], base on the design coordinate system.
   bool scrollTo(
     std::shared_ptr<LayoutNode>    node,

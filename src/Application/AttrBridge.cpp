@@ -833,6 +833,7 @@ bool AttrBridge::replaceNode(
     }
   };
 
+  // TODO use AttrBridge::addChild will be better.
   if (createNewPaintNode && !newPaintNode)
   {
     if (!newNode || !oldPaintNode)
@@ -920,6 +921,116 @@ bool AttrBridge::replaceNode(
     animate->start();
     m_animateManage.addAnimate(animate);
   }
+  return true;
+}
+
+bool AttrBridge::addChild(
+  const std::shared_ptr<LayoutNode> container,
+  const std::shared_ptr<LayoutNode> newNode,
+  layer::PaintNode*                 containerPaintNode,
+  size_t                            index,
+  std::shared_ptr<NumberAnimate>    animate)
+{
+  if (!container || !newNode || !containerPaintNode)
+  {
+    return false;
+  }
+
+  auto& children = containerPaintNode->children();
+
+  auto size = children.size();
+  if (index == static_cast<size_t>(-1))
+  {
+    index = size;
+  }
+
+  if (children.size() < index)
+  {
+    return false;
+  }
+
+  auto element = newNode->elementNode();
+  if (!element)
+  {
+    return false;
+  }
+
+  auto                      type = element->type();
+  layer::SceneBuilderResult result;
+
+  switch (type)
+  {
+    case VGG::Domain::Element::EType::PATH:
+    {
+      result = layer::SceneBuilder::builder().build<layer::StructModelPath>(
+        { layer::StructPathObject(element) });
+      break;
+    }
+    case VGG::Domain::Element::EType::IMAGE:
+    {
+      result = layer::SceneBuilder::builder().build<layer::StructModelImage>(
+        { layer::StructImageObject(element) });
+      break;
+    }
+    case VGG::Domain::Element::EType::TEXT:
+    {
+      result = layer::SceneBuilder::builder().build<layer::StructModelText>(
+        { layer::StructTextObject(element) });
+      break;
+    }
+    case VGG::Domain::Element::EType::GROUP:
+    {
+      result = layer::SceneBuilder::builder().build<layer::StructModelGroup>(
+        { layer::StructGroupObject(element) });
+      break;
+    }
+    case VGG::Domain::Element::EType::FRAME:
+    {
+      result = layer::SceneBuilder::builder().build<layer::StructModelFrame>(
+        { layer::StructFrameObject(element) });
+      break;
+    }
+    case VGG::Domain::Element::EType::SYMBOL_MASTER:
+    {
+      result = layer::SceneBuilder::builder().build<layer::StructModelMaster>(
+        { layer::StructMasterObject(element) });
+      break;
+    }
+    case VGG::Domain::Element::EType::SYMBOL_INSTANCE:
+    {
+      result = layer::SceneBuilder::builder().build<layer::StructModelInstance>(
+        { layer::StructInstanceObject(element) });
+      break;
+    }
+    default:
+    {
+      assert(false);
+      return false;
+    }
+  }
+
+  if (!result.root || result.root->size() != 1)
+  {
+    return false;
+  }
+
+  auto newPaintNode = result.root->at(0)->node();
+  if (!newPaintNode)
+  {
+    return false;
+  }
+
+  containerPaintNode->addChild(children.begin() + index, layer::incRef(newPaintNode));
+
+  if (animate)
+  {
+    auto opacity = AttrBridge::getOpacity(newPaintNode);
+    assert(opacity);
+
+    updateOpacity(newNode, newPaintNode, 0, true);
+    updateOpacity(newNode, newPaintNode, *opacity, true, animate);
+  }
+
   return true;
 }
 

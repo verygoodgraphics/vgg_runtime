@@ -29,13 +29,6 @@
 #include "ViewModel.hpp"
 #include <core/SkColor.h>
 #include <glm/detail/qualifier.hpp>
-#include <nlohmann/json.hpp>
-
-using namespace VGG;
-using namespace VGG::Layout;
-using namespace nlohmann;
-
-constexpr auto K_EMPTY_STRING = "";
 
 #undef DEBUG
 #define DEBUG(msg, ...)
@@ -43,6 +36,11 @@ constexpr auto K_EMPTY_STRING = "";
 #define VERBOSE DEBUG
 #undef VERBOSE
 #define VERBOSE(msg, ...)
+
+namespace VGG
+{
+
+constexpr auto K_EMPTY_STRING = "";
 
 namespace
 {
@@ -57,10 +55,24 @@ bool operator==(
   return false;
 }
 
-} // namespace
-
-namespace VGG
+Layout::Point pointToDocument(int x, int y, Layout::Point pointToPage, const LayoutNode& page)
 {
+  Layout::Point p{ pointToPage.x + page.asPage()->frame().origin.x,
+                   pointToPage.y + page.asPage()->frame().origin.y };
+
+  VERBOSE(
+    "page: mouse: %d, %d; point to page: %f, %f; point to document: %f, %f",
+    x,
+    y,
+    pointToPage.x,
+    pointToPage.y,
+    p.x,
+    p.y);
+
+  return p;
+}
+
+} // namespace
 
 UIView::UIView()
   : m_impl{ new internal::UIViewImpl(this) }
@@ -295,9 +307,10 @@ void UIView::layoutSubviews()
   }
 }
 
-VGG::Layout::Point UIView::converPointFromWindowAndScale(Layout::Point point)
+Layout::Point UIView::converPointFromWindowAndScale(int x, int y)
 {
-  const auto o = offset();
+  Layout::Point point{ TO_VGG_LAYOUT_SCALAR(x), TO_VGG_LAYOUT_SCALAR(y) };
+  const auto    o = offset();
   point.x -= o.x;
   point.y -= o.y;
 
@@ -403,34 +416,22 @@ bool UIView::dispatchMouseEventOnPage(
 
   auto& eventContext = m_presentedTreeContext[page->id()];
 
-  Layout::Point pointToPage =
-    converPointFromWindowAndScale({ TO_VGG_LAYOUT_SCALAR(x), TO_VGG_LAYOUT_SCALAR(y) });
-  Layout::Point pointToDocument{ pointToPage.x + page->asPage()->frame().origin.x,
-                                 pointToPage.y + page->asPage()->frame().origin.y };
-
-  VERBOSE(
-    "UIView::dispatchMouseEventOnPage, page: mouse: %d, %d; point to page: %f, %f; point to "
-    "document: %f, %f",
-    x,
-    y,
-    pointToPage.x,
-    pointToPage.y,
-    pointToDocument.x,
-    pointToDocument.y);
+  const Layout::Point pointToPage = converPointFromWindowAndScale(x, y);
+  const auto          p = pointToDocument(x, y, pointToPage, *page);
 
   auto target = page->hitTest(
-    pointToDocument,
+    p,
     [&queryHasEventListener = m_hasEventListener, type](const std::string& targetKey)
     { return queryHasEventListener(targetKey, type); });
   std::shared_ptr<VGG::LayoutNode> hitNodeInTarget;
   if (target.first)
   {
-    hitNodeInTarget = target.first->hitTest(pointToDocument, nullptr).first;
+    hitNodeInTarget = target.first->hitTest(p, nullptr).first;
   }
 
   if (updateCursor && (type == EUIEventType::MOUSEMOVE))
     page->hitTest(
-      pointToDocument,
+      p,
       [&updateCursorEventListener = m_updateCursorEventListener, type](const std::string& targetKey)
       { return updateCursorEventListener(targetKey, type); });
 
@@ -444,7 +445,7 @@ bool UIView::dispatchMouseEventOnPage(
       for (auto clickType : types)
       {
         auto clickTarget = page->hitTest(
-          pointToDocument,
+          p,
           [&queryHasEventListener = m_hasEventListener, clickType](const std::string& targetKey)
           { return queryHasEventListener(targetKey, clickType); });
         if (clickTarget.first)
@@ -504,7 +505,7 @@ bool UIView::dispatchMouseEventOnPage(
 
     case EUIEventType::MOUSELEAVE:
     {
-      handleMouseLeave(eventContext, target, jsButtonIndex, x, y, motionX, motionY);
+      handleMouseLeave(eventContext, target, p, jsButtonIndex, pointToPage, motionX, motionY);
       return true;
     }
     break;
@@ -589,52 +590,84 @@ void UIView::handleMouseOut(
 
 void UIView::handleMouseLeave(
   EventContext& eventContext,
-  TargetNode    target,
+  TargetNode    targetNodeAndKey,
+  Layout::Point pointToDocument,
   int           jsButtonIndex,
-  int           x,
-  int           y,
+  Layout::Point pointToPage,
   int           motionX,
   int           motionY)
 {
-  TargetNode fireTarget;
+  auto& targets = eventContext.mouseLeaveTargetNodes;
 
-  if (target.first)
+  if (targetNodeAndKey.first)
   {
-    if (eventContext.mouseLeaveTargetNode.first)
+    if (auto it = std::find(targets.begin(), targets.end(), targetNodeAndKey); it != targets.end())
     {
-      if (target == eventContext.mouseLeaveTargetNode)
+      for (auto leaveIt = targets.rbegin();
+           (leaveIt != targets.rend()) && (*leaveIt != targetNodeAndKey);
+           leaveIt = targets.rbegin())
       {
-        return;
+        DEBUG(
+          "mouse leave node: %s, %s",
+          leaveIt->first->name().c_str(),
+          leaveIt->first->id().c_str());
+        fireMouseEvent(
+          *leaveIt,
+          EUIEventType::MOUSELEAVE,
+          jsButtonIndex,
+          pointToPage.x,
+          pointToPage.y,
+          motionX,
+          motionY);
+        targets.pop_back();
       }
-      else
-      {
-        fireTarget = eventContext.mouseLeaveTargetNode;
-      }
+      return;
     }
+    else
+    {
+      std::erase_if(
+        targets,
+        [this, pointToDocument, jsButtonIndex, pointToPage, motionX, motionY](TargetNode& t)
+        {
+          if (!t.first->pointInside(pointToDocument))
+          {
+            DEBUG("mouse leave node: %s, %s", t.first->name().c_str(), t.first->id().c_str());
+            fireMouseEvent(
+              t,
+              EUIEventType::MOUSELEAVE,
+              jsButtonIndex,
+              pointToPage.x,
+              pointToPage.y,
+              motionX,
+              motionY);
+            return true;
+          }
 
-    DEBUG(
-      "mouse leave target node: %s, %s",
-      target.first->name().c_str(),
-      target.first->id().c_str());
-    eventContext.mouseLeaveTargetNode = target;
+          return false;
+        });
+
+      DEBUG(
+        "mouse leave target node: %s, %s",
+        targetNodeAndKey.first->name().c_str(),
+        targetNodeAndKey.first->id().c_str());
+      targets.push_back(targetNodeAndKey);
+    }
   }
   else
   {
-    if (eventContext.mouseLeaveTargetNode.first)
+    for (auto it = targets.rbegin(); it != targets.rend(); ++it)
     {
-      fireTarget = eventContext.mouseLeaveTargetNode;
-      DEBUG("mouse leave target set to null");
-      eventContext.mouseLeaveTargetNode = {};
+      DEBUG("mouse leave node: %s, %s", it->first->name().c_str(), it->first->id().c_str());
+      fireMouseEvent(
+        *it,
+        EUIEventType::MOUSELEAVE,
+        jsButtonIndex,
+        pointToPage.x,
+        pointToPage.y,
+        motionX,
+        motionY);
     }
-  }
-
-  if (fireTarget.first)
-  {
-    DEBUG(
-      "mouse leave node: %s, %s",
-      fireTarget.first->name().c_str(),
-      fireTarget.first->id().c_str());
-    fireMouseEvent(fireTarget, EUIEventType::MOUSELEAVE, jsButtonIndex, x, y, motionX, motionY);
+    targets.clear();
   }
 }
 
@@ -737,17 +770,10 @@ bool UIView::handleTouchEvent(int x, int y, int motionX, int motionY, EUIEventTy
 {
   auto page = currentPage();
   if (!page)
-  {
     return false;
-  }
-
-  Layout::Point pointToPage =
-    converPointFromWindowAndScale({ TO_VGG_LAYOUT_SCALAR(x), TO_VGG_LAYOUT_SCALAR(y) });
-  Layout::Point pointToDocument{ pointToPage.x + page->frame().origin.x,
-                                 pointToPage.y + page->frame().origin.y };
 
   auto [target, key] = page->hitTest(
-    pointToDocument,
+    pointToDocument(x, y, converPointFromWindowAndScale(x, y), *page),
     [&queryHasEventListener = m_hasEventListener, type](const std::string& targetKey)
     { return queryHasEventListener(targetKey, type); });
 
@@ -885,11 +911,19 @@ void UIView::saveState(const std::shared_ptr<StateTree>& stateTree)
     currentContext.mouseOutTargetNode = {};
     currentContext.mouseOutNode.reset();
   }
-  if (auto& n = currentContext.mouseLeaveTargetNode.first; n && (n.get() != instanceNode))
+
+  std::vector<TargetNode> targets = std::move(currentContext.mouseLeaveTargetNodes);
+  for (auto& t : targets)
   {
-    DEBUG("UIView::saveState, move mouse leave node to old state tree: %s", n->id().c_str());
-    oldContext.mouseLeaveTargetNode = currentContext.mouseLeaveTargetNode;
-    currentContext.mouseLeaveTargetNode = {};
+    if (t.first->isAncestorOf(instanceNode))
+      currentContext.mouseLeaveTargetNodes.push_back(t);
+    else
+    {
+      DEBUG(
+        "UIView::saveState, move mouse leave node to old state tree: %s",
+        t.first->id().c_str());
+      oldContext.mouseLeaveTargetNodes.push_back(t);
+    }
   }
 }
 

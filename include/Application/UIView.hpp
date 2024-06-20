@@ -85,7 +85,7 @@ private:
     TargetNode                       mouseEnterTargetNode;
     TargetNode                       mouseOutTargetNode;
     std::shared_ptr<VGG::LayoutNode> mouseOutNode;
-    TargetNode                       mouseLeaveTargetNode;
+    std::vector<TargetNode>          mouseLeaveTargetNodes; // enter nodes stack
   };
 
   EventListener    m_eventListener;
@@ -270,7 +270,7 @@ private:
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);
 
   void                        layoutSubviews();
-  Layout::Point               converPointFromWindowAndScale(Layout::Point point);
+  Layout::Point               converPointFromWindowAndScale(int x, int y);
   std::shared_ptr<LayoutNode> currentPage();
   std::shared_ptr<LayoutNode> pageById(const std::string& id);
   const std::string           pageIdByIndex(std::size_t index);
@@ -303,9 +303,9 @@ private:
   void handleMouseLeave(
     EventContext& eventContext,
     TargetNode    target,
+    Layout::Point pointToDocument,
     int           jsButtonIndex,
-    int           x,
-    int           y,
+    Layout::Point pointToPage,
     int           motionX,
     int           motionY);
   void fireMouseEvent(

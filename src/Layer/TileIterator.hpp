@@ -17,6 +17,7 @@
 
 #include <core/SkRect.h>
 #include <optional>
+#include <Layer/Core/VBounds.hpp>
 
 namespace VGG::layer
 {
@@ -76,6 +77,31 @@ struct TileIterator
     auto r = std::make_pair(m_x, m_y);
     m_x++;
     return r;
+  }
+
+  int col() const
+  {
+    return column;
+  }
+
+  int row() const
+  {
+    return endY - beginY;
+  }
+
+  int index(int x, int y) const
+  {
+    return x + y * column;
+  }
+
+  std::pair<int, int> pos(int x, int y) const
+  {
+    return std::make_pair(x * tileWidth, y * tileHeight);
+  }
+
+  Boundsi bounds(int x, int y) const
+  {
+    return Boundsi{ x * tileWidth, y * tileHeight, tileWidth, tileHeight };
   }
 
   bool contains(int x, int y) const

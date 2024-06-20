@@ -227,7 +227,10 @@ public:
 
   BoundsBase<float> toFloatBounds() const
   {
-    return BoundsBase<float>{ m_topLeft.x, m_topLeft.y, width(), height() };
+    return BoundsBase<float>{ (float)m_topLeft.x,
+                              (float)m_topLeft.y,
+                              (float)width(),
+                              (float)height() };
   }
 
   BoundsBase<int> toIntBounds() const

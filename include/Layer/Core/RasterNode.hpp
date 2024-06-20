@@ -47,7 +47,8 @@ public:
     RasterManager::RasterExecutor* executor,
     Ref<Viewport>                  viewport,
     Ref<ZoomerNode>                zoomer,
-    Ref<RenderNode>                child);
+    Ref<RenderNode>                child,
+    EDamageTrait                   trait = 0);
 
   virtual void raster(const std::vector<Bounds>& bounds) = 0;
 

@@ -85,11 +85,11 @@ public:
     auto canvas = surf->getCanvas();
     for (const auto& b : damage)
     {
-      const auto rasterRect = b.src.map(matrix);
       canvas->save();
-      canvas->translate(b.dst.x - rasterRect.x(), b.dst.y - rasterRect.y());
+      canvas->translate(b.dst.x - b.src.x(), b.dst.y - b.src.y());
+      auto clipRect = SkRect::MakeXYWH(b.src.x(), b.src.y(), b.src.width(), b.src.height());
+      canvas->clipRect(clipRect);
       canvas->concat(toSkMatrix(matrix));
-      canvas->clipRect(SkRect::MakeXYWH(b.src.x(), b.src.y(), b.src.width(), b.src.height()));
       canvas->clear(bgColor);
       picture->playback(canvas);
       canvas->restore();

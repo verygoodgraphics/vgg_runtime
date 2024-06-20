@@ -1,25 +1,17 @@
 #include "RasterManager.hpp"
 #include "TileIterator.hpp"
 #include "RasterTask.hpp"
-#include "VSkia.hpp"
 
-#include "gpu/ganesh/SkSurfaceGanesh.h"
-#include "gpu/GpuTypes.h"
 #include "core/SkSurface.h"
 
-#include <algorithm>
-#include <iostream>
 #include <optional>
 #include <vector>
-#include <thread>
-#include <mutex>
 #include <future>
-#include <condition_variable>
 
 namespace VGG::layer
 {
 
-void RasterManager::query(const std::vector<int>& query, std::vector<RasterResult>& result)
+void RasterManager::query(const std::vector<Key>& query, std::vector<RasterResult>& result)
 {
   wait();
   // TODO::
@@ -37,7 +29,7 @@ void RasterManager::wait()
   }
 }
 
-std::optional<RasterManager::RasterResult> RasterManager::query(int index)
+std::optional<RasterManager::RasterResult> RasterManager::query(Key index)
 {
   wait();
   auto res = m_cache.find(index);
@@ -63,32 +55,33 @@ void RasterManager::appendRasterTask(std::unique_ptr<RasterTask> task)
 }
 
 void RasterManager::updateDamage(
+  int                 tw,
+  int                 th,
   std::vector<Bounds> rasterDamageBounds,
   const glm::mat3&    rasterMatrix,
   const Bounds&       worldBounds,
   sk_sp<SkPicture>    pic)
 {
   const auto rasterBounds = worldBounds.map(rasterMatrix);
-  std::unordered_map<int, std::vector<TileTask::Where>>
+  std::unordered_map<Key, std::vector<TileTask::Where>>
     tileDamage; // tile_index -> tile_damage regions
   for (const auto& damage : rasterDamageBounds)
   {
-    TileIterator iter(toSkRect(damage), this->width(), this->height(), toSkRect(rasterBounds));
-
+    TileIter iter(damage, tw, th, rasterBounds);
     while (auto tile = iter.next())
     {
       std::vector<TileTask::Where> where;
       where.reserve(5);
-      const int  index = iter.index(tile->first, tile->second);
-      const auto tileBounds = iter.bounds(tile->first, tile->second).toFloatBounds();
-      const auto [x, y] = iter.pos(tile->first, tile->second);
+      const int  key = tile->key();
+      const auto tileBounds = tile->bounds().toFloatBounds();
+      const auto [x, y] = tile->pos();
       if (auto isectBounds = tileBounds.intersectAs(damage); isectBounds.valid())
       {
         where.push_back(
           TileTask::Where{ .dst = { (int)isectBounds.x() - x, (int)isectBounds.y() - y },
                            .src = isectBounds });
       }
-      if (auto it = tileDamage.find(index); it != tileDamage.end())
+      if (auto it = tileDamage.find(key); it != tileDamage.end())
       {
         it->second.insert(
           it->second.end(),
@@ -97,7 +90,7 @@ void RasterManager::updateDamage(
       }
       else
       {
-        tileDamage.insert({ index, std::move(where) });
+        tileDamage.insert({ key, std::move(where) });
       }
     }
   }
@@ -108,8 +101,8 @@ void RasterManager::updateDamage(
     if (auto cache = query(k); cache)
     {
       surf = std::move(cache->surf);
-      auto task =
-        std::make_unique<TileTask>(this, k, std::move(v), rasterMatrix, pic, std::move(surf));
+      auto task = std::make_unique<
+        TileTask>(this, k, tw, th, std::move(v), rasterMatrix, pic, std::move(surf));
       appendRasterTask(std::move(task));
     }
   }

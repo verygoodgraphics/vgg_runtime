@@ -48,12 +48,21 @@ std::optional<RasterManager::RasterResult> RasterManager::query(int index)
   return std::nullopt;
 }
 
-void RasterManager::appendRasterTask(std::unique_ptr<RasterTask> task)
+RasterManager::RasterResult RasterManager::syncExecuteRasterTask(std::unique_ptr<RasterTask> task)
 {
-  m_tasks.push({ task->index(), m_executor->addRasterTask(std::move(task)) });
+  auto res = m_executor->addRasterTask(std::move(task)).get();
+  return *m_cache.insertOrUpdate(res.index(), std::move(res));
 }
 
-void RasterManager::createRasterTask(
+void RasterManager::appendRasterTask(std::unique_ptr<RasterTask> task)
+{
+  if (task)
+  {
+    m_tasks.push({ task->index(), m_executor->addRasterTask(std::move(task)) });
+  }
+}
+
+void RasterManager::updateDamage(
   std::vector<Bounds> rasterDamageBounds,
   const glm::mat3&    rasterMatrix,
   const Bounds&       worldBounds,
@@ -70,15 +79,14 @@ void RasterManager::createRasterTask(
     {
       std::vector<TileTask::Where> where;
       where.reserve(5);
-      const int index = tile->first + tile->second * this->tileXCount();
-      Bounds    tileBounds{ (float)tile->first * this->width(),
-                         (float)tile->first * this->height(),
-                         (float)this->width(),
-                         (float)this->height() };
+      const int  index = iter.index(tile->first, tile->second);
+      const auto tileBounds = iter.bounds(tile->first, tile->second).toFloatBounds();
+      const auto [x, y] = iter.pos(tile->first, tile->second);
       if (auto isectBounds = tileBounds.intersectAs(damage); isectBounds.valid())
       {
-        where.push_back(TileTask::Where{ .dst = { (int)isectBounds.x(), (int)isectBounds.y() },
-                                         .src = isectBounds });
+        where.push_back(
+          TileTask::Where{ .dst = { (int)isectBounds.x() - x, (int)isectBounds.y() - y },
+                           .src = isectBounds });
       }
       if (auto it = tileDamage.find(index); it != tileDamage.end())
       {
@@ -104,27 +112,11 @@ void RasterManager::createRasterTask(
         std::make_unique<TileTask>(this, k, std::move(v), rasterMatrix, pic, std::move(surf));
       appendRasterTask(std::move(task));
     }
-    else
-    {
-      // maybe evicted or not rastered yet, redraw the whole tile
-
-      const int                    c = k % this->tileXCount();
-      const int                    r = k / this->tileXCount();
-      std::vector<TileTask::Where> where = { { .dst = { 0, 0 },
-                                               .src = { (float)c * this->width(),
-                                                        (float)r * this->height(),
-                                                        (float)this->width(),
-                                                        (float)this->height() } } };
-
-      auto task = std::make_unique<TileTask>(this, k, std::move(where), rasterMatrix, pic, nullptr);
-      appendRasterTask(std::move(task));
-    }
   }
 }
 
-void RasterManager::invalidate(std::vector<std::unique_ptr<RasterTask>> tasks)
+void RasterManager::update(std::vector<std::unique_ptr<RasterTask>> tasks)
 {
-  m_cache.purge();
   for (auto& task : tasks)
   {
     appendRasterTask(std::move(task));

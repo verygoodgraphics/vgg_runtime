@@ -92,8 +92,12 @@ private:
 class TransformEffectNode : public RenderNode
 {
 public:
-  TransformEffectNode(VRefCnt* cnt, Ref<TransformNode> transform, Ref<RenderNode> child)
-    : RenderNode(cnt, EState::INVALIDATE)
+  TransformEffectNode(
+    VRefCnt*           cnt,
+    Ref<TransformNode> transform,
+    Ref<RenderNode>    child,
+    EDamageTrait       trait = 0)
+    : RenderNode(cnt, EState::INVALIDATE, trait)
     , m_transform(std::move(transform))
     , m_child(std::move(child))
   {

@@ -54,6 +54,11 @@ public:
       return { m_rx, m_ry };
     }
 
+    int index() const
+    {
+      return m_index;
+    }
+
     sk_sp<SkSurface> surf = nullptr;
 
   private:
@@ -86,11 +91,10 @@ public:
       std::unique_ptr<RasterManager::RasterTask> task) = 0;
   };
 
-  RasterManager(int tileWidth, int tileHeight, const Bounds& bounds, RasterExecutor* executor)
+  RasterManager(int tileWidth, int tileHeight, RasterExecutor* executor)
     : m_executor(executor)
     , m_tileWidth(tileWidth)
     , m_tileHeight(tileHeight)
-    , m_bounds(bounds)
     , m_cache(40)
   {
   }
@@ -113,25 +117,29 @@ public:
     return m_tileHeight;
   }
 
+  void setTileSize(int w, int h)
+  {
+    m_tileWidth = w;
+    m_tileHeight = h;
+    m_cache.purge();
+  }
+
   TileIterator hitTiles(const Bounds& rasterHitBounds, const Bounds& rasterBounds) const
   {
     return TileIterator(toSkRect(rasterHitBounds), width(), height(), toSkRect(rasterBounds));
   }
 
-  int tileXCount() const
-  {
-    return m_bounds.width() / m_tileWidth;
-  }
-
-  void createRasterTask(
+  void updateDamage(
     std::vector<Bounds> damageBounds,
     const glm::mat3&    rasterMatrix,
     const Bounds&       worldBounds,
     sk_sp<SkPicture>    pic);
 
-  void invalidate(std::vector<std::unique_ptr<RasterTask>> tasks);
+  void update(std::vector<std::unique_ptr<RasterTask>> tasks);
 
   void appendRasterTask(std::unique_ptr<RasterTask> task);
+
+  RasterResult syncExecuteRasterTask(std::unique_ptr<RasterTask> task);
 
   void query(const std::vector<int>& query, std::vector<RasterResult>& result);
   std::optional<RasterResult> query(int index);
@@ -142,11 +150,8 @@ private:
   void            wait();
   RasterExecutor* m_executor;
   int             m_tileWidth, m_tileHeight;
-  Bounds          m_bounds;
   ResultCache     m_cache;
   TaskQueue       m_tasks;
-
-  bool m_allCacheAreInvalid = true;
 };
 
 } // namespace VGG::layer

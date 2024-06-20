@@ -62,8 +62,13 @@ RasterNode::RasterNode(
   RasterManager::RasterExecutor* executor,
   Ref<Viewport>                  viewport,
   Ref<ZoomerNode>                zoomer,
-  Ref<RenderNode>                child)
-  : TransformEffectNode(cnt, ensureTransformNode(viewport, std::move(zoomer)), std::move(child))
+  Ref<RenderNode>                child,
+  EDamageTrait                   trait)
+  : TransformEffectNode(
+      cnt,
+      ensureTransformNode(viewport, std::move(zoomer)),
+      std::move(child),
+      trait)
   , m_viewport(viewport)
   , m_device(device)
   , m_executor(executor)

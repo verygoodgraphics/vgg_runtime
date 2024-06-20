@@ -748,6 +748,19 @@ void AttrBridge::setTwinMatrix(
   AttrBridge::setMatrix(paintNodeTo, designMatrix);
 }
 
+void AttrBridge::setContentOffset(std::shared_ptr<LayoutNode> node, const double x, const double y)
+{
+  // TODO
+}
+
+void AttrBridge::setContentOffset(layer::PaintNode* node, const double x, const double y)
+{
+  // TODO
+  // auto matrix =
+  //   TransformHelper::fromDesignMatrix(TransformHelper::translate(x, y, { 1, 0, 0, 1, 0, 0 }));
+  // node->setContentTransform(layer::Transform(matrix));
+}
+
 bool AttrBridge::updateSize(
   std::shared_ptr<LayoutNode>    node,
   layer::PaintNode*              paintNode,
@@ -907,6 +920,35 @@ bool AttrBridge::replaceNode(
     animate->start();
     m_animateManage.addAnimate(animate);
   }
+  return true;
+}
+
+bool AttrBridge::scrollTo(
+  std::shared_ptr<LayoutNode>    node,
+  layer::PaintNode*              paintNode,
+  std::array<double, 2>          oldValue,
+  std::array<double, 2>          newValue,
+  bool                           isOnlyUpdatePaint,
+  std::shared_ptr<NumberAnimate> animate)
+{
+  if (!paintNode)
+  {
+    return false;
+  }
+
+  auto update = [node, paintNode, isOnlyUpdatePaint](const std::vector<double>& value)
+  {
+    assert(value.size() == 2);
+
+    if (!isOnlyUpdatePaint)
+    {
+      AttrBridge::setContentOffset(node, value.at(0), value.at(1));
+    }
+
+    AttrBridge::setContentOffset(paintNode, value.at(0), value.at(1));
+  };
+
+  updateSimpleAttr({ oldValue[0], oldValue[1] }, { newValue[0], newValue[1] }, update, animate);
   return true;
 }
 

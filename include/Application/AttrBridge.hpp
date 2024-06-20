@@ -117,6 +117,15 @@ public:
     std::shared_ptr<ReplaceNodeAnimate> animate = {},
     bool                                createNewPaintNode = false);
 
+  // Note: oldValue and newValue: [x, y], base on the design coordinate system.
+  bool scrollTo(
+    std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
+    std::array<double, 2>          oldValue,
+    std::array<double, 2>          newValue,
+    bool                           isOnlyUpdatePaint,
+    std::shared_ptr<NumberAnimate> animate = {});
+
 public:
   layer::PaintNode* getPaintNode(std::shared_ptr<LayoutNode> node);
 
@@ -166,6 +175,10 @@ private:
     const std::vector<double>&  value,
     bool                        isOnlyUpdatePaint,
     bool                        isNotScaleButChangeSize);
+
+  // x and y base on the design coordinate system.
+  static void setContentOffset(std::shared_ptr<LayoutNode> node, const double x, const double y);
+  static void setContentOffset(layer::PaintNode* node, const double x, const double y);
 
 private:
   void updateSimpleAttr(

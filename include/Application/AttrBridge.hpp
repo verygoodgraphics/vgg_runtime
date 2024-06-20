@@ -126,6 +126,12 @@ public:
     size_t                            index = -1,
     std::shared_ptr<NumberAnimate>    animate = {});
 
+  // Note: not deal LayoutNode
+  bool delChild(
+    layer::PaintNode*              paintNode,
+    size_t                         index,
+    std::shared_ptr<NumberAnimate> animate = {});
+
   // Note: oldValue and newValue: [x, y], base on the design coordinate system.
   bool scrollTo(
     std::shared_ptr<LayoutNode>    node,

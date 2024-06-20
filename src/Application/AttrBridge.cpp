@@ -472,12 +472,6 @@ bool AttrBridge::updateOpacity(
   {
     assert(value.size() == 1);
 
-    DEBUG(
-      "AttrBridge::updateOpacity: node[%s], paintNode[%p] value.at(0) = %f",
-      node->id().c_str(),
-      paintNode,
-      value.at(0));
-
     if (!isOnlyUpdatePaint)
     {
       AttrBridge::setOpacity(node, value.at(0));
@@ -821,6 +815,7 @@ bool AttrBridge::replaceNode(
   }
 #endif
 
+  // TODO use AttrBridge::delChild will be better.
   auto removeOldPaintNodeIfNeed = [oldPaintNode, createNewPaintNode]()
   {
     if (createNewPaintNode)
@@ -1029,6 +1024,41 @@ bool AttrBridge::addChild(
 
     updateOpacity(newNode, newPaintNode, 0, true);
     updateOpacity(newNode, newPaintNode, *opacity, true, animate);
+  }
+
+  return true;
+}
+
+bool AttrBridge::delChild(
+  layer::PaintNode*              paintNode,
+  size_t                         index,
+  std::shared_ptr<NumberAnimate> animate)
+{
+  auto& children = paintNode->children();
+  if (index >= children.size())
+  {
+    return false;
+  }
+
+  if (!animate)
+  {
+    paintNode->removeChild(children[index]);
+  }
+  else
+  {
+    updateOpacity(nullptr, children[index].get(), 0, true, animate);
+    animate->addCallBackWhenStop(
+      [paintNode, index]()
+      {
+        // Note: for safe, should not call this->delChild direct.
+        auto& children = paintNode->children();
+        if (index >= children.size())
+        {
+          return;
+        }
+
+        paintNode->removeChild(children[index]);
+      });
   }
 
   return true;

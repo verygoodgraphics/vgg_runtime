@@ -258,8 +258,14 @@ struct StructModelCastObject
   }
 };
 
+using StructModelPath = ModelPolicy<StructPathObject, StructModelCastObject>;
+using StructModelText = ModelPolicy<StructTextObject, StructModelCastObject>;
+using StructModelImage = ModelPolicy<StructImageObject, StructModelCastObject>;
+using StructModelGroup = ModelPolicy<StructGroupObject, StructModelCastObject>;
 using StructModelFrame = ModelPolicy<StructFrameObject, StructModelCastObject>;
+using StructModelMaster = ModelPolicy<StructMasterObject, StructModelCastObject>;
 using StructModelInstance = ModelPolicy<StructInstanceObject, StructModelCastObject>;
+
 #undef M_OBJECT_FIELD_DEF
 
 } // namespace VGG::layer

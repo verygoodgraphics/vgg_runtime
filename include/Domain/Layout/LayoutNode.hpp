@@ -215,16 +215,16 @@ public:
   Layout::Size   size() const;
   Layout::Matrix modelMatrix() const;
 
-private:
-  bool isResizingAroundCenter() const;
-  bool isVectorNetwork() const;
-  bool isVectorNetworkDescendant() const;
-
   bool pointInside(Layout::Point point)
   {
     auto rect = convertRectToAncestor(frame());
     return rect.contains(point);
   }
+
+private:
+  bool isResizingAroundCenter() const;
+  bool isVectorNetwork() const;
+  bool isVectorNetworkDescendant() const;
 
   Layout::Rect convertRectToAncestor(
     Layout::Rect                rect,

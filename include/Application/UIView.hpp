@@ -267,6 +267,12 @@ protected:
   void      translate(float dx, float dy);
 
 private:
+  struct EventHandleResult
+  {
+    bool handled = false;
+    bool hasTarget = false;
+  };
+
   std::tuple<bool, bool, bool, bool> getKeyModifier(int keyMod);
 
   void                        layoutSubviews();
@@ -275,14 +281,16 @@ private:
   std::shared_ptr<LayoutNode> pageById(const std::string& id);
   const std::string           pageIdByIndex(std::size_t index);
 
+  void onMouseMove(UEvent evt, bool forHover = false);
   bool handleMouseEvent(
     int          jsButtonIndex,
     int          x,
     int          y,
     int          motionX,
     int          motionY,
-    EUIEventType type);
-  bool dispatchMouseEventOnPage(
+    EUIEventType type,
+    bool         forHover = false);
+  EventHandleResult dispatchMouseEventOnPage(
     std::shared_ptr<LayoutNode> page,
     int                         jsButtonIndex,
     int                         x,
@@ -300,7 +308,7 @@ private:
     int                              y,
     int                              motionX,
     int                              motionY);
-  void handleMouseLeave(
+  bool handleMouseLeave(
     EventContext& eventContext,
     TargetNode    target,
     Layout::Point pointToDocument,

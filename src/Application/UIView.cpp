@@ -117,23 +117,7 @@ bool UIView::onEvent(UEvent evt, void* userData)
     case VGG_MOUSEMOTION:
     {
       m_lastMouseMove = evt;
-
-      // according to js event order
-      EUIEventType types[] = { EUIEventType::MOUSEMOVE,
-                               EUIEventType::MOUSEOVER,
-                               EUIEventType::MOUSEENTER,
-                               EUIEventType::MOUSEOUT,
-                               EUIEventType::MOUSELEAVE };
-      for (auto type : types)
-      {
-        handleMouseEvent(
-          0,
-          evt.motion.windowX,
-          evt.motion.windowY,
-          evt.motion.xrel,
-          evt.motion.yrel,
-          type);
-      }
+      onMouseMove(evt);
       return true;
     }
     break;
@@ -369,15 +353,25 @@ bool UIView::handleMouseEvent(
   int          y,
   int          motionX,
   int          motionY,
-  EUIEventType type)
+  EUIEventType type,
+  bool         forHover)
 {
   auto page = currentPage();
   if (!page)
-  {
     return false;
-  }
 
-  bool success = dispatchMouseEventOnPage(page, jsButtonIndex, x, y, motionX, motionY, type, true);
+  auto r = dispatchMouseEventOnPage(page, jsButtonIndex, x, y, motionX, motionY, type, true);
+  if (forHover) // dipatch on real page only, skip presenting page or state tree
+    return r.handled;
+  if (r.handled && r.hasTarget)
+  {
+    DEBUG(
+      "mouse event %s is handled on page: %s, %s",
+      uiEventTypeToString(type),
+      page->name().c_str(),
+      page->id().c_str());
+    return true;
+  }
 
   const auto& currentPageId = page->id();
   if (m_presentingPages.contains(currentPageId))
@@ -389,17 +383,49 @@ bool UIView::handleMouseEvent(
         "dispatch mouse event on from page: %s, %s",
         fromPage->name().c_str(),
         fromPage->id().c_str());
-      success |= dispatchMouseEventOnPage(fromPage, jsButtonIndex, x, y, motionX, motionY, type);
+      auto r2 = dispatchMouseEventOnPage(fromPage, jsButtonIndex, x, y, motionX, motionY, type);
+      if (r2.handled && r2.hasTarget)
+      {
+        DEBUG(
+          "mouse event %s is handled on page: %s, %s",
+          uiEventTypeToString(type),
+          fromPage->name().c_str(),
+          fromPage->id().c_str());
+        return true;
+      }
+
+      r.handled |= r2.handled;
     }
   }
 
-  for (auto& stateTree : m_stateTrees)
-    success |= dispatchMouseEventOnPage(stateTree, jsButtonIndex, x, y, motionX, motionY, type);
+  for (auto it = m_stateTrees.rbegin(); it != m_stateTrees.rend(); ++it)
+  {
+    auto r3 = dispatchMouseEventOnPage(*it, jsButtonIndex, x, y, motionX, motionY, type);
+    switch (type)
+    {
+      case EUIEventType::MOUSEENTER:
+      case EUIEventType::MOUSELEAVE:
+        if (r3.handled && r3.hasTarget)
+        {
+          DEBUG(
+            "mouse event %s is handled in state tree: %s, %s",
+            uiEventTypeToString(type),
+            (*it)->asPage()->name().c_str(),
+            (*it)->asPage()->id().c_str());
+          return true;
+        }
 
-  return success;
+      default:
+        break;
+    }
+
+    r.handled |= r3.handled;
+  }
+
+  return r.handled;
 }
 
-bool UIView::dispatchMouseEventOnPage(
+UIView::EventHandleResult UIView::dispatchMouseEventOnPage(
   std::shared_ptr<LayoutNode> page,
   int                         jsButtonIndex,
   int                         x,
@@ -469,7 +495,7 @@ bool UIView::dispatchMouseEventOnPage(
           target == eventContext.mouseOverTargetNode &&
           eventContext.mouseOverNode == hitNodeInTarget)
         {
-          return true;
+          return { true, true };
         }
         eventContext.mouseOverTargetNode = target;
         eventContext.mouseOverNode = hitNodeInTarget;
@@ -486,7 +512,7 @@ bool UIView::dispatchMouseEventOnPage(
     {
       if (target.first && target == eventContext.mouseEnterTargetNode)
       {
-        return true;
+        return { true, true };
       }
       if (auto node = target.first)
       {
@@ -499,14 +525,15 @@ bool UIView::dispatchMouseEventOnPage(
     case EUIEventType::MOUSEOUT:
     {
       handleMouseOut(eventContext, target, hitNodeInTarget, jsButtonIndex, x, y, motionX, motionY);
-      return true;
+      return { true, !!target.first };
     }
     break;
 
     case EUIEventType::MOUSELEAVE:
     {
-      handleMouseLeave(eventContext, target, p, jsButtonIndex, pointToPage, motionX, motionY);
-      return true;
+      auto handled =
+        handleMouseLeave(eventContext, target, p, jsButtonIndex, pointToPage, motionX, motionY);
+      return { true, handled };
     }
     break;
 
@@ -516,7 +543,7 @@ bool UIView::dispatchMouseEventOnPage(
     {
       if (target.first && m_possibleClickTargetNode != target)
       {
-        return false;
+        return { false, true };
       }
     }
     break;
@@ -526,7 +553,7 @@ bool UIView::dispatchMouseEventOnPage(
   }
 
   fireMouseEvent(target, type, jsButtonIndex, pointToPage.x, pointToPage.y, motionX, motionY);
-  return true;
+  return { true, !!target.first };
 }
 
 void UIView::handleMouseOut(
@@ -588,17 +615,16 @@ void UIView::handleMouseOut(
   }
 }
 
-void UIView::handleMouseLeave(
+bool UIView::handleMouseLeave(
   EventContext& eventContext,
   TargetNode    targetNodeAndKey,
   Layout::Point pointToDocument,
-  int           jsButtonIndex,
-  Layout::Point pointToPage,
+  int           button, // jsButtonIndex
+  Layout::Point p,      // point to page
   int           motionX,
   int           motionY)
 {
   auto& targets = eventContext.mouseLeaveTargetNodes;
-
   if (targetNodeAndKey.first)
   {
     if (auto it = std::find(targets.begin(), targets.end(), targetNodeAndKey); it != targets.end())
@@ -611,39 +637,24 @@ void UIView::handleMouseLeave(
           "mouse leave node: %s, %s",
           leaveIt->first->name().c_str(),
           leaveIt->first->id().c_str());
-        fireMouseEvent(
-          *leaveIt,
-          EUIEventType::MOUSELEAVE,
-          jsButtonIndex,
-          pointToPage.x,
-          pointToPage.y,
-          motionX,
-          motionY);
+        fireMouseEvent(*leaveIt, EUIEventType::MOUSELEAVE, button, p.x, p.y, motionX, motionY);
         targets.pop_back();
       }
-      return;
     }
     else
     {
       std::erase_if(
         targets,
-        [this, pointToDocument, jsButtonIndex, pointToPage, motionX, motionY](TargetNode& t)
+        [this, pointToDocument, button, p, motionX, motionY](TargetNode& t)
         {
           if (!t.first->pointInside(pointToDocument))
           {
             DEBUG("mouse leave node: %s, %s", t.first->name().c_str(), t.first->id().c_str());
-            fireMouseEvent(
-              t,
-              EUIEventType::MOUSELEAVE,
-              jsButtonIndex,
-              pointToPage.x,
-              pointToPage.y,
-              motionX,
-              motionY);
+            fireMouseEvent(t, EUIEventType::MOUSELEAVE, button, p.x, p.y, motionX, motionY);
             return true;
           }
-
-          return false;
+          else
+            return false;
         });
 
       DEBUG(
@@ -652,22 +663,21 @@ void UIView::handleMouseLeave(
         targetNodeAndKey.first->id().c_str());
       targets.push_back(targetNodeAndKey);
     }
+
+    return true; // handled
   }
   else
   {
+    if (targets.empty())
+      return false;
+
     for (auto it = targets.rbegin(); it != targets.rend(); ++it)
     {
       DEBUG("mouse leave node: %s, %s", it->first->name().c_str(), it->first->id().c_str());
-      fireMouseEvent(
-        *it,
-        EUIEventType::MOUSELEAVE,
-        jsButtonIndex,
-        pointToPage.x,
-        pointToPage.y,
-        motionX,
-        motionY);
+      fireMouseEvent(*it, EUIEventType::MOUSELEAVE, button, p.x, p.y, motionX, motionY);
     }
     targets.clear();
+    return true;
   }
 }
 
@@ -952,7 +962,7 @@ void UIView::restoreState(const std::string& instanceId)
 void UIView::triggerMouseEnter()
 {
   DEBUG("UIView::triggerMouseEnter");
-  onEvent(m_lastMouseMove, nullptr);
+  onMouseMove(m_lastMouseMove, true);
 }
 
 void UIView::setLayer(app::AppRender* layer)
@@ -1124,6 +1134,19 @@ bool UIView::presentInstanceState(
 std::unique_ptr<LayoutContext> UIView::layoutContext()
 {
   return m_impl->layoutContext();
+}
+
+void UIView::onMouseMove(UEvent evt, bool forHover)
+{
+  // according to js event order
+  EUIEventType types[] = { EUIEventType::MOUSEMOVE,
+                           EUIEventType::MOUSEOVER,
+                           EUIEventType::MOUSEENTER,
+                           EUIEventType::MOUSEOUT,
+                           EUIEventType::MOUSELEAVE };
+  const auto&  m = evt.motion;
+  for (auto type : types)
+    handleMouseEvent(0, m.windowX, m.windowY, m.xrel, m.yrel, type, forHover);
 }
 
 } // namespace VGG

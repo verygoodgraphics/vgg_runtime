@@ -978,6 +978,16 @@ SymbolInstanceElement* SymbolInstanceElement::overrideReferenceTree()
   return m_overrideReferenceTree.get();
 }
 
+bool SymbolInstanceElement::shouldKeepListeners()
+{
+  if (!m_stateStack.empty()) // is presenting state
+    return true;
+
+  if (auto s = overrideReferenceTree())
+    return masterId() == s->masterId();
+  return false;
+}
+
 // TextElement
 TextElement::TextElement(const Model::Text& text)
   : Element(EType::TEXT)

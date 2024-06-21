@@ -369,6 +369,7 @@ public:
 
   void                   saveOverrideTreeIfNeeded();
   SymbolInstanceElement* overrideReferenceTree();
+  bool                   shouldKeepListeners();
 
 private:
   std::shared_ptr<Model::SymbolInstance> m_instance;

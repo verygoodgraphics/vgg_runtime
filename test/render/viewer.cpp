@@ -1,4 +1,5 @@
 #include "viewer.hpp"
+#include "Layer/Graphics/VSkiaGL.hpp"
 #include "Layer/RasterManager.hpp"
 #include "Layer/SimpleRasterExecutor.hpp"
 #include "loop.hpp"
@@ -22,9 +23,6 @@
 #include <gpu/GrDirectContext.h>
 #include <gpu/GrRecordingContext.h>
 #include <gpu/ganesh/SkSurfaceGanesh.h>
-#include <gpu/GrBackendSurface.h>
-#include <gpu/gl/GrGLInterface.h>
-#include <src/gpu/ganesh/gl/GrGLDefines.h>
 
 #include <exception>
 #include <thread>
@@ -201,7 +199,6 @@ argparse::ArgumentParser parse(int argc, char** argv)
 void drawDebug(
   SkCanvas*                  canvas,
   Viewer&                    viewer,
-  VGG::layer::RasterNode*    raster,
   const layer::Revalidation& rev,
   const std::vector<Bounds>& damageBounds)
 {
@@ -211,7 +208,7 @@ void drawDebug(
   r.setCanvas(canvas);
   if (viewer.enableDebug)
   {
-    raster->debug(&r);
+    viewer.rasterNode->debug(&r);
   }
 #endif
 
@@ -248,7 +245,7 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
 #endif
 
   sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
-  sk_sp<GrDirectContext>     directContext = GrDirectContext::MakeGL(interface);
+  sk_sp<GrRecordingContext>  directContext = skia_impl::gl::glContextCreateProc(nullptr)();
 
   viewer.zoomNode = VGG::layer::ZoomerNode::Make();
   viewer.viewportNode = VGG::layer::Viewport::Make(1.0);
@@ -288,20 +285,19 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
       viewer.onEvent(evt, userData);
     });
 
-  Ref<RasterNode>      rasterNode;
   SceneNode*           sceneNode = nullptr;
   SimpleRasterExecutor executor(directContext.get());
   if (auto n = loadScene(program); n)
   {
     viewer.pager = std::make_unique<Pager>(n.get());
     sceneNode = n.get();
-    rasterNode =
+    viewer.rasterNode =
       VGG::layer::raster::make(&executor, viewer.viewportNode, viewer.zoomNode, std::move(n));
 #ifdef IMGUI_ENABLED
     panel.setScene(n.get());
 #endif
   }
-  if (!rasterNode)
+  if (!viewer.rasterNode)
   {
     std::cout << "Cannot load scene\n";
     return 1;
@@ -321,19 +317,19 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
     std::vector<Bounds> damageBounds;
     {
       VGG::layer::EventManager::pollEvents();
-      rasterNode->revalidate(&rev, glm::mat3{ 1 });
+      viewer.rasterNode->revalidate(&rev, glm::mat3{ 1 });
       damageBounds = mergeBounds(rev.boundsArray());
-      rasterNode->raster(damageBounds);
+      viewer.rasterNode->raster(damageBounds);
       Renderer r;
       auto     canvas = gpuSurface->getCanvas();
       r.setCanvas(canvas);
       canvas->clear(SK_ColorWHITE);
-      rasterNode->render(&r);
+      viewer.rasterNode->render(&r);
     }
 
-    drawDebug(gpuSurface->getCanvas(), viewer, rasterNode.get(), rev, damageBounds);
+    drawDebug(gpuSurface->getCanvas(), viewer, rev, damageBounds);
 
-    directContext->flush();
+    directContext->asDirectContext()->flush();
 
 #ifdef IMGUI_ENABLED
     endImGUIFrame();

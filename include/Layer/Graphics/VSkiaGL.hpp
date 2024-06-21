@@ -25,35 +25,9 @@
 
 namespace VGG::layer::skia_impl::gl
 {
-inline SurfaceCreateProc glSurfaceCreateProc()
-{
-  return [](GrRecordingContext* context, int w, int h, const ContextConfig& cfg)
-  {
-    GrGLFramebufferInfo info;
-    info.fFBOID = 0;
-    info.fFormat = GR_GL_RGBA8;
-    GrBackendRenderTarget target(w, h, cfg.multiSample, cfg.stencilBit, info);
-    SkSurfaceProps        props;
-    return SkSurfaces::WrapBackendRenderTarget(
-      context,
-      target,
-      kBottomLeft_GrSurfaceOrigin,
-      SkColorType::kRGBA_8888_SkColorType,
-      nullptr,
-      &props);
-  };
-}
 
-inline ContextCreateProc glContextCreateProc(ContextInfoGL* context)
-{
-  return []()
-  {
-    sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
-    ASSERT(interface);
-    sk_sp<GrDirectContext> grContext = GrDirectContext::MakeGL(interface);
-    ASSERT(grContext);
-    return grContext;
-  };
-}
+SurfaceCreateProc glSurfaceCreateProc();
+
+ContextCreateProc glContextCreateProc(ContextInfoGL* context);
 
 } // namespace VGG::layer::skia_impl::gl

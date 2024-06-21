@@ -9,6 +9,7 @@
 #include "Layer/Model/JSONModel.hpp"
 #include "Layer/Model/StructModel.hpp"
 #include "Layer/Memory/Ref.hpp"
+#include "glm/gtx/matrix_transform_2d.hpp"
 #include "loader.hpp"
 
 #include "Layer/SceneBuilder.hpp"
@@ -125,7 +126,83 @@ struct Viewer
   bool enableDrawDamageBounds = false;
   bool enableHover = false;
 
-  VGG::layer::WeakRef<VGG::layer::PaintNode> focus;
+  VGG::layer::PaintNode* focus = nullptr;
+  bool                   hasNode = false;
+
+  VGG::layer::PaintNode* selectedNode = nullptr;
+  glm::ivec2             prevPos;
+
+  static void paintNodeAt(
+    VGG::layer::PaintNode*                      node,
+    const VGG::layer::PaintNode::NodeAtContext* ctx)
+  {
+    auto that = static_cast<Viewer*>(ctx->userData);
+    if (that->hasNode == false)
+    {
+      that->onNodeAt(node, ctx);
+      that->hasNode = true;
+    }
+  }
+  static void nodeAt(VGG::layer::RenderNode* node, const VGG::layer::RenderNode::NodeAtContext* ctx)
+  {
+    auto that = static_cast<Viewer*>(ctx->userData);
+    static_cast<VGG::layer::FrameNode*>(node)->node()->nodeAt(
+      ctx->localX,
+      ctx->localY,
+      paintNodeAt,
+      that);
+  }
+
+  void sendNodeAt(int x, int y)
+  {
+    if (rasterNode)
+    {
+      rasterNode->nodeAt(x, y, nodeAt, this);
+      if (!hasNode)
+      {
+        if (focus)
+        {
+          INFO("Hovering exit %s", focus->name().c_str());
+#ifdef VGG_LAYER_DEBUG
+          focus->hoverBounds = false;
+#endif
+          focus = nullptr;
+        }
+      }
+      hasNode = false;
+    }
+  }
+
+  void onNodeAt(VGG::layer::PaintNode* node, const VGG::layer::PaintNode::NodeAtContext* ctx)
+  {
+    if (node != focus)
+    {
+      INFO("Hovering enter in %s", node->name().c_str());
+      if (focus)
+      {
+#ifdef VGG_LAYER_DEBUG
+        focus->hoverBounds = false;
+#endif
+      }
+#ifdef VGG_LAYER_DEBUG
+      node->hoverBounds = true;
+#endif
+      focus = node;
+    }
+  }
+
+  void onMouseTracking(int x, int y)
+  {
+    if (selectedNode)
+    {
+      auto offset = glm::ivec2(x, y) - prevPos;
+      auto t = selectedNode->attributeAccessor()->getTransform();
+      t.setMatrix(glm::translate(t.matrix(), glm::vec2(offset)));
+      DEBUG("onMouseTracking %s, [%d, %d]", selectedNode->name().c_str(), offset.x, offset.y);
+      selectedNode->attributeAccessor()->setTransform(t);
+      prevPos = { x, y };
+    }
+  }
 
   bool onZoomEvent(UEvent e, void* userData)
   {
@@ -195,51 +272,26 @@ struct Viewer
 
     if (evt.type == VGG_MOUSEMOTION)
     {
-#ifdef VGG_LAYER_DEBUG
       if (enableHover)
       {
-        // if (auto p = rasterNode->nodeAt(evt.motion.windowX, evt.motion.windowY, nullptr,
-        // nullptr);
-        //     p)
-        // {
-        //   // enter
-        //   if (p != focus)
-        //   {
-        //     INFO("Hovering enter in %s", p->name().c_str());
-        //     if (auto f = focus.lock(); f)
-        //     {
-        //       f->hoverBounds = false;
-        //     }
-        //     p->hoverBounds = true;
-        //     focus = p;
-        //     displayInfo(p);
-        //   }
-        // }
-        // else
-        // {
-        //   // exit
-        //   if (auto f = focus.lock(); f)
-        //   {
-        //     INFO("Hovering exit %s", f->name().c_str());
-        //     f->hoverBounds = false;
-        //     focus = nullptr;
-        //   }
-        // }
+        sendNodeAt(evt.motion.windowX, evt.motion.windowY);
       }
-#endif
+      if (selectedNode)
+      {
+        onMouseTracking(evt.motion.windowX, evt.motion.windowY);
+      }
     }
 
     if (evt.type == VGG_MOUSEBUTTONDOWN)
     {
-#ifdef VGG_LAYER_DEBUG
-      // if (m_layer)
-      // {
-      //   if (auto p = m_layer->nodeAt(evt.motion.windowX, evt.motion.windowY); p)
-      //   {
-      //     INFO("%s", p->dump().c_str());
-      //   }
-      // }
-#endif
+      prevPos = { evt.motion.windowX, evt.motion.windowY };
+      sendNodeAt(evt.motion.windowX, evt.motion.windowY);
+      selectedNode = focus;
+    }
+
+    if (evt.type == VGG_MOUSEBUTTONUP)
+    {
+      selectedNode = nullptr;
     }
 
     // keyboard event
@@ -271,24 +323,6 @@ struct Viewer
       return true;
     }
 
-    if (key == VGGK_3)
-    {
-      std::ofstream       ofs("capture.png");
-      layer::ImageOptions opt;
-      auto                b = pager->getPageBounds();
-      opt.extend[0] = b.width();
-      opt.extend[1] = b.height();
-      INFO("Capture PNG [%f, %f]", b.width(), b.height());
-      opt.encode = VGG::layer::EImageEncode::IE_PNG;
-      if (ofs.is_open())
-      {
-        // TODO::
-        // m_layer->makeImageSnapshot(opt, ofs);
-      }
-
-      return true;
-    }
-
     if (key == VGGK_b)
     {
       enableDebug = !enableDebug;
@@ -307,6 +341,7 @@ struct Viewer
     {
       INFO("Toggle hover bound");
       enableHover = !enableHover;
+      focus = nullptr;
       return true;
     }
     return false;

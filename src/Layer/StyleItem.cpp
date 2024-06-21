@@ -86,7 +86,7 @@ StyleItem::StyleItem(
   PaintNode*              node,
   Ref<TransformAttribute> transform,
   Creator                 creator)
-  : RenderNode(cnt, INVALIDATE, OVERRIDE_DAMAGE)
+  : RenderNode(cnt, INVALIDATE, BUBBLE_DAMAGE)
   , d_ptr(new StyleItem__pImpl(this))
   , m_transformAttr(transform)
 {

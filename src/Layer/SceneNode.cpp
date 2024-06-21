@@ -186,7 +186,10 @@ Bounds SceneNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
   Bounds bounds;
   for (auto& frame : d_ptr->frames)
   {
-    bounds.unionWith(frame->revalidate(inv, mat));
+    if (frame->isVisible())
+    {
+      bounds.unionWith(frame->revalidate(inv, mat));
+    }
   }
   d_ptr->picture = d_ptr->revalidatePicture(toSkRect(bounds));
   return bounds;

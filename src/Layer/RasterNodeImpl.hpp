@@ -17,6 +17,7 @@
 #pragma once
 #include "Layer/Core/RasterNode.hpp"
 #include "Layer/RasterManager.hpp"
+#include <core/SkColor.h>
 
 namespace VGG::layer
 {
@@ -43,7 +44,7 @@ public:
   void debug(Renderer* render) override;
 #endif
 
-  std::pair<int, int> tileSize() const
+  glm::ivec2 tileSize() const
   {
     return { m_tw, m_th };
   }

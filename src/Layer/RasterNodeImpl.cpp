@@ -23,6 +23,7 @@
 #include "Layer/RasterManager.hpp"
 #include "Layer/Raster.hpp"
 
+#include <core/SkColor.h>
 #include <core/SkRefCnt.h>
 #include <core/SkSurface.h>
 #include <gpu/ganesh/SkSurfaceGanesh.h>
@@ -33,39 +34,6 @@ namespace
 {
 using namespace VGG::layer;
 using namespace VGG;
-[[maybe_unused]] inline std::unique_ptr<VGG::layer::RasterManager::RasterTask> createRasterTask(
-  const std::vector<VGG::Bounds>& bounds,
-  const Bounds&                   viewportBounds,
-  const glm::mat3&                rasterMatrix,
-  const glm::mat3&                localMatrix)
-{
-  std::vector<SurfaceTask::Where> where;
-  where.reserve(bounds.size());
-  const auto inversedMatrix = glm::inverse(localMatrix);                // TODO:: optimized
-  const auto viewportInWorldSpace = viewportBounds.map(inversedMatrix); // TODO:: optimized
-
-  const auto mat = localMatrix * rasterMatrix; // TODO:: optimized
-  for (const auto& dr : bounds)
-  {
-    const auto worldRect = dr.intersectAs(viewportInWorldSpace);
-    if (worldRect.valid() == false)
-      continue;
-    const auto rbx = worldRect.x();
-    const auto rby = worldRect.y();
-    const auto devicePos = mat * glm::vec3(rbx, rby, 1.0f); // TODO:: optimized
-    where.push_back(
-      SurfaceTask::Where{ .dst = { (int)devicePos.x, (int)devicePos.y }, .src = worldRect });
-  }
-  return std::make_unique<SurfaceTask>(
-    0,
-    SK_ColorWHITE,
-    (int)viewportBounds.width(),
-    (int)viewportBounds.height(),
-    rasterMatrix,
-    std::move(where),
-    nullptr,
-    nullptr);
-}
 
 enum EMatrixChanged
 {
@@ -164,31 +132,29 @@ void RasterNodeImpl::render(Renderer* renderer)
     else
     {
       TileIter it(viewportBoundsInRasterSpace(), m_tw, m_th, worldBoundsInRasterSpace());
-
       canvas->concat(toSkMatrix(getLocalMatrix()));
       while (auto tile = it.next())
       {
         const auto key = tile->key();
         if (auto res = m_rasterMananger->query(key); res)
         {
-          canvas->drawImage(res->surf->makeImageSnapshot(), tile->pos().first, tile->pos().second);
+          canvas->drawImage(res->surf->makeImageSnapshot(), tile->topLeft().x, tile->topLeft().y);
         }
         else
         {
-          std::vector<TileTask::Where> where{
-            TileTask::Where{ .dst = { 0, 0 }, .src = tile->bounds().toFloatBounds() }
-          };
           auto t = std::make_unique<TileTask>(
             m_rasterMananger.get(),
             key,
             m_tw,
             m_th,
-            std::move(where),
+            SK_ColorTRANSPARENT,
+            std::vector{
+              TileTask::Where{ .dst = { 0, 0 }, .src = tile->bounds().toFloatBounds() } },
             getRasterMatrix(),
             sk_ref_sp(c->picture()),
             nullptr);
           auto r = m_rasterMananger->syncExecuteRasterTask(std::move(t));
-          canvas->drawImage(r.surf->makeImageSnapshot(), tile->pos().first, tile->pos().second);
+          canvas->drawImage(r.surf->makeImageSnapshot(), tile->topLeft().x, tile->topLeft().y);
         }
       }
     }
@@ -216,14 +182,9 @@ void RasterNodeImpl::debug(Renderer* render)
       SkPaint p;
       p.setColor(SK_ColorBLUE);
       p.setStyle(SkPaint::kStroke_Style);
-      for (int h = 0; h < it.endY - it.beginY; h++)
+      while (auto tile = it.next())
       {
-        for (int w = 0; w < it.endX - it.beginX; w++)
-        {
-          const auto rect =
-            SkRect::MakeXYWH(w * it.tileWidth, h * it.tileHeight, it.tileWidth, it.tileHeight);
-          render->canvas()->drawRect(rect, p);
-        }
+        render->canvas()->drawRect(toSkRect(tile->bounds().toFloatBounds()), p);
       }
     }
   }
@@ -320,11 +281,9 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
   {
     const auto reason = changeReason(m_prevMatrix, getTransform()->getMatrix());
     m_prevMatrix = getTransform()->getMatrix();
-    if ((reason & EMatrixChanged::SCALE && !(reason & EMatrixChanged::TRANSLATE)))
+    if ((reason & EMatrixChanged::SCALE))
     {
-      DEBUG("force update");
       std::vector<std::unique_ptr<RasterManager::RasterTask>> tasks;
-
       TileIter it(viewportBoundsInRasterSpace(), m_tw, m_th, worldBoundsInRasterSpace());
       while (auto tile = it.next())
       {
@@ -338,6 +297,7 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
           k,
           m_tw,
           m_th,
+          SK_ColorTRANSPARENT,
           std::move(where),
           getRasterMatrix(),
           sk_ref_sp(pic),
@@ -349,7 +309,6 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
     }
     else if (!bounds.empty())
     {
-      DEBUG("damage only");
       auto rasterDamageBounds = bounds;
       for (auto& rb : rasterDamageBounds)
       {
@@ -365,7 +324,6 @@ void RasterNodeImpl::raster(const std::vector<Bounds>& bounds)
     }
     else
     {
-      DEBUG("no changed");
     }
   }
 }

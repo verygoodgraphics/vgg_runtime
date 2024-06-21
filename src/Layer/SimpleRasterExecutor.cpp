@@ -29,4 +29,5 @@ RasterManager::RasterResult::Future SimpleRasterExecutor::addRasterTask(
   add([task]() { (*task)(); });
   return task->get_future();
 }
+
 } // namespace VGG::layer

@@ -48,6 +48,7 @@ struct Color;
 typedef std::array<double, 6> TDesignMatrix;
 typedef glm::mat3             TRenderMatrix;
 
+// Note: when animate is running, caller must hold AttrBridge.
 class AttrBridge
 {
   friend ReplaceNodeAnimate;
@@ -56,7 +57,17 @@ public:
   AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManage);
 
 public:
-  bool updateColor(
+  // for fill.isEnabled
+  bool updateFillEnabled(
+    std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
+    size_t                         index,
+    bool                           enabled,
+    bool                           isOnlyUpdatePaint,
+    std::shared_ptr<NumberAnimate> animate = {});
+
+  // for fill.color
+  bool updateFillColor(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,
     size_t                         index,
@@ -64,6 +75,7 @@ public:
     bool                           isOnlyUpdatePaint,
     std::shared_ptr<NumberAnimate> animate = {});
 
+  // for fill.contextSettings.opacity
   bool updateFillOpacity(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,
@@ -72,6 +84,7 @@ public:
     bool                           isOnlyUpdatePaint,
     std::shared_ptr<NumberAnimate> animate = {});
 
+  // for contextSettings.opacity
   bool updateOpacity(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,
@@ -79,6 +92,7 @@ public:
     bool                           isOnlyUpdatePaint,
     std::shared_ptr<NumberAnimate> animate = {});
 
+  // for visible
   bool updateVisible(
     std::shared_ptr<LayoutNode> node,
     layer::PaintNode*           paintNode,
@@ -86,6 +100,7 @@ public:
     bool                        isOnlyUpdatePaint);
 
   // Note: The coordinate system that newMatrix resides in depends on the value of isBasedOnGlobal.
+  // for matrix
   bool updateMatrix(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,
@@ -96,6 +111,7 @@ public:
     bool                           isFaker = false,
     bool                           isBasedOnGlobal = false);
 
+  // for bounds.width and bounds.height
   bool updateSize(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,
@@ -156,6 +172,9 @@ public:
   static std::optional<double>        getHeight(layer::PaintNode* node);
 
 private:
+  static void setFillEnabled(std::shared_ptr<LayoutNode> node, size_t index, bool enabled);
+  static void setFillEnabled(layer::PaintNode* node, size_t index, bool enabled);
+
   static void setFillColor(
     std::shared_ptr<LayoutNode> node,
     size_t                      index,

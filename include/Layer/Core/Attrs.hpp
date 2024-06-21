@@ -237,7 +237,7 @@ using FillType = std::variant<Gradient, Pattern, Color>;
 
 struct Fill
 {
-  bool           isEnabled{ true }; // TODO:: Removed
+  bool           isEnabled{ true };
   ContextSetting contextSettings{};
   FillType       type;
 

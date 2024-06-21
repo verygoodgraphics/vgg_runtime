@@ -120,11 +120,11 @@ sk_sp<SkImage> rasterTile(
 }
 
 std::vector<Rasterizer::Tile> rasterOrGetTiles(
-  SkSurface*   surface,
-  SkPicture*   picture,
-  CacheState&  cache,
-  TileIterator iter,
-  TileIterator rasterIter)
+  SkSurface*  surface,
+  SkPicture*  picture,
+  CacheState& cache,
+  TileIter    iter,
+  TileIter    rasterIter)
 {
   std::vector<Rasterizer::Tile> tiles;
   tiles.reserve(8);
@@ -133,7 +133,7 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
 
   while (auto tile = iter.next())
   {
-    const int key = tile->first + tile->second * iter.column;
+    const int key = tile->index();
     if (auto tileState = cache.tileCache.find(key); tileState)
     {
       if (!tileState->first)
@@ -141,8 +141,8 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
         auto rect = makeRect(
           iter.tileWidth,
           iter.tileHeight,
-          tile->first,
-          tile->second,
+          tile->c,
+          tile->r,
           cache.rasterBounds.left(),
           cache.rasterBounds.top());
         tileState->first = true;
@@ -155,8 +155,8 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
       const auto rect = makeRect(
         iter.tileWidth,
         iter.tileHeight,
-        tile->first,
-        tile->second,
+        tile->c,
+        tile->r,
         cache.rasterBounds.left(),
         cache.rasterBounds.top());
       auto v = cache.tileCache.insert(key, { true, { nullptr, rect } });
@@ -170,8 +170,8 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
   }
   while (auto rt = rasterIter.next())
   {
-    const int key = rt->first + rt->second * rasterIter.column;
-    if (!iter.contains(rt->first, rt->second))
+    const int key = rt->index();
+    if (!iter.contains(rt->c, rt->r))
     {
       auto tileState = cache.tileCache.find(key);
       if (!tileState)
@@ -179,8 +179,8 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
         const auto rect = makeRect(
           iter.tileWidth,
           iter.tileHeight,
-          rt->first,
-          rt->second,
+          rt->c,
+          rt->r,
           cache.rasterBounds.left(),
           cache.rasterBounds.top());
         auto v = cache.tileCache.insert(key, { true, { nullptr, rect } });
@@ -192,8 +192,8 @@ std::vector<Rasterizer::Tile> rasterOrGetTiles(
         const auto rect = makeRect(
           iter.tileWidth,
           iter.tileHeight,
-          rt->first,
-          rt->second,
+          rt->c,
+          rt->r,
           cache.rasterBounds.left(),
           cache.rasterBounds.top());
         tileState->second.image = rasterTile(surface, picture, cache.rasterMatrix, rect);
@@ -294,9 +294,22 @@ std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix> RasterCacheTile::o
     -> std::tuple<uint32_t, std::vector<Rasterizer::Tile>, SkMatrix>
   {
     cache.revalidate(rasterContext, clipRect);
-    auto iter = TileIterator(clipRect, cache.tileWidth, cache.tileHeight, cache.rasterBounds);
-    auto rasterIter =
-      TileIterator(rasterRect, cache.tileWidth, cache.tileHeight, cache.rasterBounds);
+    auto iter = TileIter(
+      Bounds{ clipRect.x(), clipRect.y(), clipRect.width(), clipRect.height() },
+      cache.tileWidth,
+      cache.tileHeight,
+      Bounds{ cache.rasterBounds.x(),
+              cache.rasterBounds.y(),
+              cache.rasterBounds.width(),
+              cache.rasterBounds.height() });
+    auto rasterIter = TileIter(
+      Bounds{ rasterRect.x(), rasterRect.y(), rasterRect.width(), rasterRect.height() },
+      cache.tileWidth,
+      cache.tileHeight,
+      Bounds{ cache.rasterBounds.x(),
+              cache.rasterBounds.y(),
+              cache.rasterBounds.width(),
+              cache.rasterBounds.height() });
     if (!iter.valid())
     {
       DEBUG("no tile hit");

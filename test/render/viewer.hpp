@@ -115,6 +115,7 @@ struct Viewer
 {
   VGG::layer::Ref<VGG::layer::Viewport>   viewportNode;
   VGG::layer::Ref<VGG::layer::ZoomerNode> zoomNode;
+  VGG::layer::Ref<VGG::layer::RasterNode> rasterNode;
   std::unique_ptr<Pager>                  pager;
   bool                                    panning{ false };
   std::function<void(int w, int h)>       viewportChangeCallback; // temporary solution
@@ -122,6 +123,9 @@ struct Viewer
   // feature switcher
   bool enableDebug = false;
   bool enableDrawDamageBounds = false;
+  bool enableHover = false;
+
+  VGG::layer::WeakRef<VGG::layer::PaintNode> focus;
 
   bool onZoomEvent(UEvent e, void* userData)
   {
@@ -189,38 +193,36 @@ struct Viewer
 
     // other events;
 
-    static bool                   s_enableHover = false;
-    static VGG::layer::PaintNode* s_currentHover = nullptr;
     if (evt.type == VGG_MOUSEMOTION)
     {
 #ifdef VGG_LAYER_DEBUG
-      if (s_enableHover)
+      if (enableHover)
       {
         // if (auto p = rasterNode->nodeAt(evt.motion.windowX, evt.motion.windowY, nullptr,
         // nullptr);
         //     p)
         // {
         //   // enter
-        //   if (p != s_currentHover)
+        //   if (p != focus)
         //   {
         //     INFO("Hovering enter in %s", p->name().c_str());
-        //     if (s_currentHover)
+        //     if (auto f = focus.lock(); f)
         //     {
-        //       s_currentHover->hoverBounds = false;
+        //       f->hoverBounds = false;
         //     }
         //     p->hoverBounds = true;
-        //     s_currentHover = p;
+        //     focus = p;
         //     displayInfo(p);
         //   }
         // }
         // else
         // {
         //   // exit
-        //   if (s_currentHover)
+        //   if (auto f = focus.lock(); f)
         //   {
-        //     INFO("Hovering exit %s", s_currentHover->name().c_str());
-        //     s_currentHover->hoverBounds = false;
-        //     s_currentHover = nullptr;
+        //     INFO("Hovering exit %s", f->name().c_str());
+        //     f->hoverBounds = false;
+        //     focus = nullptr;
         //   }
         // }
       }
@@ -304,7 +306,7 @@ struct Viewer
     if (key == VGGK_h)
     {
       INFO("Toggle hover bound");
-      s_enableHover = !s_enableHover;
+      enableHover = !enableHover;
       return true;
     }
     return false;

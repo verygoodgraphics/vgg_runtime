@@ -21,85 +21,6 @@
 
 namespace VGG::layer
 {
-
-struct TileIterator
-{
-  TileIterator(const SkRect& clip, int tileW, int tileH, const SkRect& bounds)
-    : tileWidth(tileW)
-    , tileHeight(tileH)
-    , beginX(std::max(0, int((clip.x() - bounds.x()) / tileW)))
-    , beginY(std::max(0, int((clip.y() - bounds.y()) / tileH)))
-    , endX(
-        std::min(std::ceil(bounds.width() / tileW), std::ceil((clip.right() - bounds.x()) / tileW)))
-    , endY(std::min(
-        std::ceil(bounds.height() / tileH),
-        std::ceil((clip.bottom() - bounds.y()) / tileH)))
-    , column(std::ceil(bounds.width() / tileW))
-  {
-    m_x = beginX;
-    m_y = beginY;
-  }
-
-  TileIterator(TileIterator&&) = default;
-  TileIterator(const TileIterator&) = default;
-  TileIterator& operator=(TileIterator&&) = delete;
-  TileIterator& operator=(const TileIterator&) = delete;
-
-  TileIterator()
-    : tileWidth(0)
-    , tileHeight(0)
-    , beginX(0)
-    , beginY(0)
-    , endX(0)
-    , endY(0)
-    , column(0)
-    , m_x(0)
-    , m_y(0)
-  {
-  }
-
-  bool valid() const
-  {
-    return m_x < endX && m_y < endY;
-  }
-
-  std::optional<std::pair<int, int>> next()
-  {
-    if (m_x >= endX)
-    {
-      m_x = beginX;
-      m_y++;
-    }
-    if (m_y >= endY)
-    {
-      return std::nullopt;
-    }
-    auto r = std::make_pair(m_x, m_y);
-    m_x++;
-    return r;
-  }
-
-  bool contains(int x, int y) const
-  {
-    return x >= beginX && x < endX && y >= beginY && y < endY;
-  }
-
-  bool operator==(const TileIterator& other) const
-  {
-    return tileWidth == other.tileWidth && tileHeight == other.tileHeight &&
-           beginX == other.beginX && beginY == other.beginY && endX == other.endX &&
-           endY == other.endY;
-  }
-
-  const int tileWidth, tileHeight;
-  const int beginX, beginY;
-  const int endX, endY;
-  const int column;
-
-private:
-  int m_x, m_y;
-};
-
 struct TileIter
 {
   TileIter(const Bounds& clip, int tileW, int tileH, const Bounds& bounds)
@@ -163,7 +84,6 @@ struct TileIter
       static_assert(sizeof(size_t) == 8, "size_t must be 8 bytes");
       return (((size_t)iterator.tileWidth & 0xffff) << 48) +
              (((size_t)iterator.tileHeight & 0xffff) << 32) + (size_t)index();
-      // return index();
     }
 
     glm::ivec2 topLeft() const

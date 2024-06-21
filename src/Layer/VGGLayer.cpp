@@ -223,7 +223,6 @@ public:
       Revalidation        rev;
       std::vector<Bounds> damageBounds;
       rasterNode->revalidate(&rev, glm::mat3{ 1 });
-      DEBUG("damage bounds size: %f %f", rev.bounds().width(), rev.bounds().height());
       rasterNode->raster(mergeBounds(rev.boundsArray()));
       rasterNode->render(&r);
     }

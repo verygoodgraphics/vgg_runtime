@@ -32,6 +32,7 @@ class NumberAnimate;
 class ReplaceNodeAnimate;
 class AnimateManage;
 struct Color;
+enum EBlendMode;
 
 namespace layer
 {
@@ -83,6 +84,14 @@ public:
     double                         newOpacity,
     bool                           isOnlyUpdatePaint,
     std::shared_ptr<NumberAnimate> animate = {});
+
+  // for fill.contextSettings.blendMode
+  bool updateFillBlendMode(
+    std::shared_ptr<LayoutNode> node,
+    layer::PaintNode*           paintNode,
+    size_t                      index,
+    int                         newBlendMode,
+    bool                        isOnlyUpdatePaint);
 
   // for contextSettings.opacity
   bool updateOpacity(
@@ -161,8 +170,10 @@ public:
   layer::PaintNode* getPaintNode(std::shared_ptr<LayoutNode> node);
 
 public:
+  static std::optional<bool>          getFillEnabled(layer::PaintNode* node, size_t index);
   static std::optional<VGG::Color>    getFillColor(layer::PaintNode* node, size_t index);
   static std::optional<double>        getFillOpacity(layer::PaintNode* node, size_t index);
+  static std::optional<int>           getFillBlendMode(layer::PaintNode* node, size_t index);
   static std::optional<size_t>        getFillSize(layer::PaintNode* node);
   static std::optional<double>        getOpacity(layer::PaintNode* node);
   static std::optional<bool>          getVisible(layer::PaintNode* node);
@@ -170,6 +181,8 @@ public:
   static std::optional<TDesignMatrix> getGlobalMatrix(layer::PaintNode* node);
   static std::optional<double>        getWidth(layer::PaintNode* node);
   static std::optional<double>        getHeight(layer::PaintNode* node);
+  static std::optional<size_t>        getChildrenSize(layer::PaintNode* node);
+  static std::optional<std::array<double, 2>> getScrollInfo(layer::PaintNode* node);
 
 private:
   static void setFillEnabled(std::shared_ptr<LayoutNode> node, size_t index, bool enabled);
@@ -183,6 +196,9 @@ private:
 
   static void setFillOpacity(std::shared_ptr<LayoutNode> node, size_t index, double value);
   static void setFillOpacity(layer::PaintNode* node, size_t index, double value);
+
+  static void setFillBlendMode(std::shared_ptr<LayoutNode> node, size_t index, int value);
+  static void setFillBlendMode(layer::PaintNode* node, size_t index, const VGG::EBlendMode& value);
 
   static void setOpacity(std::shared_ptr<LayoutNode> node, double value);
   static void setOpacity(layer::PaintNode* node, double value);

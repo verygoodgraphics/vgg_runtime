@@ -142,6 +142,31 @@ std::optional<double> AttrBridge::getHeight(layer::PaintNode* node)
   return node->frameBounds().height();
 }
 
+void AttrBridge::setFillEnabled(std::shared_ptr<LayoutNode> node, size_t index, bool enabled)
+{
+  auto object = AttrBridge::getlayoutNodeObject(node);
+  if (!object || index >= object->style.fills.size())
+  {
+    return;
+  }
+
+  object->style.fills.at(index).isEnabled = enabled;
+}
+
+void AttrBridge::setFillEnabled(layer::PaintNode* node, size_t index, bool enabled)
+{
+  GET_PAINTNODE_ACCESSOR(node, accessor, void());
+
+  auto fills = accessor->getFills();
+  if (index >= fills.size())
+  {
+    return;
+  }
+
+  fills.at(index).isEnabled = enabled;
+  accessor->setFills(fills);
+}
+
 void AttrBridge::setFillColor(
   std::shared_ptr<LayoutNode> node,
   size_t                      index,
@@ -380,7 +405,60 @@ layer::PaintNode* AttrBridge::getPaintNode(std::shared_ptr<LayoutNode> node)
   return sceneNode->nodeByID(id);
 }
 
-bool AttrBridge::updateColor(
+bool AttrBridge::updateFillEnabled(
+  std::shared_ptr<LayoutNode>    node,
+  layer::PaintNode*              paintNode,
+  size_t                         index,
+  bool                           enabled,
+  bool                           isOnlyUpdatePaint,
+  std::shared_ptr<NumberAnimate> animate)
+{
+  GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
+
+  auto update = [node, paintNode, index, isOnlyUpdatePaint, enabled]()
+  {
+    if (!isOnlyUpdatePaint)
+    {
+      AttrBridge::setFillEnabled(node, index, enabled);
+    }
+
+    AttrBridge::setFillEnabled(paintNode, index, enabled);
+  };
+
+  if (!animate)
+  {
+    update();
+  }
+  else
+  {
+    auto opacity = AttrBridge::getFillOpacity(paintNode, index);
+    if (!opacity)
+    {
+      return false;
+    }
+
+    if (enabled)
+    {
+      updateFillOpacity(node, paintNode, index, 0, false);
+      update();
+      updateFillOpacity(node, paintNode, index, *opacity, false, animate);
+    }
+    else
+    {
+      updateFillOpacity(node, paintNode, index, 0, false, animate);
+      animate->addCallBackWhenStop(
+        [this, node, paintNode, index, opacity, update]()
+        {
+          update();
+          updateFillOpacity(node, paintNode, index, *opacity, false);
+        });
+    }
+  }
+
+  return true;
+}
+
+bool AttrBridge::updateFillColor(
   std::shared_ptr<LayoutNode>    node,
   layer::PaintNode*              paintNode,
   size_t                         index,
@@ -1047,18 +1125,7 @@ bool AttrBridge::delChild(
   else
   {
     updateOpacity(nullptr, children[index].get(), 0, true, animate);
-    animate->addCallBackWhenStop(
-      [paintNode, index]()
-      {
-        // Note: for safe, should not call this->delChild direct.
-        auto& children = paintNode->children();
-        if (index >= children.size())
-        {
-          return;
-        }
-
-        paintNode->removeChild(children[index]);
-      });
+    animate->addCallBackWhenStop([this, paintNode, index]() { delChild(paintNode, index); });
   }
 
   return true;

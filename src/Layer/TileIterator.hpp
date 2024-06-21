@@ -146,7 +146,7 @@ struct TileIter
     const TileIter& iterator;
     const int       r;
     const int       c;
-    Result(TileIter& it, int r, int c)
+    Result(TileIter& it, int c, int r)
       : iterator(it)
       , r(r)
       , c(c)
@@ -160,21 +160,21 @@ struct TileIter
 
     size_t key() const
     {
-      // static_assert(sizeof(size_t) == 8, "size_t must be 8 bytes");
-      // return (((size_t)iterator.tileWidth & 0xffff) << 48) +
-      //        (((size_t)iterator.tileHeight & 0xffff) << 32) + (size_t)index();
-      return index();
+      static_assert(sizeof(size_t) == 8, "size_t must be 8 bytes");
+      return (((size_t)iterator.tileWidth & 0xffff) << 48) +
+             (((size_t)iterator.tileHeight & 0xffff) << 32) + (size_t)index();
+      // return index();
     }
 
-    std::pair<int, int> pos() const
+    glm::ivec2 topLeft() const
     {
-      return { r * iterator.tileWidth, c * iterator.tileHeight };
+      return { c * iterator.tileWidth, r * iterator.tileHeight };
     }
 
     Boundsi bounds() const
     {
-      return Boundsi{ r * iterator.tileWidth,
-                      c * iterator.tileHeight,
+      return Boundsi{ c * iterator.tileWidth,
+                      r * iterator.tileHeight,
                       iterator.tileWidth,
                       iterator.tileHeight };
     }

@@ -4,6 +4,7 @@
 
 #include "core/SkSurface.h"
 
+#include <core/SkColor.h>
 #include <optional>
 #include <vector>
 #include <future>
@@ -72,14 +73,13 @@ void RasterManager::updateDamage(
     {
       std::vector<TileTask::Where> where;
       where.reserve(5);
-      const int  key = tile->key();
+      const auto key = tile->key();
       const auto tileBounds = tile->bounds().toFloatBounds();
-      const auto [x, y] = tile->pos();
       if (auto isectBounds = tileBounds.intersectAs(damage); isectBounds.valid())
       {
-        where.push_back(
-          TileTask::Where{ .dst = { (int)isectBounds.x() - x, (int)isectBounds.y() - y },
-                           .src = isectBounds });
+        where.push_back(TileTask::Where{ .dst = { (int)isectBounds.x() - tile->topLeft().x,
+                                                  (int)isectBounds.y() - tile->topLeft().y },
+                                         .src = isectBounds });
       }
       if (auto it = tileDamage.find(key); it != tileDamage.end())
       {
@@ -101,8 +101,16 @@ void RasterManager::updateDamage(
     if (auto cache = query(k); cache)
     {
       surf = std::move(cache->surf);
-      auto task = std::make_unique<
-        TileTask>(this, k, tw, th, std::move(v), rasterMatrix, pic, std::move(surf));
+      auto task = std::make_unique<TileTask>(
+        this,
+        k,
+        tw,
+        th,
+        SK_ColorTRANSPARENT,
+        std::move(v),
+        rasterMatrix,
+        pic,
+        std::move(surf));
       appendRasterTask(std::move(task));
     }
   }
@@ -110,6 +118,7 @@ void RasterManager::updateDamage(
 
 void RasterManager::update(std::vector<std::unique_ptr<RasterTask>> tasks)
 {
+  m_cache.purge();
   for (auto& task : tasks)
   {
     appendRasterTask(std::move(task));

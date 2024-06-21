@@ -47,4 +47,5 @@ private:
   SimpleRasterExecutor(SimpleRasterExecutor&&) = delete;
   SimpleRasterExecutor&& operator=(SimpleRasterExecutor&&) = delete;
 };
+
 } // namespace VGG::layer

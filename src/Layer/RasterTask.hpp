@@ -45,11 +45,13 @@ public:
     size_t             index,
     int                tw,
     int                th,
+    SkColor            bgColor,
     std::vector<Where> where,
     const glm::mat3&   matrix,
     sk_sp<SkPicture>   picture,
     sk_sp<SkSurface>   surf = nullptr)
     : RasterTask(index)
+    , bgColor(bgColor)
     , matrix(matrix)
     , damage(std::move(where))
     , tw(tw)

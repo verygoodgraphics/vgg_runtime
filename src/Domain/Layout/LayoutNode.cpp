@@ -94,7 +94,7 @@ std::pair<std::shared_ptr<LayoutNode>, std::string> LayoutNode::hitTest(
     std::vector<std::string> keys{ id(), originalId(), name() };
     if (auto ele = elementNode(); ele && (ele->type() == Domain::Element::EType::SYMBOL_INSTANCE))
     {
-      keys.push_back(static_cast<Domain::SymbolInstanceElement*>(ele)->masterId());
+      keys.insert(keys.begin(), static_cast<Domain::SymbolInstanceElement*>(ele)->masterId());
     }
     for (const auto& key : keys)
     {

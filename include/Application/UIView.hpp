@@ -226,6 +226,7 @@ public:
 
   void                       saveState(const std::shared_ptr<StateTree>& stateTree);
   std::shared_ptr<StateTree> savedState(const std::string& instanceDescendantId);
+  void                       updateState(const LayoutNode* instanceNode);
 
   void enableZoomer(bool enabled);
 

@@ -1499,7 +1499,7 @@ LayoutNode* LayoutNode::closestCommonAncestor(LayoutNode* node)
   return nullptr;
 }
 
-bool LayoutNode::isAncestorOf(LayoutNode* node)
+bool LayoutNode::isAncestorOf(const LayoutNode* node)
 {
   auto p = node;
   while (p)

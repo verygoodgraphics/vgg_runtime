@@ -428,7 +428,17 @@ bool Presenter::setInstanceState(
   const app::UIAnimationOption& options,
   app::AnimationCompletion      completion)
 {
-  return m_view->setInstanceState(oldNode, newNode, options, completion);
+  return m_view->setInstanceState(
+    oldNode,
+    newNode,
+    options,
+    [v = m_view, newNode, completion](bool finished)
+    {
+      v->updateState(newNode);
+
+      if (completion)
+        completion(finished);
+    });
 }
 
 bool Presenter::presentInstanceState(

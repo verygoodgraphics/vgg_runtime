@@ -21,12 +21,24 @@
 #include "Domain/Model/DesignModel.hpp"
 #include "Layer/Core/AttributeAccessor.hpp"
 #include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/VType.hpp"
 #include "Layer/Core/SceneNode.hpp"
 #include "Layer/Memory/Ref.hpp"
 #include "Layer/Model/StructModel.hpp"
 #include "Layer/SceneBuilder.hpp"
+#include <map>
 
 using namespace VGG;
+
+const std::map<int, VGG::EBlendMode> s_blendMode{
+  { 0, VGG::BM_NORMAL },        { 1, VGG::BM_DARKEN },       { 2, VGG::BM_MULTIPLY },
+  { 3, VGG::BM_COLOR_BURN },    { 4, VGG::BM_LIGHTEN },      { 5, VGG::BM_SCREEN },
+  { 6, VGG::BM_COLOR_DODGE },   { 7, VGG::BM_OVERLAY },      { 8, VGG::BM_SOFT_LIGHT },
+  { 9, VGG::BM_HARD_LIGHT },    { 10, VGG::BM_DIFFERENCE },  { 11, VGG::BM_EXCLUSION },
+  { 12, VGG::BM_HUE },          { 13, VGG::BM_SATURATION },  { 14, VGG::BM_COLOR },
+  { 15, VGG::BM_LUMINOSITY },   { 16, VGG::BM_PLUS_DARKER }, { 17, VGG::BM_PLUS_LIGHTER },
+  { 27, VGG::BM_PASS_THROUGHT }
+};
 
 AttrBridge::AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManage)
   : m_view(view)
@@ -52,6 +64,46 @@ std::optional<VGG::Color> AttrBridge::getFillColor(layer::PaintNode* node, size_
   try
   {
     return std::get<VGG::Color>(accessor->getFills().at(index).type);
+  }
+  catch (...)
+  {
+  }
+
+  return {};
+}
+
+std::optional<bool> AttrBridge::getFillEnabled(layer::PaintNode* node, size_t index)
+{
+  GET_PAINTNODE_ACCESSOR(node, accessor, {});
+
+  try
+  {
+    return accessor->getFills().at(index).isEnabled;
+  }
+  catch (...)
+  {
+  }
+
+  return {};
+}
+
+std::optional<int> AttrBridge::getFillBlendMode(layer::PaintNode* node, size_t index)
+{
+  GET_PAINTNODE_ACCESSOR(node, accessor, {});
+
+  try
+  {
+    // s_blendMode does not have a large number of elements, so linear search is acceptable.
+    auto value = accessor->getFills().at(index).contextSettings.blendMode;
+    auto it = std::find_if(
+      s_blendMode.begin(),
+      s_blendMode.end(),
+      [value](const std::pair<int, VGG::EBlendMode>& item) { return item.second == value; });
+
+    if (it != s_blendMode.end())
+    {
+      return it->first;
+    }
   }
   catch (...)
   {
@@ -142,6 +194,18 @@ std::optional<double> AttrBridge::getHeight(layer::PaintNode* node)
   return node->frameBounds().height();
 }
 
+std::optional<size_t> AttrBridge::getChildrenSize(layer::PaintNode* node)
+{
+  CHECK_EXPR(node, {});
+  return node->children().size();
+}
+
+std::optional<std::array<double, 2>> AttrBridge::getScrollInfo(layer::PaintNode* node)
+{
+  // TODO wait to complete.
+  return {};
+}
+
 void AttrBridge::setFillEnabled(std::shared_ptr<LayoutNode> node, size_t index, bool enabled)
 {
   auto object = AttrBridge::getlayoutNodeObject(node);
@@ -228,6 +292,35 @@ void AttrBridge::setFillOpacity(layer::PaintNode* node, size_t index, double val
   }
 
   fills.at(index).contextSettings.opacity = static_cast<float>(value);
+  accessor->setFills(fills);
+}
+
+void AttrBridge::setFillBlendMode(std::shared_ptr<LayoutNode> node, size_t index, int value)
+{
+  if (auto object = AttrBridge::getlayoutNodeObject(node))
+  {
+    if (index >= object->style.fills.size())
+    {
+      return;
+    }
+    object->style.fills.at(index).contextSettings.blendMode = value;
+  }
+}
+
+void AttrBridge::setFillBlendMode(
+  layer::PaintNode*      node,
+  size_t                 index,
+  const VGG::EBlendMode& value)
+{
+  GET_PAINTNODE_ACCESSOR(node, accessor, void());
+
+  auto fills = accessor->getFills();
+  if (index >= fills.size())
+  {
+    return;
+  }
+
+  fills.at(index).contextSettings.blendMode = value;
   accessor->setFills(fills);
 }
 
@@ -413,6 +506,17 @@ bool AttrBridge::updateFillEnabled(
   bool                           isOnlyUpdatePaint,
   std::shared_ptr<NumberAnimate> animate)
 {
+  auto nowState = AttrBridge::getFillEnabled(paintNode, index);
+  if (!nowState)
+  {
+    return false;
+  }
+
+  if (*nowState == enabled)
+  {
+    return true;
+  }
+
   GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
 
   auto update = [node, paintNode, index, isOnlyUpdatePaint, enabled]()
@@ -529,6 +633,34 @@ bool AttrBridge::updateFillOpacity(
   }
 
   updateSimpleAttr({ *nowValue }, { newOpacity }, update, animate);
+  return true;
+}
+
+bool AttrBridge::updateFillBlendMode(
+  std::shared_ptr<LayoutNode> node,
+  layer::PaintNode*           paintNode,
+  size_t                      index,
+  int                         newBlendMode,
+  bool                        isOnlyUpdatePaint)
+{
+  // 27: Pass through
+  if (newBlendMode == 27)
+  {
+    return false;
+  }
+
+  auto blendMode = s_blendMode.find(newBlendMode);
+  if (blendMode == s_blendMode.end())
+  {
+    return false;
+  }
+
+  if (!isOnlyUpdatePaint)
+  {
+    AttrBridge::setFillBlendMode(node, index, newBlendMode);
+  }
+
+  AttrBridge::setFillBlendMode(paintNode, index, blendMode->second);
   return true;
 }
 
@@ -827,10 +959,9 @@ void AttrBridge::setContentOffset(std::shared_ptr<LayoutNode> node, const double
 
 void AttrBridge::setContentOffset(layer::PaintNode* node, const double x, const double y)
 {
-  // TODO
-  // auto matrix =
-  //   TransformHelper::fromDesignMatrix(TransformHelper::translate(x, y, { 1, 0, 0, 1, 0, 0 }));
-  // node->setContentTransform(layer::Transform(matrix));
+  auto matrix =
+    TransformHelper::fromDesignMatrix(TransformHelper::translate(x, y, { 1, 0, 0, 1, 0, 0 }));
+  node->setContentTransform(layer::Transform(matrix));
 }
 
 bool AttrBridge::updateSize(

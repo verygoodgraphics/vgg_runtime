@@ -512,6 +512,10 @@ UIView::EventHandleResult UIView::dispatchMouseEventOnPage(
     {
       if (target.first && target == eventContext.mouseEnterTargetNode)
       {
+        DEBUG(
+          "mouse enter same node: %s, %s",
+          target.first->name().c_str(),
+          target.first->id().c_str());
         return { true, true };
       }
       if (auto node = target.first)
@@ -1147,6 +1151,36 @@ void UIView::onMouseMove(UEvent evt, bool forHover)
   const auto&  m = evt.motion;
   for (auto type : types)
     handleMouseEvent(0, m.windowX, m.windowY, m.xrel, m.yrel, type, forHover);
+}
+
+void UIView::updateState(const LayoutNode* instanceNode)
+{
+  ASSERT(instanceNode);
+  DEBUG("UIView::updateState, instance node : %s", instanceNode->id().c_str());
+
+  EventContext& currentContext = m_presentedTreeContext[currentPage()->id()];
+  if (auto& n = currentContext.mouseOverTargetNode.first; n && (n.get() == instanceNode))
+  {
+    DEBUG("UIView::updateState, clear mouse over node: %s", n->id().c_str());
+    currentContext.mouseOverTargetNode = {};
+    currentContext.mouseOverNode.reset();
+  }
+  if (auto& n = currentContext.mouseEnterTargetNode.first; n && (n.get() == instanceNode))
+  {
+    DEBUG("UIView::updateState, clear mouse enter node: %s", n->id().c_str());
+    currentContext.mouseEnterTargetNode = {};
+  }
+  if (auto& n = currentContext.mouseOutTargetNode.first; n && (n.get() == instanceNode))
+  {
+    DEBUG("UIView::updateState, clear mouse out node: %s", n->id().c_str());
+    currentContext.mouseOutTargetNode = {};
+    currentContext.mouseOutNode.reset();
+  }
+
+  std::vector<TargetNode> targets = std::move(currentContext.mouseLeaveTargetNodes);
+  for (auto& t : targets)
+    if (t.first->isAncestorOf(instanceNode) && (t.first.get() != instanceNode))
+      currentContext.mouseLeaveTargetNodes.push_back(t);
 }
 
 } // namespace VGG

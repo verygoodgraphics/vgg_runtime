@@ -153,7 +153,7 @@ public:
     return m_children;
   }
 
-  bool        isAncestorOf(LayoutNode* node);
+  bool        isAncestorOf(const LayoutNode* node);
   LayoutNode* closestCommonAncestor(LayoutNode* node);
 
   Layout::Rect frame() const;

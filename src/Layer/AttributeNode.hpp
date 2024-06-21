@@ -109,7 +109,7 @@ class Attribute : public VNode
 {
 public:
   Attribute(VRefCnt* cnt)
-    : VNode(cnt, INVALIDATE)
+    : VNode(cnt, INVALIDATE, BUBBLE_DAMAGE)
   {
   }
   bool isInvalid() const

@@ -232,10 +232,13 @@ public:
       std::vector<std::string> info;
       drawTextAt(canvas, info, q_ptr->m_position[0], q_ptr->m_position[1]);
     }
+
+    canvas->save();
+    const auto scale = q_ptr->context()->property().dpiScaling * q_ptr->scaleFactor();
+    canvas->scale(scale, scale);
     for (auto& item : items)
-    {
       item->render(canvas);
-    }
+    canvas->restore();
 
 #ifdef VGG_LAYER_DEBUG
     if (rec)

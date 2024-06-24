@@ -966,7 +966,8 @@ void UIView::restoreState(const std::string& instanceId)
 void UIView::triggerMouseEnter()
 {
   DEBUG("UIView::triggerMouseEnter");
-  onMouseMove(m_lastMouseMove, true);
+  if (m_lastMouseMove.has_value())
+    onMouseMove(*m_lastMouseMove, true);
 }
 
 void UIView::setLayer(app::AppRender* layer)

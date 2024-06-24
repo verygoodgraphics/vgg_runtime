@@ -19,6 +19,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <stack>
 #include <string>
 #include <tuple>
@@ -126,7 +127,7 @@ private:
   bool m_isZoomerEnabled{ true };
   bool m_drawGrayBackground{ false };
 
-  UEvent m_lastMouseMove; // Used to trigger mouseenter event when content is updated
+  std::optional<UEvent> m_lastMouseMove; // Used to trigger mouseenter event when content is updated
 
 public:
   UIView();

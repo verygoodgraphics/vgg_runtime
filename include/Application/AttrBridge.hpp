@@ -94,7 +94,6 @@ public:
     bool                        isOnlyUpdatePaint);
 
   // for fill.pattern(patternImageFill).rotation
-  // newRotation: unit is degrees.
   bool updatePatternFillRotation(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,

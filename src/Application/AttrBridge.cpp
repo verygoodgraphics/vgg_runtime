@@ -30,8 +30,6 @@
 
 using namespace VGG;
 
-const double g_pi = 3.1415926;
-
 const std::map<int, VGG::EBlendMode> g_blendMode{
   { 0, VGG::BM_NORMAL },        { 1, VGG::BM_DARKEN },       { 2, VGG::BM_MULTIPLY },
   { 3, VGG::BM_COLOR_BURN },    { 4, VGG::BM_LIGHTEN },      { 5, VGG::BM_SCREEN },
@@ -147,7 +145,7 @@ std::optional<double> AttrBridge::getPatternFillRotation(layer::PaintNode* node,
 
   auto& pattern = std::get<VGG::Pattern>(accessor->getFills().at(index).type);
   auto& instance = std::get<VGG::PatternFill>(pattern.instance);
-  return instance.rotation / g_pi * 180.0;
+  return -instance.rotation;
 }
 
 std::optional<bool> AttrBridge::getVisible(layer::PaintNode* node)
@@ -377,7 +375,7 @@ void AttrBridge::setPatternFillRotation(layer::PaintNode* node, size_t index, do
   try
   {
     auto& pattern = std::get<VGG::Pattern>(fills.at(index).type);
-    std::get<VGG::PatternFill>(pattern.instance).rotation = value / 180.0 * g_pi;
+    std::get<VGG::PatternFill>(pattern.instance).rotation = -value;
   }
   catch (...)
   {

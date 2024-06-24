@@ -15,12 +15,18 @@
  */
 
 #include "Application/VggEnv.hpp"
-
+#include <chrono>
+#include <unordered_map>
 #include "Utility/Log.hpp"
 
-#include <unordered_map>
+namespace VGG
+{
 
-using namespace VGG;
+VggEnv::VggEnv()
+{
+  using namespace std::chrono;
+  m_tag = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
 
 std::weak_ptr<VggEnv> VggEnv::getDefault()
 {
@@ -49,3 +55,5 @@ std::unordered_map<std::string, std::weak_ptr<VggEnv>>& VggEnv::getRepo()
   static std::unordered_map<std::string, std::weak_ptr<VggEnv>> repo;
   return repo;
 }
+
+} // namespace VGG

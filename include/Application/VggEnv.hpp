@@ -44,11 +44,13 @@ class VggEnv : public IVggEnv
   std::weak_ptr<Presenter>  m_presenter;
 
 public:
+  VggEnv();
+
   virtual std::string getEnv() override
   {
     const void*       address = static_cast<const void*>(this);
     std::stringstream ss;
-    ss << "_" << address;
+    ss << "_" << m_tag << "_" << address;
     return ss.str();
   }
 
@@ -121,6 +123,8 @@ public:
 
 private:
   static std::unordered_map<std::string, std::weak_ptr<VggEnv>>& getRepo();
+
+  int64_t m_tag = 0;
 };
 
 } // namespace VGG

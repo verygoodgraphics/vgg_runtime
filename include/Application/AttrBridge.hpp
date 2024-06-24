@@ -166,11 +166,10 @@ public:
     size_t                         index,
     std::shared_ptr<NumberAnimate> animate = {});
 
-  // Note: oldValue and newValue: [x, y], base on the design coordinate system.
+  // Note: newValue: [x, y], represents a translate matrix, base on the design coordinate system.
   bool scrollTo(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,
-    std::array<double, 2>          oldValue,
     std::array<double, 2>          newValue,
     bool                           isOnlyUpdatePaint,
     std::shared_ptr<NumberAnimate> animate = {});

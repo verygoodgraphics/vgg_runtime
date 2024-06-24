@@ -28,6 +28,8 @@
 #include "Layer/Core/AttributeAccessor.hpp"
 #include "Layer/Memory/VAllocator.hpp"
 #include <core/SkCanvas.h>
+#include <core/SkSamplingOptions.h>
+#include <core/SkTileMode.h>
 
 namespace
 {
@@ -88,7 +90,6 @@ StyleItem::StyleItem(
   Creator                 creator)
   : RenderNode(cnt, INVALIDATE, BUBBLE_DAMAGE)
   , d_ptr(new StyleItem__pImpl(this))
-  , m_transformAttr(transform)
 {
 
   Ref<LayerFXAttribute> layerPostProcess = LayerFXAttribute::Make(WeakRef<StyleItem>(this));
@@ -103,7 +104,6 @@ StyleItem::StyleItem(
   m_fillEffect = StackFillEffectImpl::Make(m_graphicItem);
   m_borderEffect = StackBorderEffectImpl::Make(m_graphicItem);
 
-  observe(m_transformAttr);
   observe(m_alphaMaskAttr);
   observe(m_shapeMaskAttr);
   observe(m_fillEffect);
@@ -213,10 +213,9 @@ Bounds StyleItem::onRevalidateObject()
 {
   m_graphicItem->revalidate();
   m_hasFill = false;
-  for (const auto& p : m_fills)
+  for (const auto& p : m_fillEffect->fills())
   {
-    const auto& f = p;
-    if (f.isEnabled)
+    if (p->getEnabled())
     {
       m_hasFill = true;
       break;
@@ -297,7 +296,6 @@ Bounds StyleItem::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
   auto bounds = onRevalidateStyle(); // this must be the first, workaround
   m_shapeMaskAttr->revalidate();
-  m_transformAttr->revalidate();
   m_alphaMaskAttr->revalidate();
   // m_styleAttr->revalidate();
   revalidateEffectsBounds();
@@ -309,7 +307,6 @@ Bounds StyleItem::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 
 StyleItem::~StyleItem()
 {
-  unobserve(m_transformAttr);
   unobserve(m_alphaMaskAttr);
   unobserve(m_shapeMaskAttr);
   // unobserve(m_shapeAttr);

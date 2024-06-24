@@ -55,35 +55,14 @@ public:
 
   Bounds objectBounds();
 
-  // Model attributes, these should be moved out of StyleItem. Maybe PaintNode is a good choice
-  void applyFillStyle(const std::vector<Fill>& fills)
+  StackFillEffectImpl* fillEffect() const
   {
-    ASSERT(m_fillEffect);
-    if (m_fills == fills)
-      return;
-    m_fills = fills;
-    m_fillEffect->applyFillStyle(std::move(fills));
+    return m_fillEffect.get();
   }
 
-  void applyBorderStyle(const std::vector<Border>& borders)
+  StackBorderEffectImpl* borderEffect() const
   {
-    ASSERT(m_borderEffect);
-    if (m_borders == borders)
-      return;
-    m_borders = borders;
-    m_borderEffect->applyBorderStyle(std::move(borders));
-  }
-
-  const std::vector<Fill>& getModelFillStyle() const
-  {
-    ASSERT(m_fillEffect);
-    return m_fills;
-  }
-
-  const std::vector<Border>& getModelBorderStyle() const
-  {
-    ASSERT(m_borderEffect);
-    return m_borders;
+    return m_borderEffect.get();
   }
 
   // style manipulation APIs (view attributes)
@@ -124,7 +103,7 @@ public:
   ~StyleItem();
 
 protected:
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
 
 private:
   VGG_CLASS_MAKE(StyleItem);
@@ -172,7 +151,7 @@ private:
     int       m_saveCount;
   };
 
-  Ref<TransformAttribute> m_transformAttr; // Removed from StyleItem
+  // Ref<TransformAttribute> m_transformAttr; // Removed from StyleItem
 
   ////////////////////// StyleAttribute begin
   Ref<InnerShadowAttribute> m_innerShadowAttr;
@@ -182,10 +161,10 @@ private:
 
   // Ref<ObjectAttribute> m_objectAttr;
 
-  Ref<GraphicItem>    m_graphicItem;
-  std::vector<Fill>   m_fills;
-  std::vector<Border> m_borders;
-  bool                m_hasFill{ false };
+  Ref<GraphicItem> m_graphicItem;
+  // std::vector<Fill>   m_fills;
+  // std::vector<Border> m_borders;
+  bool             m_hasFill{ false };
 
   Bounds onRevalidateObject();
 

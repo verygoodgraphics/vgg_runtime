@@ -370,7 +370,7 @@ protected:
 
   virtual bool onRevalidateVisible(const Bounds&) = 0;
 
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override
   {
     ASSERT(getChild());
     const auto bounds = getChild()->revalidate();

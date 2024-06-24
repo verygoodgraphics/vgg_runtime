@@ -28,6 +28,11 @@
 #include <string>
 #include <any>
 
+#define PAINTNODE_ATTR_DECL(name, type)                                                            \
+  type get##name() const;                                                                          \
+  void set##name(const std::remove_cvref_t<type>& v);                                              \
+  void set##name(std::remove_cvref_t<type>&& v);
+
 namespace VGG::layer
 {
 class Renderer;
@@ -183,6 +188,9 @@ public:
   float frameCornerSmoothing() const;
 
   void setStyle(const Style& style);
+
+  PAINTNODE_ATTR_DECL(Borders, const std::vector<Border>&);
+  PAINTNODE_ATTR_DECL(Fills, const std::vector<Fill>&);
 
   EBoolOp clipOperator() const;
 

@@ -27,6 +27,21 @@
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Layer/ParagraphGraphicItem.hpp"
+#include "Layer/Core/PaintNode.hpp"
+
+#define MODEL_DEF(classname, name, type)                                                           \
+  void classname::set##name(const std::remove_cvref_t<type>& v)                                    \
+  {                                                                                                \
+    owner()->set##name(v);                                                                         \
+  }                                                                                                \
+  void classname::set##name(std::remove_cvref_t<type>&& v)                                         \
+  {                                                                                                \
+    owner()->set##name(std::move(v));                                                              \
+  }                                                                                                \
+  type classname::get##name() const                                                                \
+  {                                                                                                \
+    return owner()->get##name();                                                                   \
+  }
 
 namespace VGG::layer
 {
@@ -41,8 +56,8 @@ ATTR_DEF(
   const std::vector<InnerShadow>&,
   InnerShadowStyle,
   m_innerShadowAttr);
-MODEL_DEF(Accessor, Fills, const std::vector<Fill>&, FillStyle, m_item);
-MODEL_DEF(Accessor, Borders, const std::vector<Border>&, BorderStyle, m_item);
+MODEL_DEF(Accessor, Fills, const std::vector<Fill>&);
+MODEL_DEF(Accessor, Borders, const std::vector<Border>&);
 ATTR_DEF(Accessor, LayerBlurs, const std::vector<LayerFX>&, LayerBlur, m_layerFXAttr);
 ATTR_DEF(
   Accessor,

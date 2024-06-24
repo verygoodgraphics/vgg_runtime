@@ -37,6 +37,28 @@
   VGG_LAYER_DEBUG_CODE(std::string indent(this->level, '\t');                                      \
                        VGG_PAINTNODE_LOG("{}{}", indent, msg););
 
+#define PAINTNODE_ATTR_DEF(name, type, container, fun1, func2)                                     \
+  type PaintNode::get##name() const                                                                \
+  {                                                                                                \
+    return d_ptr->container;                                                                       \
+  }                                                                                                \
+  void PaintNode::set##name(const std::remove_cvref_t<type>& v)                                    \
+  {                                                                                                \
+    VGG_IMPL(PaintNode);                                                                           \
+    if (_->container == v)                                                                         \
+      return;                                                                                      \
+    _->container = v;                                                                              \
+    _->renderNode->fun1()->func2(_->container);                                                    \
+  }                                                                                                \
+  void PaintNode::set##name(std::remove_cvref_t<type>&& v)                                         \
+  {                                                                                                \
+    VGG_IMPL(PaintNode);                                                                           \
+    if (_->container == v)                                                                         \
+      return;                                                                                      \
+    _->container = std::move(v);                                                                   \
+    _->renderNode->fun1()->func2(_->container);                                                    \
+  }
+
 namespace
 {
 
@@ -72,6 +94,13 @@ public:
   ContourData    contour;
   ContourOption  maskOption;
   bool           visible{ true };
+
+  // std::vector<LayerFX>      layerEffects;
+  // std::vector<BackgroundFX> backgroundEffects;
+  std::vector<Border> borders;
+  std::vector<Fill>   fills;
+  // std::vector<InnerShadow>  innerShadow;
+  // std::vector<DropShadow>   dropShadow;
 
   const EObjectType  type;
   const int          uniqueID{ 0 };
@@ -542,11 +571,11 @@ void PaintNode::setStyle(const Style& style)
 {
   VGG_IMPL(PaintNode);
   auto aa = _->accessor.get();
-  auto item = aa->styleItem();
-  // aa->setFills(style.fills);
-  // aa->setBorders(style.borders);
-  item->applyFillStyle(style.fills);
-  item->applyBorderStyle(style.borders);
+  // auto item = aa->styleItem();
+  aa->setFills(style.fills);
+  aa->setBorders(style.borders);
+  // _->fills = style.fills;
+  // _->borders = style.borders;
 
   aa->setInnerShadows(style.innerShadow);
   aa->setDropShadows(style.dropShadow);
@@ -827,6 +856,9 @@ void PaintNode::removeChild(PaintNodePtr node)
   node->level = 0;
 #endif
 }
+
+PAINTNODE_ATTR_DEF(Borders, const std::vector<Border>&, borders, borderEffect, applyBorderStyle);
+PAINTNODE_ATTR_DEF(Fills, const std::vector<Fill>&, fills, fillEffect, applyFillStyle);
 
 PaintNode::~PaintNode() = default;
 

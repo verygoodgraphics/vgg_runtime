@@ -83,7 +83,7 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternFit& p)
   }
   m = glm::scale(m, { s, s });
   m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
-  m = glm::rotate(m, p.rotation);
+  m = glm::rotate(m, glm::radians(p.rotation));
   m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
   m_tileModeX = SkTileMode::kDecal;
   m_tileModeY = SkTileMode::kDecal;
@@ -114,7 +114,7 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternFill& p)
   }
   m = glm::scale(m, { s, s });
   m = glm::translate(m, { mi.width() / 2, mi.height() / 2 });
-  m = glm::rotate(m, p.rotation);
+  m = glm::rotate(m, glm::radians(p.rotation));
   m = glm::translate(m, { -mi.width() / 2, -mi.height() / 2 });
   m_tileModeX = SkTileMode::kDecal;
   m_tileModeY = SkTileMode::kDecal;
@@ -162,7 +162,7 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternTile& p)
     m_tileModeX = p.mirror ? SkTileMode::kMirror : SkTileMode::kRepeat;
   }
   auto m = glm::mat3{ 1.0 };
-  m = glm::rotate(m, p.rotation);
+  m = glm::rotate(m, glm::radians(p.rotation));
   m = glm::scale(m, { p.scale, p.scale });
   m_colorFilter = makeColorFilter(p.imageFilter);
   m_matrix = toSkMatrix(m);

@@ -138,6 +138,7 @@ public:
     bool                           isOnlyUpdatePaint,
     std::shared_ptr<NumberAnimate> animate = {});
 
+public:
   // Note: if createNewPaintNode is true
   //  1. oldNode already removed and newNode already added.
   //  2. newPaintNode must be nullptr.
@@ -178,19 +179,21 @@ public:
   layer::PaintNode* getPaintNode(std::shared_ptr<LayoutNode> node);
 
 public:
-  static std::optional<bool>          getFillEnabled(layer::PaintNode* node, size_t index);
-  static std::optional<VGG::Color>    getFillColor(layer::PaintNode* node, size_t index);
-  static std::optional<double>        getFillOpacity(layer::PaintNode* node, size_t index);
-  static std::optional<int>           getFillBlendMode(layer::PaintNode* node, size_t index);
-  static std::optional<size_t>        getFillSize(layer::PaintNode* node);
-  static std::optional<double>        getOpacity(layer::PaintNode* node);
-  static std::optional<double>        getPatternFillRotation(layer::PaintNode* node, size_t index);
-  static std::optional<bool>          getVisible(layer::PaintNode* node);
-  static std::optional<TDesignMatrix> getMatrix(layer::PaintNode* node);
-  static std::optional<TDesignMatrix> getGlobalMatrix(layer::PaintNode* node);
-  static std::optional<double>        getWidth(layer::PaintNode* node);
-  static std::optional<double>        getHeight(layer::PaintNode* node);
-  static std::optional<size_t>        getChildrenSize(layer::PaintNode* node);
+  static std::optional<size_t>     getFillSize(layer::PaintNode* node);
+  static std::optional<int>        getFillType(layer::PaintNode* node, size_t index);
+  static std::optional<bool>       getFillEnabled(layer::PaintNode* node, size_t index);
+  static std::optional<VGG::Color> getFillColor(layer::PaintNode* node, size_t index);
+  static std::optional<double>     getFillOpacity(layer::PaintNode* node, size_t index);
+  static std::optional<int>        getFillBlendMode(layer::PaintNode* node, size_t index);
+  static std::optional<double>     getPatternFillRotation(layer::PaintNode* node, size_t index);
+
+  static std::optional<double>                getOpacity(layer::PaintNode* node);
+  static std::optional<bool>                  getVisible(layer::PaintNode* node);
+  static std::optional<TDesignMatrix>         getMatrix(layer::PaintNode* node);
+  static std::optional<TDesignMatrix>         getGlobalMatrix(layer::PaintNode* node);
+  static std::optional<double>                getWidth(layer::PaintNode* node);
+  static std::optional<double>                getHeight(layer::PaintNode* node);
+  static std::optional<size_t>                getChildrenSize(layer::PaintNode* node);
   static std::optional<std::array<double, 2>> getScrollInfo(layer::PaintNode* node);
 
 private:

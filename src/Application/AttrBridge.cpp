@@ -133,6 +133,34 @@ std::optional<size_t> AttrBridge::getFillSize(layer::PaintNode* node)
   return accessor->getFills().size();
 }
 
+std::optional<int> AttrBridge::getFillType(layer::PaintNode* node, size_t index)
+{
+  GET_PAINTNODE_ACCESSOR(node, accessor, {});
+
+  try
+  {
+    auto id = accessor->getFills().at(index).type.index();
+    if (!id)
+    {
+      return 1;
+    }
+    else if (id == 1)
+    {
+      return 2;
+    }
+    else
+    {
+      assert(id == 2);
+      return 0;
+    }
+  }
+  catch (...)
+  {
+  }
+
+  return {};
+}
+
 std::optional<double> AttrBridge::getOpacity(layer::PaintNode* node)
 {
   CHECK_EXPR(node, {});

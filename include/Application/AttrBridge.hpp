@@ -93,6 +93,16 @@ public:
     int                         newBlendMode,
     bool                        isOnlyUpdatePaint);
 
+  // for fill.pattern(patternImageFill).rotation
+  // newRotation: unit is degrees.
+  bool updatePatternFillRotation(
+    std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
+    size_t                         index,
+    double                         newRotation,
+    bool                           isOnlyUpdatePaint,
+    std::shared_ptr<NumberAnimate> animate = {});
+
   // for contextSettings.opacity
   bool updateOpacity(
     std::shared_ptr<LayoutNode>    node,
@@ -176,6 +186,7 @@ public:
   static std::optional<int>           getFillBlendMode(layer::PaintNode* node, size_t index);
   static std::optional<size_t>        getFillSize(layer::PaintNode* node);
   static std::optional<double>        getOpacity(layer::PaintNode* node);
+  static std::optional<double>        getPatternFillRotation(layer::PaintNode* node, size_t index);
   static std::optional<bool>          getVisible(layer::PaintNode* node);
   static std::optional<TDesignMatrix> getMatrix(layer::PaintNode* node);
   static std::optional<TDesignMatrix> getGlobalMatrix(layer::PaintNode* node);
@@ -199,6 +210,9 @@ private:
 
   static void setFillBlendMode(std::shared_ptr<LayoutNode> node, size_t index, int value);
   static void setFillBlendMode(layer::PaintNode* node, size_t index, const VGG::EBlendMode& value);
+
+  static void setPatternFillRotation(std::shared_ptr<LayoutNode> node, size_t index, double value);
+  static void setPatternFillRotation(layer::PaintNode* node, size_t index, double value);
 
   static void setOpacity(std::shared_ptr<LayoutNode> node, double value);
   static void setOpacity(layer::PaintNode* node, double value);

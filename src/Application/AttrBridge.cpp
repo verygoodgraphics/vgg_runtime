@@ -211,8 +211,8 @@ std::optional<size_t> AttrBridge::getChildrenSize(layer::PaintNode* node)
 
 std::optional<std::array<double, 2>> AttrBridge::getScrollInfo(layer::PaintNode* node)
 {
-  // TODO wait to complete.
-  return {};
+  auto tsr = TransformHelper::getTSR(node->getContentTransform().matrix());
+  return std::array<double, 2>{ tsr[0], -tsr[1] };
 }
 
 void AttrBridge::setFillEnabled(std::shared_ptr<LayoutNode> node, size_t index, bool enabled)
@@ -1372,7 +1372,6 @@ bool AttrBridge::delChild(
 bool AttrBridge::scrollTo(
   std::shared_ptr<LayoutNode>    node,
   layer::PaintNode*              paintNode,
-  std::array<double, 2>          oldValue,
   std::array<double, 2>          newValue,
   bool                           isOnlyUpdatePaint,
   std::shared_ptr<NumberAnimate> animate)
@@ -1394,7 +1393,12 @@ bool AttrBridge::scrollTo(
     AttrBridge::setContentOffset(paintNode, value.at(0), value.at(1));
   };
 
-  updateSimpleAttr({ oldValue[0], oldValue[1] }, { newValue[0], newValue[1] }, update, animate);
+  auto oldValue = getScrollInfo(paintNode);
+  updateSimpleAttr(
+    { (*oldValue)[0], (*oldValue)[1] },
+    { newValue[0], newValue[1] },
+    update,
+    animate);
   return true;
 }
 

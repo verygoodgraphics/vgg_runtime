@@ -587,6 +587,11 @@ layer::PaintNode* AttrBridge::getPaintNode(std::shared_ptr<LayoutNode> node)
   return sceneNode->nodeByID(id);
 }
 
+std::shared_ptr<UIView> AttrBridge::getView()
+{
+  return m_view;
+}
+
 bool AttrBridge::updateFillEnabled(
   std::shared_ptr<LayoutNode>    node,
   layer::PaintNode*              paintNode,

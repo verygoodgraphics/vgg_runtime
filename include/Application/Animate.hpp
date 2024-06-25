@@ -118,7 +118,9 @@ class AnimateManage
   friend AttrBridge;
 
 public:
-  void deleteFinishedAnimate();
+  // Returns whether some stopped animations has been removed.
+  bool deleteFinishedAnimate();
+
   bool hasRunningAnimation() const;
 
 private:
@@ -239,7 +241,15 @@ public:
 private:
   virtual void start() override;
 
+  // not merge tree.
   void addTwinAnimate(std::shared_ptr<LayoutNode> nodeFrom, std::shared_ptr<LayoutNode> nodeTo);
+
+  // merge tree.
+  void addTwinAnimateWithMergeTree(
+    std::shared_ptr<LayoutNode> nodeFrom,
+    std::shared_ptr<LayoutNode> nodeTo,
+    layer::PaintNode*           paintNodeFrom,
+    layer::PaintNode*           paintNodeTo);
 };
 
 class MoveAnimate : public ReplaceNodeAnimate

@@ -20,6 +20,8 @@
 #include "Domain/Layout/LayoutNode.hpp"
 #include "Domain/Model/Element.hpp"
 #include "Layer/Core/PaintNode.hpp"
+#include "Layer/Core/SceneNode.hpp"
+#include "Application/UIView.hpp"
 #include <unordered_map>
 
 using namespace VGG;
@@ -339,7 +341,7 @@ bool AnimateManage::hasRunningAnimation() const
   return false;
 }
 
-void AnimateManage::deleteFinishedAnimate()
+bool AnimateManage::deleteFinishedAnimate()
 {
   auto it = std::remove_if(
     m_animates.begin(),
@@ -358,7 +360,10 @@ void AnimateManage::deleteFinishedAnimate()
   {
     DEBUG("animate stopped");
     m_animates.erase(it, m_animates.end());
+    return true;
   }
+
+  return false;
 }
 
 NumberAnimate::NumberAnimate(
@@ -745,9 +750,42 @@ void SmartAnimate::start()
     [attrBridge, from, isOnlyUpdatePaint, paintNodeFrom]()
     { attrBridge->updateVisible(from, paintNodeFrom, false, isOnlyUpdatePaint); });
 
-  addTwinAnimate(from, to);
+  const bool mergeTree = true;
+
+  if (!mergeTree)
+  {
+    addTwinAnimate(from, to);
+  }
+
   addStyleOpacityAnimate(from, paintNodeFrom, false, true);
   addStyleOpacityAnimate(to, paintNodeTo, true, true);
+
+  if (mergeTree)
+  {
+    auto frames = attrBridge->getView()->getSceneNode()->getFrames();
+
+    auto cmp = [](const VGG::layer::FramePtr& frame, VGG::layer::PaintNode* node)
+    { return frame->node() == node; };
+    auto itFrom = std::find_if(
+      frames.begin(),
+      frames.end(),
+      std::bind(cmp, std::placeholders::_1, paintNodeFrom));
+    auto itTo = std::find_if(
+      frames.begin(),
+      frames.end(),
+      std::bind(cmp, std::placeholders::_1, paintNodeTo));
+    if (itFrom > itTo)
+    {
+      addCallBackWhenStop([frames, attrBridge]()
+                          { attrBridge->getView()->getSceneNode()->setFrames(frames); });
+
+      std::iter_swap(itFrom, itTo);
+      attrBridge->getView()->getSceneNode()->setFrames(frames);
+    }
+
+    addTwinAnimateWithMergeTree(from, to, paintNodeFrom, paintNodeTo);
+  }
+
   attrBridge->updateVisible(to, attrBridge->getPaintNode(to), true, isOnlyUpdatePaint);
 
   addTwinMatrixAnimate({ { from, to } });
@@ -833,6 +871,128 @@ void SmartAnimate::addTwinAnimate(
     {
       addTwinAnimate(item.first, item.second);
     }
+  }
+}
+
+// The implementation process refers to MoveAnimate::dealChildren.
+void SmartAnimate::addTwinAnimateWithMergeTree(
+  std::shared_ptr<LayoutNode> nodeFrom,
+  std::shared_ptr<LayoutNode> nodeTo,
+  layer::PaintNode*           paintNodeFrom,
+  layer::PaintNode*           paintNodeTo)
+{
+  auto attrBridge = getAttrBridge();
+
+  if (!paintNodeFrom || !paintNodeTo || !nodeFrom->elementNode() || !nodeTo->elementNode())
+  {
+    assert(false);
+    return;
+  }
+
+  assert(
+    ReplaceNodeAnimate::isContainerType(nodeFrom->elementNode()) ||
+    ReplaceNodeAnimate::isContainerType(nodeTo->elementNode()));
+
+  const auto& originFromChild = paintNodeFrom->children();
+  const auto& originToChild = paintNodeTo->children();
+
+  addCallBackWhenStop(
+    [originFromChild, originToChild, paintNodeFrom, paintNodeTo]()
+    {
+      setPaintNodeChildren(paintNodeFrom, originFromChild);
+      setPaintNodeChildren(paintNodeTo, originToChild);
+    });
+
+  std::unordered_map<int, std::shared_ptr<LayoutNode>> nodeIds;
+
+  auto extraChildren = [&nodeIds](std::shared_ptr<LayoutNode>& node)
+  {
+    if (ReplaceNodeAnimate::isContainerType(node->elementNode()))
+    {
+      for (auto& item : node->children())
+      {
+        nodeIds.emplace(item->elementNode()->idNumber(), item);
+      }
+    }
+  };
+
+  extraChildren(nodeFrom);
+  extraChildren(nodeTo);
+  assert(nodeIds.size() == nodeFrom->children().size() + nodeTo->children().size());
+
+  // <from, to>
+  ReplaceNodeAnimate::TTwins twins;
+
+  std::list<layer::PaintNodePtr> childrenInAnimate(originToChild.begin(), originToChild.end());
+  auto                           itSearch = childrenInAnimate.begin();
+  auto                           itInsert = itSearch;
+
+  for (auto it = originFromChild.begin(); it != originFromChild.end(); ++it)
+  {
+    if (!(*it) || !*attrBridge->getVisible(it->get()))
+    {
+      continue;
+    }
+
+    auto result = std::find_if(
+      itSearch,
+      childrenInAnimate.end(),
+      [it, attrBridge](layer::PaintNodePtr obj)
+      {
+        if (!obj || !*attrBridge->getVisible(obj.get()))
+        {
+          return false;
+        }
+
+        return (*it)->name() == obj->name();
+      });
+
+    if (result == childrenInAnimate.end())
+    {
+      childrenInAnimate.insert(itInsert, *it);
+    }
+    else
+    {
+      childrenInAnimate.insert(result, *it);
+
+      auto itFrom = nodeIds.find(it->get()->uniqueID());
+      auto itTo = nodeIds.find(result->get()->uniqueID());
+      assert(itFrom != nodeIds.end() && itTo != nodeIds.end());
+      if (itFrom != nodeIds.end() && itTo != nodeIds.end())
+      {
+        twins.emplace(itFrom->second, itTo->second);
+      }
+
+      itSearch = ++result;
+      itInsert = itSearch;
+    }
+  }
+
+  addTwinMatrixAnimate(twins);
+
+  for (auto& twin : twins)
+  {
+    auto& childFrom = twin.first;
+    auto& childTo = twin.second;
+    auto  elementFrom = childFrom->elementNode();
+    auto  elementTo = childTo->elementNode();
+    auto  childPaintFrom = attrBridge->getPaintNode(childFrom);
+    auto  childPaintTo = attrBridge->getPaintNode(childTo);
+    assert(elementFrom && elementTo);
+
+    if (
+      ReplaceNodeAnimate::isContainerType(elementFrom) &&
+      ReplaceNodeAnimate::isContainerType(elementTo))
+    {
+      addTwinAnimateWithMergeTree(childFrom, childTo, childPaintFrom, childPaintTo);
+    }
+  }
+
+  clearPaintNodeChildren(paintNodeFrom);
+  clearPaintNodeChildren(paintNodeTo);
+  for (auto& item : childrenInAnimate)
+  {
+    paintNodeTo->addChild(item);
   }
 }
 

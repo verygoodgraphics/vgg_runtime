@@ -208,6 +208,12 @@ protected:
 
   std::shared_ptr<NumberAnimate> createAndAddNumberAnimate();
 
+  // When performing a replaceNode operation, if it is done by merging trees, it is necessary to
+  // ensure that paintNodeTo comes after paintNodeFrom.
+  void changeOrderForMergeTree(
+    VGG::layer::PaintNode* paintNodeFrom,
+    VGG::layer::PaintNode* paintNodeTo);
+
 private:
   std::shared_ptr<LayoutNode>     m_from;
   std::shared_ptr<LayoutNode>     m_to;

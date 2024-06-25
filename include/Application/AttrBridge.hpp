@@ -177,6 +177,7 @@ public:
 
 public:
   layer::PaintNode* getPaintNode(std::shared_ptr<LayoutNode> node);
+  std::shared_ptr<UIView> getView();
 
 public:
   static std::optional<size_t>     getFillSize(layer::PaintNode* node);

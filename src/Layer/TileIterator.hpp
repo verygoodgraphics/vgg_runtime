@@ -79,11 +79,10 @@ struct TileIter
       return r * iterator.column + c;
     }
 
-    size_t key() const
+    uint64_t key() const
     {
-      static_assert(sizeof(size_t) == 8, "size_t must be 8 bytes");
-      return (((size_t)iterator.tileWidth & 0xffff) << 48) +
-             (((size_t)iterator.tileHeight & 0xffff) << 32) + (size_t)index();
+      return (((uint64_t)iterator.tileWidth & 0xffff) << 48) +
+             (((uint64_t)iterator.tileHeight & 0xffff) << 32) + (uint64_t)index();
     }
 
     glm::ivec2 topLeft() const

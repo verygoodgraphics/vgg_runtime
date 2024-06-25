@@ -344,10 +344,7 @@ void AttrBridge::setFillBlendMode(std::shared_ptr<LayoutNode> node, size_t index
   }
 }
 
-void AttrBridge::setFillBlendMode(
-  layer::PaintNode*      node,
-  size_t                 index,
-  const VGG::EBlendMode& value)
+void AttrBridge::setFillBlendMode(layer::PaintNode* node, size_t index, const int value)
 {
   GET_PAINTNODE_ACCESSOR(node, accessor, void());
 
@@ -357,7 +354,7 @@ void AttrBridge::setFillBlendMode(
     return;
   }
 
-  fills.at(index).contextSettings.blendMode = value;
+  fills.at(index).contextSettings.blendMode = static_cast<VGG::EBlendMode>(value);
   accessor->setFills(fills);
 }
 

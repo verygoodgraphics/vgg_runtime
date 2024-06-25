@@ -304,16 +304,18 @@ bool Controller::edit(std::vector<char>& buffer)
 
 void Controller::onResize()
 {
-  if (isNormalMode() && hasContent())
+  if (!hasContent())
+    return;
+
+  if (isNormalMode())
   {
     auto currentPageIndex = m_presenter->currentPageIndex();
     auto pageIndexForViewport = m_model->getFrameIndexForWidth(m_presenter->viewSize().width);
     if (pageIndexForViewport != -1 && currentPageIndex != pageIndexForViewport)
-    {
       m_presenter->setCurrentFrameIndex(pageIndexForViewport, true);
-    }
-    scaleContentUpdateViewModelAndFit();
   }
+
+  scaleContentUpdateViewModelAndFit();
 }
 
 void Controller::setEditMode(bool editMode)

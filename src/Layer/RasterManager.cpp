@@ -43,15 +43,17 @@ std::optional<RasterManager::RasterResult> RasterManager::query(Key index)
 
 RasterManager::RasterResult RasterManager::syncExecuteRasterTask(std::unique_ptr<RasterTask> task)
 {
-  auto res = m_executor->addRasterTask(std::move(task)).get();
-  return *m_cache.insertOrUpdate(res.index(), std::move(res));
+  auto       res = m_executor->addRasterTask(std::move(task)).get();
+  const auto key = res.index();
+  return *m_cache.insertOrUpdate(key, std::move(res));
 }
 
 void RasterManager::appendRasterTask(std::unique_ptr<RasterTask> task)
 {
   if (task)
   {
-    m_tasks.push({ task->index(), m_executor->addRasterTask(std::move(task)) });
+    const auto key = task->index();
+    m_tasks.push({ key, m_executor->addRasterTask(std::move(task)) });
   }
 }
 

@@ -34,6 +34,7 @@
 #include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Core/ViewportNode.hpp"
 #include "Layer/Graphics/VSkiaGL.hpp" // this header and the skia headers must be included first for ios build
+#include "Layer/SimpleRasterExecutor.hpp"
 
 #ifdef VGG_USE_VULKAN
 #include "Layer/Graphics/VSkiaVK.hpp"
@@ -397,11 +398,8 @@ void VLayer::setRenderNode(Ref<RenderNode> node)
 
 void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
-  d_ptr->rasterNode = raster::makeTileRaster(
-    d_ptr->skiaContext->context(),
-    d_ptr->viewport,
-    std::move(transform),
-    std::move(node));
+  static SimpleRasterExecutor s_e(d_ptr->skiaContext->context());
+  d_ptr->rasterNode = raster::make(&s_e, d_ptr->viewport, std::move(transform), std::move(node));
 }
 
 } // namespace VGG::layer

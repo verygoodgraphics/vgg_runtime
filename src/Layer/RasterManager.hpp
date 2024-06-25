@@ -79,6 +79,7 @@ public:
       return m_index;
     }
     virtual RasterResult execute(GrRecordingContext* context) = 0;
+    virtual ~RasterTask() = default;
 
   private:
     Key m_index;

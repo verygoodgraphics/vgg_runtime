@@ -833,7 +833,7 @@ bool Controller::nextFrame()
 {
   if (m_presenter->setCurrentFrameIndex(m_presenter->currentPageIndex() + 1, true))
   {
-    fitPage();
+    scaleContentUpdateViewModelAndFit();
     return true;
   }
   return false;
@@ -843,7 +843,7 @@ bool Controller::previouseFrame()
 {
   if (m_presenter->setCurrentFrameIndex(m_presenter->currentPageIndex() - 1, true))
   {
-    fitPage();
+    scaleContentUpdateViewModelAndFit();
     return true;
   }
   return false;
@@ -1003,8 +1003,7 @@ bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
 {
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
-  layoutContext()->setLayerValid(false);
-  scaleContent(index);
+  scaleContentAndUpdate(index);
   return m_presenter->pushFrame(
     index,
     true,
@@ -1018,12 +1017,11 @@ bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
 
 bool Controller::popFrame(const app::PopOptions& opts)
 {
-  layoutContext()->setLayerValid(false);
   return m_presenter->popFrame(
     opts,
     [this](bool)
     {
-      fitPage();
+      scaleContentUpdateViewModelAndFit();
       m_presenter->triggerMouseEnter();
     });
 }
@@ -1032,8 +1030,7 @@ bool Controller::presentFrame(const std::string& id, const app::FrameOptions& op
 {
   ASSERT(m_model);
   const auto index = m_model->getFrameIndexById(id);
-  layoutContext()->setLayerValid(false);
-  scaleContent(index);
+  scaleContentAndUpdate(index);
   return m_presenter->presentFrame(
     index,
     opts,

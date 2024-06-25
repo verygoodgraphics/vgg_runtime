@@ -36,7 +36,7 @@ class RasterExecutor;
 class RasterManager
 {
 public:
-  using Key = size_t;
+  using Key = uint64_t;
   class RasterResult
   {
   public:

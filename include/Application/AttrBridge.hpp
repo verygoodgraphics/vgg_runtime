@@ -32,7 +32,7 @@ class NumberAnimate;
 class ReplaceNodeAnimate;
 class AnimateManage;
 struct Color;
-enum EBlendMode;
+// enum EBlendMode;
 
 namespace layer
 {
@@ -176,7 +176,7 @@ public:
     std::shared_ptr<NumberAnimate> animate = {});
 
 public:
-  layer::PaintNode* getPaintNode(std::shared_ptr<LayoutNode> node);
+  layer::PaintNode*       getPaintNode(std::shared_ptr<LayoutNode> node);
   std::shared_ptr<UIView> getView();
 
 public:
@@ -211,7 +211,9 @@ private:
   static void setFillOpacity(layer::PaintNode* node, size_t index, double value);
 
   static void setFillBlendMode(std::shared_ptr<LayoutNode> node, size_t index, int value);
-  static void setFillBlendMode(layer::PaintNode* node, size_t index, const VGG::EBlendMode& value);
+  // static void setFillBlendMode(layer::PaintNode* node, size_t index, const VGG::EBlendMode&
+  // value);
+  static void setFillBlendMode(layer::PaintNode* node, size_t index, const int value);
 
   static void setPatternFillRotation(std::shared_ptr<LayoutNode> node, size_t index, double value);
   static void setPatternFillRotation(layer::PaintNode* node, size_t index, double value);

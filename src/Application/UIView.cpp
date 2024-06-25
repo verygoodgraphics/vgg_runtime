@@ -1022,8 +1022,7 @@ layer::Ref<layer::SceneNode> UIView::getSceneNode()
 
 void UIView::frame()
 {
-  m_impl->frame();
-  setDirty(false);
+  setDirty(m_impl->deleteFinishedAnimation());
 }
 
 bool UIView::isDirty()

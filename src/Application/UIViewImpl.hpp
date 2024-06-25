@@ -117,7 +117,7 @@ public:
   std::unique_ptr<LayoutContext> layoutContext();
 
 public:
-  void frame();
+  bool deleteFinishedAnimation();
   bool isAnimating();
 
 private:

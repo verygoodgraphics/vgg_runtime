@@ -218,9 +218,9 @@ void UIViewImpl::setBackgroundColor(uint32_t color)
     m_layer->setBackgroundColor(color);
 }
 
-void UIViewImpl::frame()
+bool UIViewImpl::deleteFinishedAnimation()
 {
-  m_animationManager.deleteFinishedAnimate();
+  return m_animationManager.deleteFinishedAnimate();
 }
 
 bool UIViewImpl::isAnimating()

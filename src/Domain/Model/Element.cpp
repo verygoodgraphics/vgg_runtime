@@ -985,7 +985,8 @@ bool SymbolInstanceElement::shouldKeepListeners()
 
   if (auto s = overrideReferenceTree())
     return masterId() == s->masterId();
-  return false;
+
+  return true;
 }
 
 // TextElement

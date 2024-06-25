@@ -509,6 +509,33 @@ std::shared_ptr<NumberAnimate> ReplaceNodeAnimate::createAndAddNumberAnimate()
   return animate;
 };
 
+void ReplaceNodeAnimate::changeOrderForMergeTree(
+  VGG::layer::PaintNode* paintNodeFrom,
+  VGG::layer::PaintNode* paintNodeTo)
+{
+  auto attrBridge = getAttrBridge();
+  auto frames = attrBridge->getView()->getSceneNode()->getFrames();
+
+  auto cmp = [](const VGG::layer::FramePtr& frame, VGG::layer::PaintNode* node)
+  { return frame->node() == node; };
+  auto itFrom = std::find_if(
+    frames.begin(),
+    frames.end(),
+    std::bind(cmp, std::placeholders::_1, paintNodeFrom));
+  auto itTo =
+    std::find_if(frames.begin(), frames.end(), std::bind(cmp, std::placeholders::_1, paintNodeTo));
+
+  assert(itFrom != frames.end() && itTo != frames.end());
+  if (itFrom != frames.end() && itTo != frames.end() && itFrom > itTo)
+  {
+    addCallBackWhenStop([frames, attrBridge]()
+                        { attrBridge->getView()->getSceneNode()->setFrames(frames); });
+
+    std::iter_swap(itFrom, itTo);
+    attrBridge->getView()->getSceneNode()->setFrames(frames);
+  }
+}
+
 void ReplaceNodeAnimate::addStyleOpacityAnimate(
   std::shared_ptr<LayoutNode> node,
   layer::PaintNode*           paintNode,
@@ -762,27 +789,7 @@ void SmartAnimate::start()
 
   if (mergeTree)
   {
-    auto frames = attrBridge->getView()->getSceneNode()->getFrames();
-
-    auto cmp = [](const VGG::layer::FramePtr& frame, VGG::layer::PaintNode* node)
-    { return frame->node() == node; };
-    auto itFrom = std::find_if(
-      frames.begin(),
-      frames.end(),
-      std::bind(cmp, std::placeholders::_1, paintNodeFrom));
-    auto itTo = std::find_if(
-      frames.begin(),
-      frames.end(),
-      std::bind(cmp, std::placeholders::_1, paintNodeTo));
-    if (itFrom > itTo)
-    {
-      addCallBackWhenStop([frames, attrBridge]()
-                          { attrBridge->getView()->getSceneNode()->setFrames(frames); });
-
-      std::iter_swap(itFrom, itTo);
-      attrBridge->getView()->getSceneNode()->setFrames(frames);
-    }
-
+    changeOrderForMergeTree(paintNodeFrom, paintNodeTo);
     addTwinAnimateWithMergeTree(from, to, paintNodeFrom, paintNodeTo);
   }
 
@@ -1086,6 +1093,8 @@ void MoveAnimate::start()
     addStyleOpacityAnimate(to, paintNodeTo, true, false);
     attrBridge->updateVisible(to, paintNodeTo, true, isOnlyUpdatePaint);
     addTwinMatrixAnimate({ { from, to } });
+
+    changeOrderForMergeTree(paintNodeFrom, paintNodeTo);
     dealChildren(from, to, paintNodeFrom, paintNodeTo);
   }
 

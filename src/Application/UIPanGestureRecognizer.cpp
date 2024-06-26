@@ -94,7 +94,7 @@ void UIPanGestureRecognizer::touchesMoved(UEvent e)
 
 void UIPanGestureRecognizer::touchesEnded(UEvent e)
 {
-  translate(m_lastDelta); // no more movement, use the last delta to calculate velocity
+  m_velocity = m_lastVelocity; // no more movement, use the last velocity
   setState(EUIGestureRecognizerState::ENDED);
   if (e.type == VGG_TOUCHUP)
     DEBUG("UIPanGestureRecognizer::touchesEnded: touch up");
@@ -112,7 +112,8 @@ bool UIPanGestureRecognizer::translate(Point delta)
     return false;
 
   const auto now = nowTimestampInSeconds();
-  const auto timeDiff = now - m_lastMovementTime; // may be zero
+  const auto timeDiff = now - m_lastMovementTime; // may be ZERO
+  m_lastMovementTime = now;
 
   m_translation.x += delta.x;
   m_translation.y += delta.y;
@@ -124,9 +125,9 @@ bool UIPanGestureRecognizer::translate(Point delta)
       "UIPanGestureRecognizer::translate: velocity: x = %f, y = %f",
       m_velocity.x,
       m_velocity.y);
+    m_lastVelocity = m_velocity;
   }
-  m_lastMovementTime = now;
-  m_lastDelta = delta;
+
   return true;
 }
 

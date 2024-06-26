@@ -851,9 +851,9 @@ bool Controller::previouseFrame()
 
 void Controller::scaleContentAndUpdate(std::size_t pageIndex)
 {
+  layoutContext()->setLayerValid(false);
   scaleContent(pageIndex);
   m_presenter->update();
-  layoutContext()->setLayerValid(false);
 }
 
 void Controller::fitPage()

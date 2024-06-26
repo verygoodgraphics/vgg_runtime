@@ -31,10 +31,10 @@ public:
 
 private:
   double m_lastMovementTime;
-  Point  m_lastDelta;
 
   Point m_translation;
   Point m_velocity;
+  Point m_lastVelocity;
 
   TPanHandler m_handler;
 

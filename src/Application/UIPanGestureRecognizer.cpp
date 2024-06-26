@@ -24,7 +24,8 @@
 #undef DEBUG
 #define DEBUG(msg, ...)
 
-using namespace VGG::UIKit;
+namespace VGG::UIKit
+{
 
 void UIPanGestureRecognizer::touchesBegan(UEvent e)
 {
@@ -95,6 +96,8 @@ void UIPanGestureRecognizer::touchesEnded(UEvent e)
 {
   translate(m_lastDelta); // no more movement, use the last delta to calculate velocity
   setState(EUIGestureRecognizerState::ENDED);
+  if (e.type == VGG_TOUCHUP)
+    DEBUG("UIPanGestureRecognizer::touchesEnded: touch up");
 }
 
 void UIPanGestureRecognizer::setTranslation(Point translation)
@@ -105,27 +108,26 @@ void UIPanGestureRecognizer::setTranslation(Point translation)
 
 bool UIPanGestureRecognizer::translate(Point delta)
 {
-  auto now = nowTimestampInSeconds();
-  auto timeDiff = now - m_lastMovementTime;
+  if (delta == Point::zero())
+    return false;
 
-  if ((delta != Point::zero()) && timeDiff > 0)
+  const auto now = nowTimestampInSeconds();
+  const auto timeDiff = now - m_lastMovementTime; // may be zero
+
+  m_translation.x += delta.x;
+  m_translation.y += delta.y;
+  if (timeDiff > 0)
   {
-    m_translation.x += delta.x;
-    m_translation.y += delta.y;
     m_velocity.x = delta.x / timeDiff;
     m_velocity.y = delta.y / timeDiff;
     DEBUG(
-      "UIPanGestureRecognizer::translate: vecocity: x = %f, y = %f",
+      "UIPanGestureRecognizer::translate: velocity: x = %f, y = %f",
       m_velocity.x,
       m_velocity.y);
-    m_lastMovementTime = now;
-    m_lastDelta = delta;
-    return true;
   }
-  else
-  {
-    return false;
-  }
+  m_lastMovementTime = now;
+  m_lastDelta = delta;
+  return true;
 }
 
 Point UIPanGestureRecognizer::translation()
@@ -146,3 +148,5 @@ void UIPanGestureRecognizer::setState(EUIGestureRecognizerState state)
     m_handler(*this);
   }
 }
+
+} // namespace VGG::UIKit

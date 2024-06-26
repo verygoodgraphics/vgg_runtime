@@ -229,10 +229,10 @@ struct VMouseWheelEvent
 struct VTouchEvent
 {
   uint32_t type;
-  int32_t  windowX; /**< X coordinate, relative to window */
-  int32_t  windowY; /**< Y coordinate, relative to window */
-  float    xrel;    /**< The relative motion in the X direction */
-  float    yrel;    /**< The relative motion in the Y direction */
+  float    windowX; /**< X coordinate, relative to window. Normalized in the range 0...1 */
+  float    windowY; /**< Y coordinate, relative to window. Normalized in the range 0...1 */
+  float    xrel;    /**< The relative motion in the X direction. Normalized in the range -1...1 */
+  float    yrel;    /**< The relative motion in the Y direction. Normalized in the range -1...1 */
 };
 
 enum EWindowEventID

@@ -1144,7 +1144,7 @@ bool AttrBridge::replaceNode(
   std::shared_ptr<ReplaceNodeAnimate> animate,
   bool                                createNewPaintNode)
 {
-#ifdef DEBUG
+#ifndef NDEBUG
   if (createNewPaintNode)
   {
     assert(!newPaintNode);
@@ -1159,7 +1159,7 @@ bool AttrBridge::replaceNode(
       assert(newNode->parent());
     }
   }
-#endif
+#endif // !NDEBUG
 
   // TODO use AttrBridge::delChild will be better.
   auto removeOldPaintNodeIfNeed = [oldPaintNode, createNewPaintNode]()

@@ -60,29 +60,6 @@ public:
 
   using EventListener = std::function<void(UIEventPtr event)>;
 
-private:
-  std::weak_ptr<IVggEnv> m_env;
-
-  std::string                m_designSchemaFilePath;
-  std::shared_ptr<RunLoop>   m_runLoop;
-  std::shared_ptr<VggExec>   m_jsEngine;
-  std::shared_ptr<Presenter> m_presenter;
-  std::shared_ptr<Editor>    m_editor;
-  std::shared_ptr<Reporter>  m_reporter;
-  bool                       m_panning{ false };
-
-  // configuration
-  bool     m_isFitToViewportEnabled{ true };
-  ERunMode m_mode;
-
-  std::shared_ptr<Daruma> m_model;
-  std::shared_ptr<Daruma> m_editModel;
-
-  std::shared_ptr<Layout::Layout>       m_layout;
-  std::shared_ptr<Layout::ExpandSymbol> m_expander;
-
-  EventListener m_listener;
-
 public:
   Controller(
     std::weak_ptr<IVggEnv>     env,
@@ -211,8 +188,32 @@ private:
   Statistic*                  statistic();
 
 private:
+  std::weak_ptr<IVggEnv> m_env;
+
+  std::string                m_designSchemaFilePath;
+  std::shared_ptr<RunLoop>   m_runLoop;
+  std::shared_ptr<VggExec>   m_jsEngine;
+  std::shared_ptr<Presenter> m_presenter;
+  std::shared_ptr<Editor>    m_editor;
+  std::shared_ptr<Reporter>  m_reporter;
+  bool                       m_panning{ false };
+
+  // configuration
+  bool     m_isFitToViewportEnabled{ true };
+  ERunMode m_mode;
+
+  std::shared_ptr<Daruma> m_model;
+  std::shared_ptr<Daruma> m_editModel;
+
+  std::shared_ptr<Layout::Layout>       m_layout;
+  std::shared_ptr<Layout::ExpandSymbol> m_expander;
+
+  EventListener m_listener;
+
   std::unique_ptr<LayoutContext> m_layoutContext;
   std::unique_ptr<Statistic>     m_statistic;
+
+  bool m_isUpdatingFrame = false;
 };
 
 } // namespace VGG

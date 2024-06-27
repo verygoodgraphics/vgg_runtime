@@ -1001,7 +1001,12 @@ bool Controller::updateElementFillColor(
 
 bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
 {
+  if (m_isUpdatingFrame)
+    return false;
+  m_isUpdatingFrame = true;
+
   ASSERT(m_model);
+
   const auto index = m_model->getFrameIndexById(id);
   scaleContentAndUpdate(index);
   return m_presenter->pushFrame(
@@ -1012,23 +1017,34 @@ bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
     {
       fitPage();
       m_presenter->triggerMouseEnter();
+      m_isUpdatingFrame = false;
     });
 }
 
 bool Controller::popFrame(const app::PopOptions& opts)
 {
+  if (m_isUpdatingFrame)
+    return false;
+  m_isUpdatingFrame = true;
+
   return m_presenter->popFrame(
     opts,
     [this](bool)
     {
       scaleContentUpdateViewModelAndFit();
       m_presenter->triggerMouseEnter();
+      m_isUpdatingFrame = false;
     });
 }
 
 bool Controller::presentFrame(const std::string& id, const app::FrameOptions& opts)
 {
+  if (m_isUpdatingFrame)
+    return false;
+  m_isUpdatingFrame = true;
+
   ASSERT(m_model);
+
   const auto index = m_model->getFrameIndexById(id);
   scaleContentAndUpdate(index);
   return m_presenter->presentFrame(
@@ -1038,6 +1054,7 @@ bool Controller::presentFrame(const std::string& id, const app::FrameOptions& op
     {
       fitPage();
       m_presenter->triggerMouseEnter();
+      m_isUpdatingFrame = false;
     });
 }
 

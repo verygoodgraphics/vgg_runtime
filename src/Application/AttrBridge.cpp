@@ -167,13 +167,51 @@ std::optional<double> AttrBridge::getOpacity(layer::PaintNode* node)
   return node->contextSetting().opacity;
 }
 
-std::optional<double> AttrBridge::getPatternFillRotation(layer::PaintNode* node, size_t index)
+std::optional<std::string> AttrBridge::getFillPatternType(layer::PaintNode* node, size_t index)
+{
+  static const std::string names[4] = {
+    "patternImageFill",
+    "patternImageFit",
+    "patternImageStretch",
+    "patternImageTile",
+    // "patternLayer" // render not complete.
+  };
+
+  GET_PAINTNODE_ACCESSOR(node, accessor, {});
+
+  try
+  {
+    auto id = std::get<VGG::Pattern>(accessor->getFills().at(index).type).instance.index();
+    if (id < 4)
+    {
+      return names[id];
+    }
+  }
+  catch (...)
+  {
+  }
+
+  return {};
+}
+
+std::optional<double> AttrBridge::getPatternImageFillRotation(
+  layer::PaintNode* node,
+  size_t            index,
+  bool              effectOnFill)
 {
   GET_PAINTNODE_ACCESSOR(node, accessor, {});
 
-  auto& pattern = std::get<VGG::Pattern>(accessor->getFills().at(index).type);
-  auto& instance = std::get<VGG::PatternFill>(pattern.instance);
-  return -instance.rotation;
+  if (effectOnFill)
+  {
+    auto& pattern = std::get<VGG::Pattern>(accessor->getFills().at(index).type);
+    auto& instance = std::get<VGG::PatternFill>(pattern.instance);
+    return -instance.rotation;
+  }
+  else
+  {
+    // TODO not complete.
+    return {};
+  }
 }
 
 std::optional<bool> AttrBridge::getVisible(layer::PaintNode* node)
@@ -358,56 +396,75 @@ void AttrBridge::setFillBlendMode(layer::PaintNode* node, size_t index, const in
   accessor->setFills(fills);
 }
 
-void AttrBridge::setPatternFillRotation(
+void AttrBridge::setPatternImageFillRotation(
   std::shared_ptr<LayoutNode> node,
   size_t                      index,
-  double                      value)
+  double                      value,
+  bool                        effectOnFill)
 {
   if (auto object = AttrBridge::getlayoutNodeObject(node))
   {
-    if (index >= object->style.fills.size())
+    if (effectOnFill)
     {
-      return;
-    }
+      if (index >= object->style.fills.size())
+      {
+        return;
+      }
 
-    auto& pattern = object->style.fills.at(index).pattern;
-    if (!pattern)
+      auto& pattern = object->style.fills.at(index).pattern;
+      if (!pattern)
+      {
+        return;
+      }
+
+      try
+      {
+        std::get<VGG::Model::PatternImageFill>(pattern->instance).rotation = value;
+      }
+      catch (...)
+      {
+        return;
+      }
+    }
+    else
+    {
+      // TODO not complete
+    }
+  }
+}
+
+void AttrBridge::setPatternImageFillRotation(
+  layer::PaintNode* node,
+  size_t            index,
+  double            value,
+  bool              effectOnFill)
+{
+  GET_PAINTNODE_ACCESSOR(node, accessor, void());
+
+  if (effectOnFill)
+  {
+    auto fills = accessor->getFills();
+    if (index >= fills.size())
     {
       return;
     }
 
     try
     {
-      std::get<VGG::Model::PatternImageFill>(pattern->instance).rotation = value;
+      auto& pattern = std::get<VGG::Pattern>(fills.at(index).type);
+      std::get<VGG::PatternFill>(pattern.instance).rotation = -value;
     }
     catch (...)
     {
       return;
     }
+
+    accessor->setFills(fills);
   }
-}
-
-void AttrBridge::setPatternFillRotation(layer::PaintNode* node, size_t index, double value)
-{
-  GET_PAINTNODE_ACCESSOR(node, accessor, void());
-
-  auto fills = accessor->getFills();
-  if (index >= fills.size())
+  else
   {
-    return;
+    // TODO not complete
   }
-
-  try
-  {
-    auto& pattern = std::get<VGG::Pattern>(fills.at(index).type);
-    std::get<VGG::PatternFill>(pattern.instance).rotation = -value;
-  }
-  catch (...)
-  {
-    return;
-  }
-
-  accessor->setFills(fills);
 }
 
 void AttrBridge::setOpacity(std::shared_ptr<LayoutNode> node, double value)
@@ -770,35 +827,49 @@ bool AttrBridge::updateFillBlendMode(
   return true;
 }
 
-bool AttrBridge::updatePatternFillRotation(
+bool AttrBridge::updatePatternImageFillRotation(
   std::shared_ptr<LayoutNode>    node,
   layer::PaintNode*              paintNode,
   size_t                         index,
   double                         newRotation,
   bool                           isOnlyUpdatePaint,
+  bool                           effectOnFill,
   std::shared_ptr<NumberAnimate> animate)
 {
   GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
 
-  if (index >= *AttrBridge::getFillSize(paintNode))
+  if (effectOnFill)
   {
-    return false;
-  }
-
-  auto update = [node, paintNode, index, isOnlyUpdatePaint](const std::vector<double>& value)
-  {
-    assert(value.size() == 1);
-
-    if (!isOnlyUpdatePaint)
+    if (index >= *AttrBridge::getFillSize(paintNode))
     {
-      AttrBridge::setPatternFillRotation(node, index, value.at(0));
+      return false;
     }
 
-    AttrBridge::setPatternFillRotation(paintNode, index, value.at(0));
-  };
+    auto update = [node, paintNode, index, isOnlyUpdatePaint](const std::vector<double>& value)
+    {
+      assert(value.size() == 1);
 
-  updateSimpleAttr({ *getPatternFillRotation(paintNode, index) }, { newRotation }, update, animate);
-  return true;
+      if (!isOnlyUpdatePaint)
+      {
+        AttrBridge::setPatternImageFillRotation(node, index, value.at(0), true);
+      }
+
+      AttrBridge::setPatternImageFillRotation(paintNode, index, value.at(0), true);
+    };
+
+    updateSimpleAttr(
+      { *getPatternImageFillRotation(paintNode, index, true) },
+      { newRotation },
+      update,
+      animate);
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
 }
 
 bool AttrBridge::updateOpacity(

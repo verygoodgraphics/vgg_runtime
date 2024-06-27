@@ -16,6 +16,12 @@
 
 #include "Layer/Graphics/VSkiaGL.hpp"
 
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/gpu/GrBackendSurface.h>
+#include <src/gpu/ganesh/gl/GrGLDefines.h>
+
+#include "Layer/Graphics/GraphicsSkia.hpp"
+
 namespace VGG::layer::skia_impl::gl
 {
 

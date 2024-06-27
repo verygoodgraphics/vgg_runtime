@@ -101,7 +101,17 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     // -
     .function("openUrl", &VggSdk::openUrl)
     // editor
-    .function("vggFileUint8Array", &VggSdk::vggFileUint8Array);
+    .function("vggFileUint8Array", &VggSdk::vggFileUint8Array)
+    // element
+    .function("setElementFillEnabled", &VggSdk::setElementFillEnabled)
+    .function("setElementFillColor", &VggSdk::setElementFillColor)
+    .function("setElementFillOpacity", &VggSdk::setElementFillOpacity)
+    .function("setElementFillBlendMode", &VggSdk::setElementFillBlendMode)
+    .function("setElementFillRotation", &VggSdk::setElementFillRotation)
+    .function("setElementOpacity", &VggSdk::setElementOpacity)
+    .function("setElementVisible", &VggSdk::setElementVisible)
+    .function("setElementMatrix", &VggSdk::setElementMatrix)
+    .function("setElementSize", &VggSdk::setElementSize);
 }
 
 EMSCRIPTEN_BINDINGS(vgg_event)

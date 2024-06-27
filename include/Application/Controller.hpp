@@ -140,15 +140,6 @@ public:
 
   void openUrl(const std::string& url, const std::string& target);
 
-public:
-  bool updateElementFillColor(
-    const std::string& id,
-    const std::size_t  fillIndex,
-    const double       r,
-    const double       g,
-    const double       b,
-    const double       a);
-
 private:
   void          initModel(const char* designDocSchemaFilePath, const char* layoutDocSchemaFilePath);
   JsonDocument* createJsonDoc();

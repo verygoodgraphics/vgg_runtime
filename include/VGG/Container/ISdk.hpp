@@ -37,7 +37,7 @@ public:
   struct AnimationOptions
   {
     double      duration{ 0.3 };
-    std::string type{ "none" }; //"none", "dissolve", "smart"
+    std::string type{ "none" }; //"none", "default", "dissolve", "smart"
     std::string timingFunction{ "linear" };
   };
 
@@ -70,6 +70,58 @@ public:
 
   virtual std::string getElement(const std::string& id) = 0;
   virtual void updateElement(const std::string& id, const std::string& contentJsonString) = 0;
+
+  virtual bool setElementFillEnabled(
+    const std::string&      id,
+    std::size_t             index,
+    bool                    enabled,
+    const AnimationOptions& animation) = 0;
+  virtual bool setElementFillColor(
+    const std::string&      id,
+    std::size_t             index,
+    float                   a,
+    float                   r,
+    float                   g,
+    float                   b,
+    const AnimationOptions& animation) = 0;
+  virtual bool setElementFillOpacity(
+    const std::string&      id,
+    std::size_t             index,
+    float                   opacity,
+    const AnimationOptions& animation) = 0;
+  virtual bool setElementFillBlendMode(
+    const std::string&      id,
+    std::size_t             index,
+    int                     mode,
+    const AnimationOptions& animation) = 0;
+  virtual bool setElementFillRotation(
+    const std::string&      id,
+    std::size_t             index,
+    float                   degree,
+    const AnimationOptions& animation) = 0;
+
+  virtual bool setElementOpacity(
+    const std::string&      id,
+    float                   opacity,
+    const AnimationOptions& animation) = 0;
+  virtual bool setElementVisible(
+    const std::string&      id,
+    bool                    visible,
+    const AnimationOptions& animation) = 0;
+  virtual bool setElementMatrix(
+    const std::string&      id,
+    float                   a,
+    float                   b,
+    float                   c,
+    float                   d,
+    float                   tx,
+    float                   ty,
+    const AnimationOptions& animation) = 0;
+  virtual bool setElementSize(
+    const std::string&      id,
+    float                   width,
+    float                   height,
+    const AnimationOptions& animation) = 0;
 
   // -
   virtual std::string getFramesInfo() const = 0;
@@ -113,15 +165,6 @@ public:
     const std::string&  newStateMasterId,
     const StateOptions& options) = 0;
   virtual bool dismissState(const std::string& instanceDescendantId) = 0;
-
-  // element
-  virtual bool updateElementFillColor(
-    const std::string& id,
-    const std::size_t  fillIndex,
-    const double       r,
-    const double       g,
-    const double       b,
-    const double       a) = 0;
 
   // misc
   virtual std::string requiredFonts() const = 0;

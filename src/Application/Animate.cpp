@@ -52,18 +52,18 @@ void setPaintNodeChildren(layer::PaintNode* node, const layer::PaintNode::ChildC
 // only for Debug
 void printAlign(int level)
 {
-#ifdef DEBUG
+#ifndef NDEBUG
   for (int i = 0; i < level; ++i)
   {
     std::cout << "    ";
   }
-#endif // DEBUG
+#endif // !NDEBUG
 }
 
 // only for Debug
 void printLayoutNode(std::shared_ptr<LayoutNode> node, int level)
 {
-#ifdef DEBUG
+#ifndef NDEBUG
   printAlign(level);
 
   std::cout << node->name() << ", " << node->id() << "," << node->elementNode()->idNumber()
@@ -74,13 +74,13 @@ void printLayoutNode(std::shared_ptr<LayoutNode> node, int level)
   {
     printLayoutNode(child, level);
   }
-#endif // DEBUG
+#endif // !NDEBUG
 }
 
 // only for Debug
 void printPaintNode(layer::PaintNode* node, int level)
 {
-#ifdef DEBUG
+#ifndef NDEBUG
   printAlign(level);
 
   std::cout << node->name() << ", " << node->guid() << "," << node->uniqueID() << std::endl;
@@ -90,13 +90,13 @@ void printPaintNode(layer::PaintNode* node, int level)
   {
     printPaintNode(child, level);
   }
-#endif // DEBUG
+#endif // !NDEBUG
 }
 
 // only for Debug
 std::shared_ptr<LayoutNode> getLayoutNodeByName(std::shared_ptr<LayoutNode> node, std::string name)
 {
-#ifdef DEBUG
+#ifndef NDEBUG
   if (node->name() == name)
   {
     return node;
@@ -110,7 +110,7 @@ std::shared_ptr<LayoutNode> getLayoutNodeByName(std::shared_ptr<LayoutNode> node
       return target;
     }
   }
-#endif // DEBUG
+#endif // !NDEBUG
 
   return nullptr;
 }
@@ -539,7 +539,7 @@ void ReplaceNodeAnimate::changeOrderForMergeTree(
   }
   else
   {
-#ifdef DEBUG
+#ifndef NDEBUG
     auto parentFrom = paintNodeFrom->parent();
     auto parentTo = paintNodeTo->parent();
     assert(parentFrom == parentTo);
@@ -547,7 +547,7 @@ void ReplaceNodeAnimate::changeOrderForMergeTree(
     auto itFrom = std::find(children.begin(), children.end(), paintNodeFrom);
     auto itTo = std::find(children.begin(), children.end(), paintNodeTo);
     assert(itFrom != children.end() && itTo != children.end() && itFrom < itTo);
-#endif // DEBUG
+#endif // !NDEBUG
   }
 }
 

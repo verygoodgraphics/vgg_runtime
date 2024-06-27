@@ -98,8 +98,10 @@ protected:
   steady_clock::time_point getStartTime();
   milliseconds             getPassedTime();
   Animate*                 getParent();
-  void                     addChildAnimate(std::shared_ptr<Animate> child);
-  const auto&              getChildAnimate();
+
+public:
+  const std::vector<std::shared_ptr<Animate>>& getChildAnimate();
+  void                                         addChildAnimate(std::shared_ptr<Animate> child);
 
 private:
   std::optional<milliseconds>             m_duration;
@@ -144,6 +146,8 @@ public:
     milliseconds                  interval,
     std::shared_ptr<Interpolator> interpolator);
 
+  // Note: After the construction of NumberAnimate is completed, you must call
+  // parent->addChildAnimate to finish adding the child animation.
   NumberAnimate(Animate* parent);
 
 public:

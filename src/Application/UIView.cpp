@@ -1096,21 +1096,6 @@ bool UIView::pushFrame(
   return success;
 }
 
-bool UIView::updateNodeFillColor(
-  const std::string& id,
-  const std::size_t  fillIndex,
-  const double       r,
-  const double       g,
-  const double       b,
-  const double       a)
-{
-  const auto success = m_impl->updateNodeFillColor(id, fillIndex, r, g, b, a);
-  if (success)
-    setDirty(true);
-
-  return success;
-}
-
 void UIView::initHistory()
 {
   m_history.push(currentPage()->id());
@@ -1181,6 +1166,110 @@ void UIView::updateState(const LayoutNode* instanceNode)
   for (auto& t : targets)
     if (t.first->isAncestorOf(instanceNode) && (t.first.get() != instanceNode))
       currentContext.mouseLeaveTargetNodes.push_back(t);
+}
+
+bool UIView::setElementFillEnabled(
+  const std::string&            id,
+  std::size_t                   index,
+  bool                          enabled,
+  const app::UIAnimationOption& animation)
+{
+  if (m_impl->setElementFillEnabled(id, index, enabled, animation))
+    setDirty(true);
+  return false;
+}
+
+bool UIView::setElementFillColor(
+  const std::string&            id,
+  std::size_t                   index,
+  float                         a,
+  float                         r,
+  float                         g,
+  float                         b,
+  const app::UIAnimationOption& animation)
+{
+  if (m_impl->setElementFillColor(id, index, a, r, g, b, animation))
+    setDirty(true);
+  return false;
+}
+
+bool UIView::setElementFillOpacity(
+  const std::string&            id,
+  std::size_t                   index,
+  float                         opacity,
+  const app::UIAnimationOption& animation)
+{
+  if (m_impl->setElementFillOpacity(id, index, opacity, animation))
+    setDirty(true);
+  return false;
+}
+
+bool UIView::setElementFillBlendMode(
+  const std::string&            id,
+  std::size_t                   index,
+  int                           mode,
+  const app::UIAnimationOption& animation)
+{
+  if (m_impl->setElementFillBlendMode(id, index, mode, animation))
+    setDirty(true);
+  return false;
+}
+
+bool UIView::setElementFillRotation(
+  const std::string&            id,
+  std::size_t                   index,
+  float                         degree,
+  const app::UIAnimationOption& animation)
+{
+  if (m_impl->setElementFillRotation(id, index, degree, animation))
+    setDirty(true);
+  return false;
+}
+
+bool UIView::setElementOpacity(
+  const std::string&            id,
+  float                         opacity,
+  const app::UIAnimationOption& animation)
+{
+  if (m_impl->setElementOpacity(id, opacity, animation))
+    setDirty(true);
+  return false;
+}
+
+bool UIView::setElementVisible(
+  const std::string&            id,
+  bool                          visible,
+  const app::UIAnimationOption& animation)
+{
+  if (m_impl->setElementVisible(id, visible, animation))
+    setDirty(true);
+  return false;
+}
+
+bool UIView::setElementMatrix(
+  const std::string&            id,
+  float                         a,
+  float                         b,
+  float                         c,
+  float                         d,
+  float                         tx,
+  float                         ty,
+  const app::UIAnimationOption& animation)
+{
+  if (m_impl->setElementMatrix(id, a, b, c, d, tx, ty, animation))
+    setDirty(true);
+  return false;
+}
+
+bool UIView::setElementSize(
+  const std::string&            id,
+  float                         width,
+  float                         height,
+  const app::UIAnimationOption& animation)
+{
+  if (m_impl->setElementSize(id, width, height, animation))
+    setDirty(true);
+  return false;
 }
 
 } // namespace VGG

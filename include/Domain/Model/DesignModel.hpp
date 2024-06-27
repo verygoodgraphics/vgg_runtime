@@ -213,11 +213,11 @@ struct Color
   /**
    * The opacity of the object. `0` represents transparent, and `1` represents opaque.
    */
-  float                alpha;
-  float                blue;
   BackgroundColorClass colorClass;
-  float                green;
+  float                alpha;
   float                red;
+  float                green;
+  float                blue;
 };
 
 enum class BoundsClass : int

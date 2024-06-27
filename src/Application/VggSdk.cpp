@@ -50,6 +50,8 @@ app::UIAnimationOption toUIAnimationOption(const ISdk::AnimationOptions& inOptio
 
   if (inOption.type == "none")
     option.type = app::EAnimationType::NONE;
+  if (inOption.type == "default")
+    option.type = app::EAnimationType::DEFAULT;
   else if (inOption.type == "dissolve")
     option.type = app::EAnimationType::DISSOLVE;
   else if (inOption.type == "smart")
@@ -513,19 +515,6 @@ bool VggSdk::setCurrentFrameByIdAnimated(
   return pushFrame(id, { resetScrollPosition, inOption });
 }
 
-bool VggSdk::updateElementFillColor(
-  const std::string& id,
-  const std::size_t  fillIndex,
-  const double       r,
-  const double       g,
-  const double       b,
-  const double       a)
-{
-  if (const auto& c = controller())
-    return c->updateElementFillColor(id, fillIndex, r, g, b, a);
-  return false;
-}
-
 bool VggSdk::pushFrame(const std::string& id, const FrameOptions& inOpts)
 {
   auto c = controller();
@@ -565,6 +554,110 @@ std::shared_ptr<Presenter> VggSdk::presenter()
     return currentEnv->presenter();
 
   return nullptr;
+}
+
+bool VggSdk::setElementFillEnabled(
+  const std::string&      id,
+  std::size_t             index,
+  bool                    enabled,
+  const AnimationOptions& animation)
+{
+  if (const auto& p = presenter())
+    return p->setElementFillEnabled(id, index, enabled, toUIAnimationOption(animation));
+  return false;
+}
+
+bool VggSdk::setElementFillColor(
+  const std::string&      id,
+  std::size_t             index,
+  float                   a,
+  float                   r,
+  float                   g,
+  float                   b,
+  const AnimationOptions& animation)
+{
+  if (const auto& p = presenter())
+    return p->setElementFillColor(id, index, a, r, g, b, toUIAnimationOption(animation));
+  return false;
+}
+
+bool VggSdk::setElementFillOpacity(
+  const std::string&      id,
+  std::size_t             index,
+  float                   opacity,
+  const AnimationOptions& animation)
+{
+  if (const auto& p = presenter())
+    return p->setElementFillOpacity(id, index, opacity, toUIAnimationOption(animation));
+  return false;
+}
+
+bool VggSdk::setElementFillBlendMode(
+  const std::string&      id,
+  std::size_t             index,
+  int                     mode,
+  const AnimationOptions& animation)
+{
+  if (const auto& p = presenter())
+    return p->setElementFillBlendMode(id, index, mode, toUIAnimationOption(animation));
+  return false;
+}
+
+bool VggSdk::setElementFillRotation(
+  const std::string&      id,
+  std::size_t             index,
+  float                   degree,
+  const AnimationOptions& animation)
+{
+  if (const auto& p = presenter())
+    return p->setElementFillRotation(id, index, degree, toUIAnimationOption(animation));
+  return false;
+}
+
+bool VggSdk::setElementOpacity(
+  const std::string&      id,
+  float                   opacity,
+  const AnimationOptions& animation)
+{
+  if (const auto& p = presenter())
+    return p->setElementOpacity(id, opacity, toUIAnimationOption(animation));
+  return false;
+}
+
+bool VggSdk::setElementVisible(
+  const std::string&      id,
+  bool                    visible,
+  const AnimationOptions& animation)
+{
+  if (const auto& p = presenter())
+    return p->setElementVisible(id, visible, toUIAnimationOption(animation));
+  return false;
+}
+
+bool VggSdk::setElementMatrix(
+  const std::string&      id,
+  float                   a,
+  float                   b,
+  float                   c,
+  float                   d,
+  float                   tx,
+  float                   ty,
+  const AnimationOptions& animation)
+{
+  if (const auto& p = presenter())
+    return p->setElementMatrix(id, a, b, c, d, tx, ty, toUIAnimationOption(animation));
+  return false;
+}
+
+bool VggSdk::setElementSize(
+  const std::string&      id,
+  float                   width,
+  float                   height,
+  const AnimationOptions& animation)
+{
+  if (const auto& p = presenter())
+    return p->setElementSize(id, width, height, toUIAnimationOption(animation));
+  return false;
 }
 
 } // namespace VGG

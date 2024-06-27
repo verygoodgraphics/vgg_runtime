@@ -62,13 +62,62 @@ public:
   void        setInstanceKey(const std::string& instanceKey);
   void        setListenerKey(const std::string& listenerKey);
 
-  // design document
+  // -
   std::string designDocument() override;
   std::string designDocumentValueAt(const std::string& jsonPointer) override;
 
   std::string getElement(const std::string& id) override;
   void        updateElement(const std::string& id, const std::string& contentJsonString) override;
 
+  bool setElementFillEnabled(
+    const std::string&      id,
+    std::size_t             index,
+    bool                    enabled,
+    const AnimationOptions& animation) override;
+  bool setElementFillColor(
+    const std::string&      id,
+    std::size_t             index,
+    float                   a,
+    float                   r,
+    float                   g,
+    float                   b,
+    const AnimationOptions& animation) override;
+  bool setElementFillOpacity(
+    const std::string&      id,
+    std::size_t             index,
+    float                   opacity,
+    const AnimationOptions& animation) override;
+  bool setElementFillBlendMode(
+    const std::string&      id,
+    std::size_t             index,
+    int                     mode,
+    const AnimationOptions& animation) override;
+  bool setElementFillRotation(
+    const std::string&      id,
+    std::size_t             index,
+    float                   degree,
+    const AnimationOptions& animation) override;
+
+  bool setElementOpacity(const std::string& id, float opacity, const AnimationOptions& animation)
+    override;
+  bool setElementVisible(const std::string& id, bool visible, const AnimationOptions& animation)
+    override;
+  bool setElementMatrix(
+    const std::string&      id,
+    float                   a,
+    float                   b,
+    float                   c,
+    float                   d,
+    float                   tx,
+    float                   ty,
+    const AnimationOptions& animation) override;
+  bool setElementSize(
+    const std::string&      id,
+    float                   width,
+    float                   height,
+    const AnimationOptions& animation) override;
+
+  // -
   std::string getFramesInfo() const override;
   std::string currentFrameId() const override;
 
@@ -109,15 +158,6 @@ public:
     const std::string&  stateMasterId,
     const StateOptions& options) override;
   bool dismissState(const std::string& instanceDescendantId) override;
-
-  // element
-  bool updateElementFillColor(
-    const std::string& id,
-    const std::size_t  index,
-    const double       r,
-    const double       g,
-    const double       b,
-    const double       a) override;
 
   // misc
   std::string requiredFonts() const override;

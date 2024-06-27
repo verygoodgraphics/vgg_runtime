@@ -985,20 +985,6 @@ void Controller::layoutForEditing(std::size_t pageIndex)
   m_layout->layout(pageOriginalSize(pageIndex), pageIndex);
 }
 
-bool Controller::updateElementFillColor(
-  const std::string& id,
-  const std::size_t  fillIndex,
-  const double       r,
-  const double       g,
-  const double       b,
-  const double       a)
-{
-  if (m_model->updateElementFillColor(id, fillIndex, r, g, b, a))
-    return m_presenter->updateViewNodeFillColor(id, fillIndex, r, g, b, a);
-
-  return false;
-}
-
 bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
 {
   if (m_isUpdatingFrame)

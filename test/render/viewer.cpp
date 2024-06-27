@@ -230,11 +230,15 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
   auto surfCreateProc = skia_impl::gl::glSurfaceCreateProc();
 
   viewer.zoomNode = VGG::layer::ZoomerNode::Make();
-  viewer.viewportNode = VGG::layer::Viewport::Make(1.0);
+  auto scale = loop.resolutionScale();
+  viewer.viewportNode = VGG::layer::Viewport::Make(scale);
 
-  sk_sp<SkSurface> gpuSurface =
-    surfCreateProc(directContext.get(), 1920, 1080, { config.stencilBit, config.multiSample });
-  viewer.viewportNode->setViewport(Bounds{ 0, 0, 1920, 1080 });
+  sk_sp<SkSurface> gpuSurface = surfCreateProc(
+    directContext.get(),
+    1920 * scale,
+    1080 * scale,
+    { config.stencilBit, config.multiSample });
+  viewer.viewportNode->setViewport(Bounds{ 0, 0, 1920 * scale, 1080 * scale });
 
 #ifdef IMGUI_ENABLED
   Panel panel(viewer);

@@ -228,40 +228,6 @@ bool UIViewImpl::isAnimating()
   return m_animationManager.hasRunningAnimation();
 }
 
-bool UIViewImpl::updateNodeFillColor(
-  const std::string& id,
-  const std::size_t  fillIndex,
-  const double       r,
-  const double       g,
-  const double       b,
-  const double       a)
-{
-  const auto& root = m_viewModel->layoutTree();
-  if (!root)
-    return false;
-
-  auto layoutNode = root->findDescendantNodeById(id);
-  if (!layoutNode)
-    return false;
-
-  auto node = m_sceneNode->nodeByID(layoutNode->elementNode()->idNumber());
-  if (!node)
-    return false;
-
-  auto fills = node->attributeAccessor()->getFills();
-  if (fillIndex >= fills.size())
-    return false;
-
-  Color color;
-  color.a = a;
-  color.r = r;
-  color.g = g;
-  color.b = b;
-  fills.at(fillIndex).type = color;
-  node->attributeAccessor()->setFills(fills);
-  return true;
-}
-
 bool UIViewImpl::setInstanceState(
   const LayoutNode*             oldNode,
   const LayoutNode*             newNode,
@@ -302,6 +268,7 @@ bool UIViewImpl::transition(
   switch (option.type)
   {
     case app::EAnimationType::NONE:
+    case app::EAnimationType::DEFAULT:
       break;
 
     case app::EAnimationType::DISSOLVE:
@@ -380,6 +347,172 @@ std::unique_ptr<LayoutContext> UIViewImpl::layoutContext()
   return std::make_unique<AppLayoutContext>(std::make_shared<AttrBridge>(
     std::static_pointer_cast<UIView>(m_api->shared_from_this()),
     m_animationManager));
+}
+
+bool UIViewImpl::setElementFillEnabled(
+  const std::string&            id,
+  std::size_t                   index,
+  bool                          enabled,
+  const app::UIAnimationOption& animation)
+{
+  auto b = makeUpdateBuilder(id, animation);
+  if (!b.has_value())
+    return false;
+
+  return b->updater
+    ->updateFillEnabled(b->layoutNode, b->paintNode, index, enabled, false, b->animation);
+}
+
+bool UIViewImpl::setElementFillColor(
+  const std::string&            id,
+  std::size_t                   index,
+  float                         a,
+  float                         r,
+  float                         g,
+  float                         blue,
+  const app::UIAnimationOption& animation)
+{
+  auto b = makeUpdateBuilder(id, animation);
+  if (!b.has_value())
+    return false;
+
+  return b->updater->updateFillColor(
+    b->layoutNode,
+    b->paintNode,
+    index,
+    Model::Color{ .alpha = a, .red = r, .green = g, .blue = blue },
+    false,
+    b->animation);
+}
+
+bool UIViewImpl::setElementFillOpacity(
+  const std::string&            id,
+  std::size_t                   index,
+  float                         opacity,
+  const app::UIAnimationOption& animation)
+{
+  auto b = makeUpdateBuilder(id, animation);
+  if (!b.has_value())
+    return false;
+
+  return b->updater
+    ->updateFillOpacity(b->layoutNode, b->paintNode, index, opacity, false, b->animation);
+}
+
+bool UIViewImpl::setElementFillBlendMode(
+  const std::string&            id,
+  std::size_t                   index,
+  int                           mode,
+  const app::UIAnimationOption& animation)
+{
+  auto b = makeUpdateBuilder(id, animation);
+  if (!b.has_value())
+    return false;
+
+  return b->updater->updateFillBlendMode(b->layoutNode, b->paintNode, index, mode, false);
+}
+
+bool UIViewImpl::setElementFillRotation(
+  const std::string&            id,
+  std::size_t                   index,
+  float                         degree,
+  const app::UIAnimationOption& animation)
+{
+  auto b = makeUpdateBuilder(id, animation);
+  if (!b.has_value())
+    return false;
+
+  return b->updater
+    ->updatePatternFillRotation(b->layoutNode, b->paintNode, index, degree, false, b->animation);
+}
+
+bool UIViewImpl::setElementOpacity(
+  const std::string&            id,
+  float                         opacity,
+  const app::UIAnimationOption& animation)
+{
+  auto b = makeUpdateBuilder(id, animation);
+  if (!b.has_value())
+    return false;
+
+  return b->updater->updateOpacity(b->layoutNode, b->paintNode, opacity, false, b->animation);
+}
+
+bool UIViewImpl::setElementVisible(
+  const std::string&            id,
+  bool                          visible,
+  const app::UIAnimationOption& animation)
+{
+  auto b = makeUpdateBuilder(id, animation);
+  if (!b.has_value())
+    return false;
+
+  return b->updater->updateVisible(b->layoutNode, b->paintNode, visible, false);
+}
+
+bool UIViewImpl::setElementMatrix(
+  const std::string&            id,
+  float                         a,
+  float                         mb,
+  float                         c,
+  float                         d,
+  float                         tx,
+  float                         ty,
+  const app::UIAnimationOption& animation)
+{
+  auto b = makeUpdateBuilder(id, animation);
+  if (!b.has_value())
+    return false;
+
+  return b->updater
+    ->updateMatrix(b->layoutNode, b->paintNode, { a, mb, c, d, tx, ty }, false, b->animation);
+}
+
+bool UIViewImpl::setElementSize(
+  const std::string&            id,
+  float                         width,
+  float                         height,
+  const app::UIAnimationOption& animation)
+{
+  auto b = makeUpdateBuilder(id, animation);
+  if (!b.has_value())
+    return false;
+
+  return b->updater->updateSize(b->layoutNode, b->paintNode, width, height, false, b->animation);
+}
+
+std::optional<UIViewImpl::UpdateBuilder> UIViewImpl::makeUpdateBuilder(
+  const std::string&            id,
+  const app::UIAnimationOption& option)
+{
+  const auto& root = m_viewModel->layoutTree();
+  if (!root)
+    return std::nullopt;
+
+  auto layoutNode = root->findDescendantNodeById(id);
+  if (!layoutNode)
+    return std::nullopt;
+
+  auto paintNode = m_sceneNode->nodeByID(layoutNode->elementNode()->idNumber());
+  if (!paintNode)
+    return std::nullopt;
+
+  std::shared_ptr<NumberAnimate> animation;
+  if (option.type != app::EAnimationType::NONE)
+  {
+    const int duration = option.duration * 1000;
+    auto      timing = std::make_shared<LinearInterpolator>();
+    animation = std::make_shared<NumberAnimate>(
+      std::chrono::milliseconds(duration),
+      std::chrono::milliseconds(K_ANIMATION_INTERVAL),
+      timing);
+  }
+
+  auto updater = std::make_shared<AttrBridge>(
+    std::static_pointer_cast<UIView>(m_api->shared_from_this()),
+    m_animationManager);
+
+  return UpdateBuilder{ updater, layoutNode->shared_from_this(), paintNode, animation };
 }
 
 } // namespace VGG::internal

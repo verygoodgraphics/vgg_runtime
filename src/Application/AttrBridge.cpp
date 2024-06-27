@@ -1235,7 +1235,7 @@ bool AttrBridge::replaceNode(
       return false;
     }
 
-    parent->addChild(it, layer::incRef(result.root->at(0)->node()));
+    parent->addChild(++it, layer::incRef(result.root->at(0)->node()));
 
     if (animate)
     {

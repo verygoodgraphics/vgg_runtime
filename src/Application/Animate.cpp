@@ -525,14 +525,29 @@ void ReplaceNodeAnimate::changeOrderForMergeTree(
   auto itTo =
     std::find_if(frames.begin(), frames.end(), std::bind(cmp, std::placeholders::_1, paintNodeTo));
 
-  assert(itFrom != frames.end() && itTo != frames.end());
-  if (itFrom != frames.end() && itTo != frames.end() && itFrom > itTo)
+  // assert(itFrom != frames.end() && itTo != frames.end());
+  if (itFrom != frames.end() && itTo != frames.end())
   {
-    addCallBackWhenStop([frames, attrBridge]()
-                        { attrBridge->getView()->getSceneNode()->setFrames(frames); });
+    if (itFrom > itTo)
+    {
+      addCallBackWhenStop([frames, attrBridge]()
+                          { attrBridge->getView()->getSceneNode()->setFrames(frames); });
 
-    std::iter_swap(itFrom, itTo);
-    attrBridge->getView()->getSceneNode()->setFrames(frames);
+      std::iter_swap(itFrom, itTo);
+      attrBridge->getView()->getSceneNode()->setFrames(frames);
+    }
+  }
+  else
+  {
+#ifdef DEBUG
+    auto parentFrom = paintNodeFrom->parent();
+    auto parentTo = paintNodeTo->parent();
+    assert(parentFrom == parentTo);
+    auto children = parentFrom->children();
+    auto itFrom = std::find(children.begin(), children.end(), paintNodeFrom);
+    auto itTo = std::find(children.begin(), children.end(), paintNodeTo);
+    assert(itFrom != children.end() && itTo != children.end() && itFrom < itTo);
+#endif // DEBUG
   }
 }
 
@@ -964,7 +979,7 @@ void SmartAnimate::addTwinAnimateWithMergeTree(
 
       auto itFrom = nodeIds.find(it->get()->uniqueID());
       auto itTo = nodeIds.find(result->get()->uniqueID());
-      assert(itFrom != nodeIds.end() && itTo != nodeIds.end());
+      // assert(itFrom != nodeIds.end() && itTo != nodeIds.end());
       if (itFrom != nodeIds.end() && itTo != nodeIds.end())
       {
         twins.emplace(itFrom->second, itTo->second);

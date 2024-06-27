@@ -302,6 +302,11 @@ void Animate::timerCallback()
   {
     m_lastTriggeredTime = steady_clock::now();
   }
+
+  for (auto& child : getChildAnimate())
+  {
+    child->timerCallback();
+  }
 }
 
 Animate* Animate::getParent()
@@ -314,7 +319,7 @@ void Animate::addChildAnimate(std::shared_ptr<Animate> child)
   m_childAnimates.emplace_back(child);
 }
 
-const auto& Animate::getChildAnimate()
+const std::vector<std::shared_ptr<Animate>>& Animate::getChildAnimate()
 {
   return m_childAnimates;
 }
@@ -491,10 +496,12 @@ void ReplaceNodeAnimate::timerCallback()
 {
   Animate::timerCallback();
 
+  /*
   for (auto& child : getChildAnimate())
   {
     child->timerCallback();
   }
+  */
 
   for (auto& item : getTriggeredCallback())
   {

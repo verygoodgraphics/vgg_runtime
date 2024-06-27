@@ -1,4 +1,5 @@
 #include "viewer.hpp"
+#include "Layer/Graphics/GraphicsSkia.hpp"
 #include "Layer/Graphics/VSkiaGL.hpp"
 #include "Layer/RasterManager.hpp"
 #include "Layer/SimpleRasterExecutor.hpp"
@@ -31,27 +32,6 @@ using namespace VGG::app;
 namespace fs = std::filesystem;
 
 constexpr char POS_ARG_INPUT_FILE[] = "fig/ai/sketch/json";
-
-inline sk_sp<SkSurface> createGPUSurface(
-  GrRecordingContext* context,
-  int                 w,
-  int                 h,
-  int                 multiSample,
-  int                 stencilBit)
-{
-  GrGLFramebufferInfo info;
-  info.fFBOID = 0;
-  info.fFormat = GR_GL_RGBA8;
-  GrBackendRenderTarget target(w, h, multiSample, stencilBit, info);
-  SkSurfaceProps        props;
-  return SkSurfaces::WrapBackendRenderTarget(
-    context,
-    target,
-    kBottomLeft_GrSurfaceOrigin,
-    SkColorType::kRGBA_8888_SkColorType,
-    nullptr,
-    &props);
-}
 
 VGG::layer::Ref<VGG::layer::SceneNode> loadScene(const argparse::ArgumentParser& program)
 {
@@ -247,11 +227,13 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
   sk_sp<const GrGLInterface> interface = GrGLMakeNativeInterface();
   sk_sp<GrRecordingContext>  directContext = skia_impl::gl::glContextCreateProc(nullptr)();
 
+  auto surfCreateProc = skia_impl::gl::glSurfaceCreateProc();
+
   viewer.zoomNode = VGG::layer::ZoomerNode::Make();
   viewer.viewportNode = VGG::layer::Viewport::Make(1.0);
 
   sk_sp<SkSurface> gpuSurface =
-    createGPUSurface(directContext.get(), 1920, 1080, config.multiSample, config.stencilBit);
+    surfCreateProc(directContext.get(), 1920, 1080, { config.stencilBit, config.multiSample });
   viewer.viewportNode->setViewport(Bounds{ 0, 0, 1920, 1080 });
 
 #ifdef IMGUI_ENABLED
@@ -269,12 +251,11 @@ int run(Loop& loop, Viewer& viewer, const argparse::ArgumentParser& program)
           evt.type == VGG_WINDOWEVENT &&
           (window.event == VGG_WINDOWEVENT_RESIZED || window.event == VGG_WINDOWEVENT_SIZE_CHANGED))
       {
-        gpuSurface = createGPUSurface(
+        gpuSurface = surfCreateProc(
           directContext,
           window.drawableWidth,
           window.drawableHeight,
-          config.multiSample,
-          config.stencilBit);
+          { config.stencilBit, config.multiSample });
       }
 #ifdef IMGUI_ENABLED
       if (evt.type == VGG_KEYDOWN && evt.key.keysym.sym == VGGK_p)

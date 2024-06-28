@@ -26,10 +26,10 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include "Application/ElementUpdateProperty.hpp"
 #include "Application/Event/EventListener.hpp"
 #include "Application/UIAnimation.hpp"
 #include "Application/UIOptions.hpp"
-#include "Application/UIUpdateElement.hpp"
 #include "Domain/Layout/LayoutContext.hpp"
 #include "Domain/Layout/Rect.hpp"
 #include "Event/Event.hpp"
@@ -258,8 +258,8 @@ public:
 
 public:
   int updateElement(
-    const std::vector<app::UpdateElementItem>& items,
-    const app::UIAnimationOption&              option);
+    const std::vector<app::ElementUpdateProperty>& items,
+    const app::UIAnimationOption&                  option);
 
 protected:
   float     scale() const;

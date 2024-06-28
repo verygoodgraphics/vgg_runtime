@@ -1169,8 +1169,8 @@ void UIView::updateState(const LayoutNode* instanceNode)
 }
 
 int UIView::updateElement(
-  const std::vector<app::UpdateElementItem>& items,
-  const app::UIAnimationOption&              option)
+  const std::vector<app::ElementUpdateProperty>& items,
+  const app::UIAnimationOption&                  option)
 {
   int successCount = m_impl->updateElement(items, option);
   if (successCount > 0)

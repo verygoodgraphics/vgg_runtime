@@ -454,8 +454,8 @@ void Presenter::setBackgroundColor(uint32_t color)
 }
 
 int Presenter::updateElement(
-  const std::vector<app::UpdateElementItem>& items,
-  const app::UIAnimationOption&              option)
+  const std::vector<app::ElementUpdateProperty>& items,
+  const app::UIAnimationOption&                  option)
 {
   return m_view->updateElement(items, option);
 }

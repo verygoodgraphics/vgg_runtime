@@ -21,23 +21,23 @@
 namespace VGG::app
 {
 
-struct UpdateElement
+struct ElementUpdate
 {
   std::string type;
   std::string id;
 };
 
-struct UpdateElementFill : UpdateElement
+struct ElementUpdateFill : ElementUpdate
 {
   std::size_t index = 0;
 };
 
-struct UpdateElementFillEnabled : UpdateElementFill
+struct ElementUpdateFillEnabled : ElementUpdateFill
 {
   bool enabled = false;
 };
 
-struct UpdateElementFillColor : UpdateElementFill
+struct ElementUpdateFillColor : ElementUpdateFill
 {
   float a = 0;
   float r = 0;
@@ -45,33 +45,33 @@ struct UpdateElementFillColor : UpdateElementFill
   float b = 0;
 };
 
-struct UpdateElementFillOpacity : UpdateElementFill
+struct ElementUpdateFillOpacity : ElementUpdateFill
 {
   float opacity = 1;
 };
 
-struct UpdateElementFillBlendMode : UpdateElementFill
+struct ElementUpdateFillBlendMode : ElementUpdateFill
 {
   int mode = 0;
 };
 
-struct UpdateElementPatternImageFillRotation : UpdateElementFill
+struct ElementUpdatePatternImageFillRotation : ElementUpdateFill
 {
   float degree = 0;
   bool  effectOnFill = false;
 };
 
-struct UpdateElementOpacity : UpdateElement
+struct ElementUpdateOpacity : ElementUpdate
 {
   float opacity = 1;
 };
 
-struct UpdateElementVisible : UpdateElement
+struct ElementUpdateVisible : ElementUpdate
 {
   bool visible = false;
 };
 
-struct UpdateElementMatrix : UpdateElement
+struct ElementUpdateMatrix : ElementUpdate
 {
   float a = 0;
   float b = 0;
@@ -81,22 +81,22 @@ struct UpdateElementMatrix : UpdateElement
   float ty = 0;
 };
 
-struct UpdateElementSize : UpdateElement
+struct ElementUpdateSize : ElementUpdate
 {
   float width = 0;
   float height = 0;
 };
 
-using UpdateElementItem = std::variant<
+using ElementUpdateProperty = std::variant<
   std::monostate,
-  UpdateElementFillBlendMode,
-  UpdateElementFillColor,
-  UpdateElementFillEnabled,
-  UpdateElementFillOpacity,
-  UpdateElementPatternImageFillRotation,
-  UpdateElementMatrix,
-  UpdateElementOpacity,
-  UpdateElementVisible,
-  UpdateElementSize>;
+  ElementUpdateFillBlendMode,
+  ElementUpdateFillColor,
+  ElementUpdateFillEnabled,
+  ElementUpdateFillOpacity,
+  ElementUpdatePatternImageFillRotation,
+  ElementUpdateMatrix,
+  ElementUpdateOpacity,
+  ElementUpdateVisible,
+  ElementUpdateSize>;
 
 } // namespace VGG::app

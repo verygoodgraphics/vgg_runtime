@@ -22,7 +22,7 @@
 #include <vector>
 #include "Application/Animate.hpp"
 #include "Application/UIAnimation.hpp"
-#include "Application/UIUpdateElement.hpp"
+#include "Application/ElementUpdateProperty.hpp"
 #include "Application/ZoomerNodeController.hpp"
 #include "Domain/Layout/LayoutContext.hpp"
 #include "Layer/Core/FrameNode.hpp"
@@ -109,8 +109,8 @@ public:
 
 public:
   int updateElement(
-    const std::vector<app::UpdateElementItem>& items,
-    const app::UIAnimationOption&              option);
+    const std::vector<app::ElementUpdateProperty>& items,
+    const app::UIAnimationOption&                  option);
 
   std::optional<UpdateBuilder> makeUpdateBuilder(
     const std::string&            id,

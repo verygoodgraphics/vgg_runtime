@@ -68,6 +68,8 @@ public:
 
   std::string getElement(const std::string& id) override;
   void        updateElement(const std::string& id, const std::string& contentJsonString) override;
+  int         updateElementProperties(const std::string& updates, const AnimationOptions& animation)
+    override;
 
   bool setElementFillEnabled(
     const std::string&      id,

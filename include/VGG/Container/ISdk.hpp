@@ -70,6 +70,9 @@ public:
 
   virtual std::string getElement(const std::string& id) = 0;
   virtual void updateElement(const std::string& id, const std::string& contentJsonString) = 0;
+  virtual int  updateElementProperties(
+     const std::string&      updates, // json array string, std::vector<app::UpdateElementItem>
+     const AnimationOptions& animation) = 0;
 
   virtual bool setElementFillEnabled(
     const std::string&      id,

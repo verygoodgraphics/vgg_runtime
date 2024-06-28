@@ -532,4 +532,12 @@ bool Presenter::setElementSize(
 {
   return m_view->setElementSize(id, width, height, animation);
 }
+
+int Presenter::updateElement(
+  const std::vector<app::UpdateElementItem>& items,
+  const app::UIAnimationOption&              option)
+{
+  return m_view->updateElement(items, option);
+}
+
 } // namespace VGG

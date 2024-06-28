@@ -22,6 +22,7 @@
 #include <vector>
 #include "Application/Animate.hpp"
 #include "Application/UIAnimation.hpp"
+#include "Application/UIUpdateElement.hpp"
 #include "Application/ZoomerNodeController.hpp"
 #include "Domain/Layout/LayoutContext.hpp"
 #include "Layer/Core/FrameNode.hpp"
@@ -48,21 +49,14 @@ namespace internal
 
 class UIViewImpl
 {
-  UIView* m_api;
-
-  app::AppRender*                          m_layer{ nullptr };
-  layer::Ref<layer::SceneNode>             m_sceneNode;
-  std::unique_ptr<Pager>                   m_pager;
-  std::unique_ptr<app::ZoomNodeController> m_zoomController;
-  layer::Ref<layer::ZoomerNode>            m_zoomer;
-  std::shared_ptr<ViewModel>               m_viewModel;
-
-  AnimateManage m_animationManager;
-
-  int m_pageIndexCache{ 0 };
-
-private:
-  bool isUnitTest() const;
+public:
+  struct UpdateBuilder
+  {
+    std::shared_ptr<AttrBridge>    updater;
+    std::shared_ptr<LayoutNode>    layoutNode;
+    layer::PaintNode*              paintNode = nullptr;
+    std::shared_ptr<NumberAnimate> animation;
+  };
 
 public:
   UIViewImpl(UIView* api);
@@ -114,6 +108,10 @@ public:
   bool isAnimating();
 
 public:
+  int updateElement(
+    const std::vector<app::UpdateElementItem>& items,
+    const app::UIAnimationOption&              option);
+
   bool setElementFillEnabled(
     const std::string&            id,
     std::size_t                   index,
@@ -166,14 +164,13 @@ public:
     float                         height,
     const app::UIAnimationOption& animation);
 
+  std::optional<UpdateBuilder> makeUpdateBuilder(
+    const std::string&            id,
+    const app::UIAnimationOption* anamation,
+    Animate*                      parentAnimation);
+
 private:
-  struct UpdateBuilder
-  {
-    std::shared_ptr<AttrBridge>    updater;
-    std::shared_ptr<LayoutNode>    layoutNode;
-    layer::PaintNode*              paintNode = nullptr;
-    std::shared_ptr<NumberAnimate> animation;
-  };
+  bool isUnitTest() const;
 
   bool transition(
     const LayoutNode*             fromNode,
@@ -187,6 +184,21 @@ private:
   std::optional<UpdateBuilder> makeUpdateBuilder(
     const std::string&            id,
     const app::UIAnimationOption& anamation);
+
+private:
+  UIView* m_api;
+
+  app::AppRender*                          m_layer{ nullptr };
+  layer::Ref<layer::SceneNode>             m_sceneNode;
+  std::unique_ptr<Pager>                   m_pager;
+  std::unique_ptr<app::ZoomNodeController> m_zoomController;
+  layer::Ref<layer::ZoomerNode>            m_zoomer;
+  std::shared_ptr<ViewModel>               m_viewModel;
+
+  AnimateManage m_animationManager;
+
+  int m_pageIndexCache{ 0 };
 };
+
 } // namespace internal
 } // namespace VGG

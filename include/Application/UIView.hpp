@@ -29,6 +29,7 @@
 #include "Application/Event/EventListener.hpp"
 #include "Application/UIAnimation.hpp"
 #include "Application/UIOptions.hpp"
+#include "Application/UIUpdateElement.hpp"
 #include "Domain/Layout/LayoutContext.hpp"
 #include "Domain/Layout/Rect.hpp"
 #include "Event/Event.hpp"
@@ -256,6 +257,10 @@ public:
   std::unique_ptr<LayoutContext> layoutContext();
 
 public:
+  int updateElement(
+    const std::vector<app::UpdateElementItem>& items,
+    const app::UIAnimationOption&              option);
+
   bool setElementFillEnabled(
     const std::string&            id,
     std::size_t                   index,

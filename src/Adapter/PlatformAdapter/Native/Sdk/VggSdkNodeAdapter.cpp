@@ -36,10 +36,12 @@
 #include <rxcpp/rx-subscriber.hpp>
 #include <rxcpp/sources/rx-iterate.hpp>
 
+namespace VGG
+{
+
 constexpr auto listener_code_key = "listener";
 
-using namespace VGG::adapter;
-using namespace VGG;
+using namespace adapter;
 
 // Empty value so that macros here are able to return NULL or void
 #define NODE_API_RETVAL_NOTHING // Intentionally blank #define
@@ -287,6 +289,7 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
 
     DECLARE_NODE_API_PROPERTY("getElement", GetElement),
     DECLARE_NODE_API_PROPERTY("updateElement", UpdateElement),
+    DECLARE_NODE_API_PROPERTY("updateElementProperties", updateElementProperties),
     DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
 
     DECLARE_NODE_API_PROPERTY("pushFrame", pushFrame),
@@ -1445,3 +1448,47 @@ napi_value VggSdkNodeAdapter::presentFrame(napi_env env, napi_callback_info info
 
   return nullptr;
 }
+
+napi_value VggSdkNodeAdapter::updateElementProperties(napi_env env, napi_callback_info info)
+{
+  size_t     argc = 2;
+  napi_value args[2];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 2)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto       updates = GetArgString(env, args[0]);
+    const auto option = animationOptionsFromJsObject(env, args[1]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    int successCount = 0;
+    SyncTaskInMainLoop<bool>{ [&successCount, sdk = sdkAdapter->m_vggSdk, updates, option]()
+                              {
+                                successCount = sdk->updateElementProperties(updates, option);
+                                return true;
+                              },
+                              [](bool) {} }();
+
+    napi_value value;
+    auto       status = napi_create_int32(env, successCount, &value);
+    if (status == napi_ok)
+      return value;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+} // namespace VGG

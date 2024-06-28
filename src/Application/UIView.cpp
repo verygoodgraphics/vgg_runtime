@@ -1272,4 +1272,14 @@ bool UIView::setElementSize(
   return false;
 }
 
+int UIView::updateElement(
+  const std::vector<app::UpdateElementItem>& items,
+  const app::UIAnimationOption&              option)
+{
+  int successCount = m_impl->updateElement(items, option);
+  if (successCount > 0)
+    setDirty(true);
+  return successCount;
+}
+
 } // namespace VGG

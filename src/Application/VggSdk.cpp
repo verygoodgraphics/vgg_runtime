@@ -15,9 +15,10 @@
  */
 #include "VggSdk.hpp"
 #include <unordered_set>
+#include "Application/ElementGetPropertySerializer.hpp"
+#include "Application/ElementUpdatePropertySerializer.hpp"
 #include "Application/Presenter.hpp"
 #include "Application/UIApplication.hpp"
-#include "Application/UIUpdateElementSerializer.hpp"
 #include "Application/VggEnv.hpp"
 #include "Controller.hpp"
 #include "Domain/Daruma.hpp"
@@ -566,6 +567,11 @@ int VggSdk::updateElementProperties(const std::string& updates, const AnimationO
   }
 
   return 0;
+}
+
+std::string VggSdk::getElementProperties(const std::string& items)
+{
+  return "[]";
 }
 
 } // namespace VGG

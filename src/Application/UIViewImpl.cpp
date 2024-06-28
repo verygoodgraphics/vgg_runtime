@@ -26,7 +26,7 @@
 #include "AppRender.hpp"
 #include "Application/AppLayoutContext.hpp"
 #include "Application/Pager.hpp"
-#include "Application/UIUpdateElement.hpp"
+#include "Application/ElementUpdateProperty.hpp"
 #include "Application/ViewModel.hpp"
 #include "AttrBridge.hpp"
 #include "Domain/Layout/LayoutNode.hpp"
@@ -67,7 +67,7 @@ struct UpdateBuilderVisitor
     return std::nullopt;
   }
 
-  std::optional<UIViewImpl::UpdateBuilder> operator()(const app::UpdateElement& u) const
+  std::optional<UIViewImpl::UpdateBuilder> operator()(const app::ElementUpdate& u) const
   {
     return viewImpl->makeUpdateBuilder(u.id, animationOption, parentAnimation);
   }
@@ -82,11 +82,11 @@ struct UpdateVisitor
     return false;
   }
 
-  bool operator()(const app::UpdateElementFillBlendMode& u) const
+  bool operator()(const app::ElementUpdateFillBlendMode& u) const
   {
     return b.updater->updateFillBlendMode(b.layoutNode, b.paintNode, u.index, u.mode, false);
   }
-  bool operator()(const app::UpdateElementFillColor& u) const
+  bool operator()(const app::ElementUpdateFillColor& u) const
   {
     return b.updater->updateFillColor(
       b.layoutNode,
@@ -96,17 +96,17 @@ struct UpdateVisitor
       false,
       b.animation);
   }
-  bool operator()(const app::UpdateElementFillEnabled& u) const
+  bool operator()(const app::ElementUpdateFillEnabled& u) const
   {
     return b.updater
       ->updateFillEnabled(b.layoutNode, b.paintNode, u.index, u.enabled, false, b.animation);
   }
-  bool operator()(const app::UpdateElementFillOpacity& u) const
+  bool operator()(const app::ElementUpdateFillOpacity& u) const
   {
     return b.updater
       ->updateFillOpacity(b.layoutNode, b.paintNode, u.index, u.opacity, false, b.animation);
   }
-  bool operator()(const app::UpdateElementPatternImageFillRotation& u) const
+  bool operator()(const app::ElementUpdatePatternImageFillRotation& u) const
   {
     return b.updater->updatePatternImageFillRotation(
       b.layoutNode,
@@ -117,7 +117,7 @@ struct UpdateVisitor
       u.effectOnFill,
       b.animation);
   }
-  bool operator()(const app::UpdateElementMatrix& u) const
+  bool operator()(const app::ElementUpdateMatrix& u) const
   {
     return b.updater->updateMatrix(
       b.layoutNode,
@@ -126,15 +126,15 @@ struct UpdateVisitor
       false,
       b.animation);
   }
-  bool operator()(const app::UpdateElementOpacity& u) const
+  bool operator()(const app::ElementUpdateOpacity& u) const
   {
     return b.updater->updateOpacity(b.layoutNode, b.paintNode, u.opacity, false, b.animation);
   }
-  bool operator()(const app::UpdateElementVisible& u) const
+  bool operator()(const app::ElementUpdateVisible& u) const
   {
     return b.updater->updateVisible(b.layoutNode, b.paintNode, u.visible, false);
   }
-  bool operator()(const app::UpdateElementSize& u) const
+  bool operator()(const app::ElementUpdateSize& u) const
   {
     return b.updater->updateSize(b.layoutNode, b.paintNode, u.width, u.height, false, b.animation);
   }
@@ -476,8 +476,8 @@ std::optional<UIViewImpl::UpdateBuilder> UIViewImpl::makeUpdateBuilder(
 }
 
 int UIViewImpl::updateElement(
-  const std::vector<app::UpdateElementItem>& items,
-  const app::UIAnimationOption&              option)
+  const std::vector<app::ElementUpdateProperty>& items,
+  const app::UIAnimationOption&                  option)
 {
   int                            successCount = 0;
   std::shared_ptr<NumberAnimate> animation;

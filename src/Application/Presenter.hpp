@@ -24,7 +24,7 @@
 #include "Application/UIEvent.hpp"
 #include "Application/UIOptions.hpp"
 #include "Application/UIScrollView.hpp"
-#include "Application/UIUpdateElement.hpp"
+#include "Application/ElementUpdateProperty.hpp"
 #include "Application/UIView.hpp"
 #include "Domain/Layout/Rect.hpp"
 #include "Domain/ModelEvent.hpp"
@@ -294,8 +294,8 @@ public:
 
 public:
   int updateElement(
-    const std::vector<app::UpdateElementItem>& items,
-    const app::UIAnimationOption&              option);
+    const std::vector<app::ElementUpdateProperty>& items,
+    const app::UIAnimationOption&                  option);
 
 public:
   bool updateViewNodeFillColor(

@@ -74,58 +74,6 @@ public:
      const std::string&      updates, // json array string, std::vector<app::UpdateElementItem>
      const AnimationOptions& animation) = 0;
 
-  virtual bool setElementFillEnabled(
-    const std::string&      id,
-    std::size_t             index,
-    bool                    enabled,
-    const AnimationOptions& animation) = 0;
-  virtual bool setElementFillColor(
-    const std::string&      id,
-    std::size_t             index,
-    float                   a,
-    float                   r,
-    float                   g,
-    float                   b,
-    const AnimationOptions& animation) = 0;
-  virtual bool setElementFillOpacity(
-    const std::string&      id,
-    std::size_t             index,
-    float                   opacity,
-    const AnimationOptions& animation) = 0;
-  virtual bool setElementFillBlendMode(
-    const std::string&      id,
-    std::size_t             index,
-    int                     mode,
-    const AnimationOptions& animation) = 0;
-  virtual bool setElementFillRotation(
-    const std::string&      id,
-    std::size_t             index,
-    float                   degree,
-    const AnimationOptions& animation) = 0;
-
-  virtual bool setElementOpacity(
-    const std::string&      id,
-    float                   opacity,
-    const AnimationOptions& animation) = 0;
-  virtual bool setElementVisible(
-    const std::string&      id,
-    bool                    visible,
-    const AnimationOptions& animation) = 0;
-  virtual bool setElementMatrix(
-    const std::string&      id,
-    float                   a,
-    float                   b,
-    float                   c,
-    float                   d,
-    float                   tx,
-    float                   ty,
-    const AnimationOptions& animation) = 0;
-  virtual bool setElementSize(
-    const std::string&      id,
-    float                   width,
-    float                   height,
-    const AnimationOptions& animation) = 0;
-
   // -
   virtual std::string getFramesInfo() const = 0;
   virtual std::string currentFrameId() const = 0;

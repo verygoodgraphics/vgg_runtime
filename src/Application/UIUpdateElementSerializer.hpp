@@ -34,7 +34,13 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
   b);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(UpdateElementFillEnabled, type, id, index, enabled);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(UpdateElementFillOpacity, type, id, index, opacity);
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(UpdateElementFillRotation, type, id, index, degree);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+  UpdateElementPatternImageFillRotation,
+  type,
+  id,
+  index,
+  degree,
+  effectOnFill);
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(UpdateElementMatrix, type, id, a, b, c, d, tx, ty);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(UpdateElementOpacity, type, id, opacity);
@@ -69,8 +75,8 @@ inline void adl_serializer<VGG::app::UpdateElementItem>::from_json(
     x = j.get<UpdateElementFillEnabled>();
   else if (t == "fillOpacity")
     x = j.get<UpdateElementFillOpacity>();
-  else if (t == "fillRotation")
-    x = j.get<UpdateElementFillRotation>();
+  else if (t == "patternImageFillRotation")
+    x = j.get<UpdateElementPatternImageFillRotation>();
   else if (t == "matrix")
     x = j.get<UpdateElementMatrix>();
   else if (t == "opacity")

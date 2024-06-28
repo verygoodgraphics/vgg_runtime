@@ -55,9 +55,10 @@ struct UpdateElementFillBlendMode : UpdateElementFill
   int mode = 0;
 };
 
-struct UpdateElementFillRotation : UpdateElementFill
+struct UpdateElementPatternImageFillRotation : UpdateElementFill
 {
   float degree = 0;
+  bool  effectOnFill = false;
 };
 
 struct UpdateElementOpacity : UpdateElement
@@ -92,7 +93,7 @@ using UpdateElementItem = std::variant<
   UpdateElementFillColor,
   UpdateElementFillEnabled,
   UpdateElementFillOpacity,
-  UpdateElementFillRotation,
+  UpdateElementPatternImageFillRotation,
   UpdateElementMatrix,
   UpdateElementOpacity,
   UpdateElementVisible,

@@ -115,7 +115,11 @@ std::pair<sk_sp<SkImage>, int> loadImageFromStack(const std::string& imageGUID, 
         {
           return { nullptr, 0 };
         }
-        auto                        codec = SkCodec::MakeFromData(blob);
+        auto codec = SkCodec::MakeFromData(blob);
+        if (!codec)
+        {
+          return { nullptr, 0 };
+        }
         std::vector<sk_sp<SkImage>> stack(codec->getFrameCount());
         if (!stack[i])
         {

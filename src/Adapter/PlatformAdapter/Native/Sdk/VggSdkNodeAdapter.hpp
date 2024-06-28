@@ -50,6 +50,7 @@ private:
   // design document in vgg daruma file
   static napi_value GetElement(napi_env env, napi_callback_info info);
   static napi_value UpdateElement(napi_env env, napi_callback_info info);
+  static napi_value updateElementProperties(napi_env env, napi_callback_info info);
 
   // frame
   static napi_value pushFrame(napi_env env, napi_callback_info info);

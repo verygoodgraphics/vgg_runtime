@@ -26,6 +26,7 @@
 #include "AppRender.hpp"
 #include "Application/AppLayoutContext.hpp"
 #include "Application/Pager.hpp"
+#include "Application/UIUpdateElement.hpp"
 #include "Application/ViewModel.hpp"
 #include "AttrBridge.hpp"
 #include "Domain/Layout/LayoutNode.hpp"
@@ -54,7 +55,86 @@ namespace VGG::internal
 namespace
 {
 constexpr auto K_ANIMATION_INTERVAL = 16;
-}
+
+struct UpdateBuilderVisitor
+{
+  UIViewImpl*                   viewImpl = nullptr;
+  const app::UIAnimationOption* animationOption = nullptr;
+  Animate*                      parentAnimation = nullptr;
+
+  std::optional<UIViewImpl::UpdateBuilder> operator()(const std::monostate&) const
+  {
+    return std::nullopt;
+  }
+
+  std::optional<UIViewImpl::UpdateBuilder> operator()(const app::UpdateElement& u) const
+  {
+    return viewImpl->makeUpdateBuilder(u.id, animationOption, parentAnimation);
+  }
+};
+
+struct UpdateVisitor
+{
+  const UIViewImpl::UpdateBuilder& b;
+
+  bool operator()(const std::monostate&) const
+  {
+    return false;
+  }
+
+  bool operator()(const app::UpdateElementFillBlendMode& u) const
+  {
+    return b.updater->updateFillBlendMode(b.layoutNode, b.paintNode, u.index, u.mode, false);
+  }
+  bool operator()(const app::UpdateElementFillColor& u) const
+  {
+    return b.updater->updateFillColor(
+      b.layoutNode,
+      b.paintNode,
+      u.index,
+      Model::Color{ .alpha = u.a, .red = u.r, .green = u.g, .blue = u.b },
+      false,
+      b.animation);
+  }
+  bool operator()(const app::UpdateElementFillEnabled& u) const
+  {
+    return b.updater
+      ->updateFillEnabled(b.layoutNode, b.paintNode, u.index, u.enabled, false, b.animation);
+  }
+  bool operator()(const app::UpdateElementFillOpacity& u) const
+  {
+    return b.updater
+      ->updateFillOpacity(b.layoutNode, b.paintNode, u.index, u.opacity, false, b.animation);
+  }
+  bool operator()(const app::UpdateElementFillRotation& u) const
+  {
+    return b.updater
+      ->updatePatternFillRotation(b.layoutNode, b.paintNode, u.index, u.degree, false, b.animation);
+  }
+  bool operator()(const app::UpdateElementMatrix& u) const
+  {
+    return b.updater->updateMatrix(
+      b.layoutNode,
+      b.paintNode,
+      { u.a, u.b, u.c, u.d, u.tx, u.ty },
+      false,
+      b.animation);
+  }
+  bool operator()(const app::UpdateElementOpacity& u) const
+  {
+    return b.updater->updateOpacity(b.layoutNode, b.paintNode, u.opacity, false, b.animation);
+  }
+  bool operator()(const app::UpdateElementVisible& u) const
+  {
+    return b.updater->updateVisible(b.layoutNode, b.paintNode, u.visible, false);
+  }
+  bool operator()(const app::UpdateElementSize& u) const
+  {
+    return b.updater->updateSize(b.layoutNode, b.paintNode, u.width, u.height, false, b.animation);
+  }
+};
+
+} // namespace
 
 bool UIViewImpl::isUnitTest() const
 {
@@ -513,6 +593,66 @@ std::optional<UIViewImpl::UpdateBuilder> UIViewImpl::makeUpdateBuilder(
     m_animationManager);
 
   return UpdateBuilder{ updater, layoutNode->shared_from_this(), paintNode, animation };
+}
+
+std::optional<UIViewImpl::UpdateBuilder> UIViewImpl::makeUpdateBuilder(
+  const std::string&            id,
+  const app::UIAnimationOption* option,
+  Animate*                      parentAnimation)
+{
+  const auto& root = m_viewModel->layoutTree();
+  if (!root)
+    return std::nullopt;
+
+  auto layoutNode = root->findDescendantNodeById(id);
+  if (!layoutNode)
+    return std::nullopt;
+
+  auto paintNode = m_sceneNode->nodeByID(layoutNode->elementNode()->idNumber());
+  if (!paintNode)
+    return std::nullopt;
+
+  std::shared_ptr<NumberAnimate> animation;
+  if (parentAnimation)
+  {
+    animation = std::make_shared<NumberAnimate>(parentAnimation);
+    parentAnimation->addChildAnimate(animation);
+  }
+  else if (option && option->type != app::EAnimationType::NONE)
+  {
+    const int duration = option->duration * 1000;
+    auto      timing = std::make_shared<LinearInterpolator>();
+    animation = std::make_shared<NumberAnimate>(
+      std::chrono::milliseconds(duration),
+      std::chrono::milliseconds(K_ANIMATION_INTERVAL),
+      timing);
+  }
+
+  auto updater = std::make_shared<AttrBridge>(
+    std::static_pointer_cast<UIView>(m_api->shared_from_this()),
+    m_animationManager);
+
+  return UpdateBuilder{ updater, layoutNode->shared_from_this(), paintNode, animation };
+}
+
+int UIViewImpl::updateElement(
+  const std::vector<app::UpdateElementItem>& items,
+  const app::UIAnimationOption&              option)
+{
+  int                            successCount = 0;
+  std::shared_ptr<NumberAnimate> animation;
+  for (auto& item : items)
+  {
+    if (const auto& b = std::visit(UpdateBuilderVisitor{ this, &option, animation.get() }, item);
+        b.has_value())
+    {
+      if (!animation)
+        animation = (*b).animation; // first animation is parent
+      successCount += std::visit(UpdateVisitor{ *b }, item);
+    }
+  }
+
+  return successCount;
 }
 
 } // namespace VGG::internal

@@ -17,6 +17,7 @@
 #include <unordered_set>
 #include "Application/Presenter.hpp"
 #include "Application/UIApplication.hpp"
+#include "Application/UIUpdateElementSerializer.hpp"
 #include "Application/VggEnv.hpp"
 #include "Controller.hpp"
 #include "Domain/Daruma.hpp"
@@ -658,6 +659,17 @@ bool VggSdk::setElementSize(
   if (const auto& p = presenter())
     return p->setElementSize(id, width, height, toUIAnimationOption(animation));
   return false;
+}
+
+int VggSdk::updateElementProperties(const std::string& updates, const AnimationOptions& animation)
+{
+  if (const auto& p = presenter())
+  {
+    const auto& j = nlohmann::json::parse(updates);
+    return p->updateElement(j, toUIAnimationOption(animation));
+  }
+
+  return 0;
 }
 
 } // namespace VGG

@@ -261,58 +261,6 @@ public:
     const std::vector<app::UpdateElementItem>& items,
     const app::UIAnimationOption&              option);
 
-  bool setElementFillEnabled(
-    const std::string&            id,
-    std::size_t                   index,
-    bool                          enabled,
-    const app::UIAnimationOption& animation);
-  bool setElementFillColor(
-    const std::string&            id,
-    std::size_t                   index,
-    float                         a,
-    float                         r,
-    float                         g,
-    float                         b,
-    const app::UIAnimationOption& animation);
-  bool setElementFillOpacity(
-    const std::string&            id,
-    std::size_t                   index,
-    float                         opacity,
-    const app::UIAnimationOption& animation);
-  bool setElementFillBlendMode(
-    const std::string&            id,
-    std::size_t                   index,
-    int                           mode,
-    const app::UIAnimationOption& animation);
-  bool setElementFillRotation(
-    const std::string&            id,
-    std::size_t                   index,
-    float                         degree,
-    const app::UIAnimationOption& animation);
-
-  bool setElementOpacity(
-    const std::string&            id,
-    float                         opacity,
-    const app::UIAnimationOption& animation);
-  bool setElementVisible(
-    const std::string&            id,
-    bool                          visible,
-    const app::UIAnimationOption& animation);
-  bool setElementMatrix(
-    const std::string&            id,
-    float                         a,
-    float                         b,
-    float                         c,
-    float                         d,
-    float                         tx,
-    float                         ty,
-    const app::UIAnimationOption& animation);
-  bool setElementSize(
-    const std::string&            id,
-    float                         width,
-    float                         height,
-    const app::UIAnimationOption& animation);
-
 protected:
   float     scale() const;
   glm::vec2 offset() const;

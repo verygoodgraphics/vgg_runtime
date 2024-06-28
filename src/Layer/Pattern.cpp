@@ -45,17 +45,17 @@ namespace VGG::layer
 
 std::string_view ShaderPattern::init(const std::string& guid)
 {
-  auto blob = loadBlob(guid);
-  if (!blob)
+  auto [image, count] = loadImageFromStack(guid, 0);
+  if (count > 0 && image)
   {
-    return "data not found"sv;
+    m_frames.resize(count);
+    m_imageInfo = image->imageInfo();
   }
-  m_codec = SkCodec::MakeFromData(blob);
-  if (!m_codec)
+  else
   {
-    return "failed to decode"sv;
+    return "error"sv;
   }
-  m_frames.resize(m_codec->getFrameCount());
+  m_guid = guid;
   return ""sv;
 }
 
@@ -66,7 +66,7 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternFit& p)
     return;
   }
 
-  SkImageInfo mi = m_codec->getInfo();
+  SkImageInfo mi = m_imageInfo;
   float       width = bounds.width();
   float       height = bounds.height();
   float       sx = (float)width / mi.width();
@@ -97,7 +97,7 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternFill& p)
     return;
   }
 
-  SkImageInfo mi = m_codec->getInfo();
+  SkImageInfo mi = m_imageInfo;
   float       width = bounds.width();
   float       height = bounds.height();
   float       sx = (float)width / mi.width();
@@ -127,7 +127,8 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternStretch& p)
   {
     return;
   }
-  SkImageInfo mi = m_codec->getInfo();
+
+  SkImageInfo mi = m_imageInfo;
   float       width = bounds.width();
   float       height = bounds.height();
   auto        m = glm::mat3{ 1.0 };
@@ -170,7 +171,6 @@ ShaderPattern::ShaderPattern(const Bounds& bounds, const PatternTile& p)
 
 sk_sp<SkShader> ShaderPattern::shader(int frame) const
 {
-  ASSERT(m_codec);
   ASSERT((int)m_frames.size() == frameCount());
   if (frame < 0 || frame >= frameCount())
   {
@@ -178,13 +178,10 @@ sk_sp<SkShader> ShaderPattern::shader(int frame) const
   }
   if (!m_frames[frame])
   {
-    SkImageInfo      ii = m_codec->getInfo();
-    SkCodec::Options options;
-    options.fFrameIndex = frame;
-    auto [img, res] = m_codec->getImage(ii, &options);
-    if (res != SkCodec::Result::kSuccess)
+    auto [img, total] = loadImageFromStack(m_guid, frame);
+    if (!img)
     {
-      VGG_LOG_DEV(LOG, Codec, "failed to decode frame {}. Error Code: {}", frame, (int)res);
+      VGG_LOG_DEV(LOG, Codec, "frame {} is null", frame);
       return nullptr;
     }
     auto shader = createShader(img, m_tileModeX, m_tileModeY, m_matrix, m_colorFilter);

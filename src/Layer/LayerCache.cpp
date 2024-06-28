@@ -16,6 +16,7 @@
 #include "LayerCache.h"
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/ResourceManager.hpp"
+#include <include/codec/SkCodec.h>
 #include <include/core/SkImage.h>
 
 namespace VGG::layer
@@ -36,6 +37,12 @@ ImageCache* getGlobalImageCache()
 {
   static ImageCache s_imageCache(40);
   return &s_imageCache;
+}
+
+ImageStackCache* getGlobalImageStackCache()
+{
+  static ImageStackCache s_imageStackCache(40);
+  return &s_imageStackCache;
 }
 
 ResourcesCache* getGlobalResourcesCache()
@@ -103,6 +110,68 @@ sk_sp<SkImage> loadImage(const std::string& imageGUID)
     }
   }
   return image;
+}
+
+std::pair<sk_sp<SkImage>, int> loadImageFromStack(const std::string& imageGUID, int i)
+{
+  if (imageGUID.empty())
+    return { nullptr, 0 };
+  sk_sp<SkImage> image;
+  int            totalCount = 0;
+  auto           imageCache = getGlobalImageStackCache();
+
+  auto decode = [&imageGUID](SkCodec* codec, int i) -> sk_sp<SkImage>
+  {
+    SkCodec::Options options;
+    options.fFrameIndex = i;
+    auto [img, res] = codec->getImage(codec->getInfo(), &options);
+    if (res != SkCodec::Result::kSuccess)
+    {
+      DEBUG("can not decode image [%d] %s", i, imageGUID.c_str());
+      return nullptr;
+    }
+    return img;
+  };
+
+  if (auto it = imageCache->find(imageGUID); it)
+  {
+    if (!it->first)
+      return { nullptr, 0 };
+    if (!it->second[i])
+    {
+      it->second[i] = decode(it->first.get(), i);
+    }
+    image = it->second[i];
+    totalCount = it->second.size();
+  }
+  else
+  {
+    if (auto repo = getGlobalResourceProvider(); repo)
+    {
+      if (auto data = repo->readData(imageGUID); data)
+      {
+        auto blob = loadBlob(imageGUID);
+        if (!blob)
+        {
+          return { nullptr, 0 };
+        }
+        auto                        codec = SkCodec::MakeFromData(blob);
+        std::vector<sk_sp<SkImage>> stack(codec->getFrameCount());
+        if (!stack[i])
+        {
+          stack[i] = decode(codec.get(), i);
+        }
+        image = stack[i];
+        totalCount = stack.size();
+        imageCache->insert(imageGUID, std::pair{ std::move(codec), std::move(stack) });
+      }
+      else
+      {
+        WARN("Cannot find %s from resources repository", imageGUID.c_str());
+      }
+    }
+  }
+  return { image, totalCount };
 }
 
 MaskMap* getMaskMap()

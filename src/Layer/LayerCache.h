@@ -21,6 +21,8 @@
 #include <core/SkImage.h>
 #include <effects/SkRuntimeEffect.h>
 
+class SkCodec;
+
 namespace VGG::layer
 {
 
@@ -34,14 +36,19 @@ using EffectCache = LRUCache<EffectCacheKey, sk_sp<SkRuntimeEffect>>;
 using ResourcesCache = LRUCache<ResourceGUID, sk_sp<SkData>>;
 using ImageCacheKey = std::string;
 using ImageCache = LRUCache<ImageCacheKey, sk_sp<SkImage>>;
+using ImageStackCache =
+  LRUCache<ImageCacheKey, std::pair<std::unique_ptr<SkCodec>, std::vector<sk_sp<SkImage>>>>;
 
 using MaskMap = std::unordered_map<std::string, WeakRef<PaintNode>>;
 
-BlenderCache*   getGlobalBlenderCache();
-EffectCache*    getGlobalEffectCache();
-ImageCache*     getGlobalImageCache();
-ResourcesCache* getGlobalResourcesCache();
-sk_sp<SkImage>  loadImage(const std::string& imageGUID); // DEPRECATED
+BlenderCache*    getGlobalBlenderCache();
+EffectCache*     getGlobalEffectCache();
+ImageCache*      getGlobalImageCache();
+ResourcesCache*  getGlobalResourcesCache();
+ImageStackCache* getGlobalImageStackCache();
+sk_sp<SkImage>   loadImage(const std::string& imageGUID); // DEPRECATED
+
+std::pair<sk_sp<SkImage>, int> loadImageFromStack(const std::string& imageGUID, int i);
 
 sk_sp<SkData> loadBlob(const std::string& guid);
 

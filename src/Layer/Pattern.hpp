@@ -23,6 +23,34 @@
 namespace VGG::layer
 {
 
+class CodecProxy
+{
+public:
+  CodecProxy(const std::string& guid)
+  {
+  }
+
+  int getFrameCount() const
+  {
+    return m_codec->getFrameCount();
+  }
+
+  std::tuple<sk_sp<SkImage>, SkCodec::Result> getImage(
+    const SkImageInfo&      info,
+    const SkCodec::Options* opts = nullptr)
+  {
+    return m_codec->getImage(info, opts);
+  }
+
+  SkImageInfo getInfo() const
+  {
+    return m_codec->getInfo();
+  }
+
+private:
+  std::unique_ptr<SkCodec> m_codec;
+};
+
 class ShaderPattern
 {
 public:
@@ -39,12 +67,12 @@ public:
 
   bool isValid() const
   {
-    return m_codec != nullptr;
+    return !m_frames.empty();
   }
 
   int frameCount() const
   {
-    return m_codec->getFrameCount();
+    return m_frames.size();
   }
 
   sk_sp<SkShader> shader(int frame = 0) const;
@@ -52,11 +80,11 @@ public:
 private:
   std::string_view                     init(const std::string& guid);
   mutable std::vector<sk_sp<SkShader>> m_frames;
-
-  std::unique_ptr<SkCodec> m_codec;
-  SkMatrix                 m_matrix;
-  sk_sp<SkColorFilter>     m_colorFilter;
-  SkTileMode               m_tileModeX, m_tileModeY;
+  SkImageInfo                          m_imageInfo;
+  std::string                          m_guid;
+  SkMatrix                             m_matrix;
+  sk_sp<SkColorFilter>                 m_colorFilter;
+  SkTileMode                           m_tileModeX, m_tileModeY;
 };
 
 } // namespace VGG::layer

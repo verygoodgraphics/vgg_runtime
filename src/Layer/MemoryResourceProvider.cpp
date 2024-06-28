@@ -18,6 +18,7 @@
 #include "Layer/LayerCache.h"
 #include <core/SkData.h>
 #include <core/SkImage.h>
+#include <codec/SkCodec.h>
 
 namespace VGG::layer
 {
@@ -26,13 +27,13 @@ MemoryResourceProvider::MemoryResourceProvider(
   std::unordered_map<std::string, std::vector<char>> data)
   : m_data(std::move(data))
 {
-  getGlobalImageCache()->purge();
+  getGlobalImageStackCache()->purge();
 }
 
 void MemoryResourceProvider::purge()
 {
   m_data.clear();
-  getGlobalImageCache()->purge();
+  getGlobalImageStackCache()->purge();
 }
 
 Blob MemoryResourceProvider::readData(std::string_view guid)

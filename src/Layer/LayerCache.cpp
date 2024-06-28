@@ -33,12 +33,6 @@ EffectCache* getGlobalEffectCache()
   return &s_blenderCache;
 }
 
-ImageCache* getGlobalImageCache()
-{
-  static ImageCache s_imageCache(40);
-  return &s_imageCache;
-}
-
 ImageStackCache* getGlobalImageStackCache()
 {
   static ImageStackCache s_imageStackCache(40);
@@ -76,40 +70,6 @@ sk_sp<SkData> loadBlob(const std::string& guid)
     }
   }
   return nullptr;
-}
-
-sk_sp<SkImage> loadImage(const std::string& imageGUID)
-{
-  sk_sp<SkImage> image;
-  if (imageGUID.empty())
-    return image;
-  auto imageCache = getGlobalImageCache();
-  if (auto it = imageCache->find(imageGUID); it)
-  {
-    image = *it;
-  }
-  else
-  {
-    if (auto repo = getGlobalResourceProvider(); repo)
-    {
-      if (auto data = repo->readData(imageGUID); data)
-      {
-        sk_sp<SkImage> skImage = SkImages::DeferredFromEncodedData(data);
-        if (!skImage)
-        {
-          WARN("Make SkImage failed.");
-          return image;
-        }
-        imageCache->insert(imageGUID, skImage);
-        image = skImage;
-      }
-      else
-      {
-        WARN("Cannot find %s from resources repository", imageGUID.c_str());
-      }
-    }
-  }
-  return image;
 }
 
 std::pair<sk_sp<SkImage>, int> loadImageFromStack(const std::string& imageGUID, int i)

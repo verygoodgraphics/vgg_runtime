@@ -23,34 +23,6 @@
 namespace VGG::layer
 {
 
-class CodecProxy
-{
-public:
-  CodecProxy(const std::string& guid)
-  {
-  }
-
-  int getFrameCount() const
-  {
-    return m_codec->getFrameCount();
-  }
-
-  std::tuple<sk_sp<SkImage>, SkCodec::Result> getImage(
-    const SkImageInfo&      info,
-    const SkCodec::Options* opts = nullptr)
-  {
-    return m_codec->getImage(info, opts);
-  }
-
-  SkImageInfo getInfo() const
-  {
-    return m_codec->getInfo();
-  }
-
-private:
-  std::unique_ptr<SkCodec> m_codec;
-};
-
 class ShaderPattern
 {
 public:

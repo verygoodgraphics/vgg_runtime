@@ -27,41 +27,24 @@ ImageItem::ImageItem(VRefCnt* cnt, StyleItem* object)
   : GraphicItem(cnt)
 {
   m_imageShape = ShapeAttributeImpl::Make();
+  m_brush = Brush::Make();
+  Pattern patt;
+  patt.instance = PatternStretch{};
+  m_brush->setBrush(std::move(patt));
   observe(m_imageShape);
+  observe(m_brush);
 }
 
 void ImageItem::render(Renderer* renderer)
 {
   DEBUG("render image");
-  // auto parent = m_styleItem.lock();
-  if (m_imageShader)
-  {
-    auto    canvas = renderer->canvas();
-    SkPaint p;
-    p.setShader(m_imageShader);
-    canvas->drawPaint(p);
-  }
-  ASSERT(m_imageShape);
-  // if (auto shape = m_imageShape->getShape(); !shape.isEmpty() && parent)
-  // {
-  //   const auto skBounds = toSkRect(m_imageBounds);
-  //   VGG::layer::drawBorder(renderer, shape, skBounds, parent->getBorderStyle(), 0);
-  // }
-  // else
-  // {
-  //   DEBUG("failed to get image border or shape");
-  // };
+  auto canvas = renderer->canvas();
+  canvas->drawPaint(m_brush->paint(getImageBounds()));
 }
 
-Bounds ImageItem::onRevalidate(Revalidation* inv, const glm::mat3 & mat)
+Bounds ImageItem::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
-  if (!m_imageShader)
-  {
-    m_imageShader = makeStretchPattern(m_imageBounds, m_imagePattern);
-    VGG_LAYER_DEBUG_CODE(if (!m_imageShader) {
-      DEBUG("failed to create image shader for %s", m_imagePattern.guid.c_str());
-    });
-  }
+  m_brush->revalidate();
   return m_imageBounds;
 }
 

@@ -18,9 +18,11 @@
 #include "ShapeAttribute.hpp"
 #include "GraphicItem.hpp"
 #include "ObjectAttribute.hpp"
+#include "PenNode.hpp"
 
 #include "Layer/Core/Attrs.hpp"
 #include <any>
+#include <variant>
 
 namespace VGG::layer
 {
@@ -42,28 +44,32 @@ public:
 
   void setImageGUID(const std::string& guid)
   {
-    if (guid == m_imagePattern.guid)
-      return;
-    m_imagePattern.guid = guid;
-    this->invalidate();
+    Pattern        patt;
+    PatternStretch ps;
+    ps.guid = guid;
+    ps.imageFilter = getImageFilter();
+    patt.instance = ps;
+    m_brush->setBrush(std::move(patt));
   }
 
   const std::string& getImageGUID() const
   {
-    return m_imagePattern.guid;
+    return pattern().guid;
   }
 
   void setImageFilter(const ImageFilter& filter)
   {
-    if (filter == m_imagePattern.imageFilter)
-      return;
-    m_imagePattern.imageFilter = filter;
-    this->invalidate();
+    Pattern        patt;
+    PatternStretch ps;
+    ps.guid = getImageGUID();
+    ps.imageFilter = filter;
+    patt.instance = ps;
+    m_brush->setBrush(std::move(patt));
   }
 
   const ImageFilter& getImageFilter() const
   {
-    return m_imagePattern.imageFilter;
+    return pattern().imageFilter;
   }
 
   void setImageBounds(const Bounds& bounds)
@@ -87,13 +93,16 @@ public:
   }
 
   VGG_CLASS_MAKE(ImageItem);
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
 
 private:
-  // WeakRef<StyleItem>      m_styleItem;
+  const PatternStretch& pattern() const
+  {
+    return std::get<PatternStretch>(std::get<Pattern>(m_brush->getBrush()).instance);
+  }
+
   Ref<ShapeAttributeImpl> m_imageShape;
-  sk_sp<SkShader>         m_imageShader;
-  PatternStretch          m_imagePattern;
   Bounds                  m_imageBounds;
+  Ref<Brush>              m_brush;
 };
 } // namespace VGG::layer

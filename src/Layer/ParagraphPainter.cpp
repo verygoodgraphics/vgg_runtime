@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 #include "ParagraphPainter.hpp"
+#include "Layer/Core/Attrs.hpp"
+#include "Layer/Pattern.hpp"
 #include "VSkia.hpp"
 #include "Effects.hpp"
 
@@ -84,7 +86,24 @@ void VParagraphPainter::drawTextBlob(
             },
             [&](const Pattern& p, const ContextSetting& st)
             {
-              fillPen.setShader(makePatternShader(m_paragraph->bounds(), p));
+              sk_sp<SkShader> shader;
+              if (auto ip = std::get_if<PatternFit>(&p.instance); ip)
+              {
+                shader = ShaderPattern(m_paragraph->bounds(), *ip).shader(0);
+              }
+              else if (auto ip = std::get_if<PatternStretch>(&p.instance); ip)
+              {
+                shader = ShaderPattern(m_paragraph->bounds(), *ip).shader(0);
+              }
+              else if (auto ip = std::get_if<PatternTile>(&p.instance); ip)
+              {
+                shader = ShaderPattern(m_paragraph->bounds(), *ip).shader(0);
+              }
+              else if (auto ip = std::get_if<PatternFill>(&p.instance); ip)
+              {
+                shader = ShaderPattern(m_paragraph->bounds(), *ip).shader(0);
+              }
+              fillPen.setShader(shader);
               fillPen.setAlphaf(st.opacity);
             });
           paints.push_back(fillPen);

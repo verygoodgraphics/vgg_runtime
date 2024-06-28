@@ -45,10 +45,6 @@ public:
 };
 
 sk_sp<SkColorFilter> makeColorFilter(const ImageFilter& imageFilter);
-sk_sp<SkShader>      makeFitPattern(const Bounds& bounds, const PatternFit& p);
-sk_sp<SkShader>      makeFillPattern(const Bounds& bounds, const PatternFill& p);
-sk_sp<SkShader>      makeStretchPattern(const Bounds& bounds, const PatternStretch& p);
-sk_sp<SkShader>      makeTilePattern(const Bounds& bounds, const PatternTile& p);
 sk_sp<SkShader>      makeGradientLinear(const Bounds& bounds, const GradientLinear& g);
 
 sk_sp<SkImageFilter>   makeMotionBlurFilter(const MotionBlur& blur);
@@ -71,18 +67,6 @@ inline sk_sp<SkBlender> getMaskBlender(EAlphaMaskType type)
   }
   DEBUG("No corresponding mask blender");
   return nullptr;
-}
-
-inline sk_sp<SkShader> makePatternShader(const Bounds& bounds, const Pattern& pattern)
-{
-  sk_sp<SkShader> shader;
-  std::visit(
-    Overloaded{ [&](const PatternFill& p) { shader = makeFillPattern(bounds, p); },
-                [&](const PatternFit& p) { shader = makeFitPattern(bounds, p); },
-                [&](const PatternStretch& p) { shader = makeStretchPattern(bounds, p); },
-                [&](const PatternTile& p) { shader = makeTilePattern(bounds, p); } },
-    pattern.instance);
-  return shader;
 }
 
 inline SkMatrix makeMatrix(
@@ -325,13 +309,6 @@ sk_sp<SkImageFilter> makeDropShadowImageFilter(
   const Bounds&        bounds,
   bool                 overrideSpread,
   sk_sp<SkImageFilter> input);
-
-SkRect drawBorder(
-  Renderer*                  renderer,
-  const VShape&              border,
-  const SkRect&              bounds,
-  const std::vector<Border>& borders,
-  sk_sp<SkBlender>           blender);
 
 class GraphicItemEffectNode : public EffectNode
 {

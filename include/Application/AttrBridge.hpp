@@ -32,6 +32,7 @@ class NumberAnimate;
 class ReplaceNodeAnimate;
 class AnimateManage;
 struct Color;
+struct ImageFilter;
 // enum EBlendMode;
 
 namespace layer
@@ -45,6 +46,7 @@ namespace Model
 struct Object;
 struct Fill;
 struct Color;
+struct ImageFilters;
 } // namespace Model
 
 typedef std::array<double, 6> TDesignMatrix;
@@ -123,6 +125,19 @@ public:
     std::string                 newName,
     bool                        isOnlyUpdatePaint,
     bool                        effectOnFill);
+
+  // for patternImageFill.imageFilters
+  // for patternImageStretch.imageFilters
+  // for patternImageFit.imageFilters
+  // for patternImageTile.imageFilters
+  bool updatePatternImageFilters(
+    std::shared_ptr<LayoutNode>        node,
+    layer::PaintNode*                  paintNode,
+    size_t                             index,
+    std::optional<Model::ImageFilters> imageFilters,
+    bool                               isOnlyUpdatePaint,
+    bool                               effectOnFill,
+    std::shared_ptr<NumberAnimate>     animate = {});
 
   // for patternImageFill.rotation
   bool updatePatternImageFillRotation(
@@ -211,6 +226,7 @@ public:
 public:
   layer::PaintNode*       getPaintNode(std::shared_ptr<LayoutNode> node);
   std::shared_ptr<UIView> getView();
+  static Model::Object*   getlayoutNodeObject(std::shared_ptr<LayoutNode> node);
 
 public:
   static std::optional<size_t>      getFillSize(layer::PaintNode* node);
@@ -225,7 +241,11 @@ public:
     layer::PaintNode* node,
     size_t            index,
     bool              effectOnFill);
-  static std::optional<double> getPatternImageFillRotation(
+  static std::optional<VGG::ImageFilter> getPatternImageFilters(
+    layer::PaintNode* node,
+    size_t            index,
+    bool              effectOnFill);
+  static std::optional<double> getPatternImageFillRotation( // TODO wait change.
     layer::PaintNode* node,
     size_t            index,
     bool              effectOnFill);
@@ -265,6 +285,17 @@ private:
     size_t             index,
     const std::string& newName,
     bool               effectOnFill);
+
+  static void setPatternImageFilters(
+    std::shared_ptr<LayoutNode> node,
+    size_t                      index,
+    const std::vector<double>&  value,
+    bool                        effectOnFill);
+  static void setPatternImageFilters(
+    layer::PaintNode*          node,
+    size_t                     index,
+    const std::vector<double>& value,
+    bool                       effectOnFill);
 
   static void setPatternImageFillRotation(
     std::shared_ptr<LayoutNode> node,
@@ -313,8 +344,6 @@ private:
     const std::vector<double>&                      to,
     std::function<void(const std::vector<double>&)> update,
     std::shared_ptr<NumberAnimate>                  animate);
-
-  static Model::Object* getlayoutNodeObject(std::shared_ptr<LayoutNode> node);
 
 private:
   std::shared_ptr<UIView> m_view;

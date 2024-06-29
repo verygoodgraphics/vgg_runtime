@@ -42,12 +42,6 @@ const std::map<int, VGG::EBlendMode> g_blendMode{
   { 27, VGG::BM_PASS_THROUGHT }
 };
 
-AttrBridge::AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManage)
-  : m_view(view)
-  , m_animateManage(animateManage)
-{
-}
-
 #define CHECK_EXPR(expr, resultWhenFailed)                                                         \
   if (!(expr))                                                                                     \
   {                                                                                                \
@@ -58,6 +52,98 @@ AttrBridge::AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManag
   CHECK_EXPR(node, resultWhenFailed)                                                               \
   auto accessor = node->attributeAccessor();                                                       \
   CHECK_EXPR(accessor, resultWhenFailed)
+
+template<typename T>
+bool getPatternAttr(layer::PaintNode* node, size_t index, bool effectOnFill, T fun)
+{
+  GET_PAINTNODE_ACCESSOR(node, accessor, false);
+
+  if (effectOnFill)
+  {
+    if (index >= *AttrBridge::getFillSize(node))
+    {
+      return false;
+    }
+
+    auto& pattern = std::get<VGG::Pattern>(accessor->getFills().at(index).type);
+    std::visit(fun, pattern.instance);
+  }
+  else
+  {
+    // TODO not complete.
+    return false;
+  }
+
+  return true;
+}
+
+template<typename T>
+void setLayoutNodePatternAttr(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  bool                        effectOnFill,
+  T                           fun)
+{
+  if (auto object = AttrBridge::getlayoutNodeObject(node))
+  {
+    if (effectOnFill)
+    {
+      if (index >= object->style.fills.size())
+      {
+        return;
+      }
+
+      auto& pattern = object->style.fills.at(index).pattern;
+      if (!pattern)
+      {
+        return;
+      }
+
+      std::visit(fun, pattern->instance);
+    }
+    else
+    {
+      // TODO not complete
+    }
+  }
+}
+
+template<typename T>
+void setPaintNodePatternAttr(layer::PaintNode* node, size_t index, bool effectOnFill, T fun)
+{
+  GET_PAINTNODE_ACCESSOR(node, accessor, void());
+
+  if (effectOnFill)
+  {
+    auto fills = accessor->getFills();
+    if (index >= fills.size())
+    {
+      return;
+    }
+
+    try
+    {
+      auto& pattern = std::get<VGG::Pattern>(fills.at(index).type);
+      std::visit(fun, pattern.instance);
+    }
+    catch (...)
+    {
+      return;
+    }
+
+    accessor->setFills(fills);
+  }
+  else
+  {
+    // TODO not complete
+  }
+}
+
+AttrBridge::AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManage)
+  : m_view(view)
+  , m_animateManage(animateManage)
+{
+}
 
 std::optional<VGG::Color> AttrBridge::getFillColor(layer::PaintNode* node, size_t index)
 {
@@ -201,26 +287,33 @@ std::optional<std::string> AttrBridge::getPatternImageFileName(
   size_t            index,
   bool              effectOnFill)
 {
-  GET_PAINTNODE_ACCESSOR(node, accessor, {});
+  std::string name;
 
-  if (effectOnFill)
+  if (!getPatternAttr(node, index, effectOnFill, [&name](auto&& arg) { name = arg.guid; }))
   {
-    if (index >= *getFillSize(node))
-    {
-      return {};
-    }
-
-    auto& pattern = std::get<VGG::Pattern>(accessor->getFills().at(index).type);
-
-    std::string name;
-    std::visit([&name](auto&& arg) { name = arg.guid; }, pattern.instance);
-    return name;
-  }
-  else
-  {
-    // TODO not complete.
     return {};
   }
+
+  return name;
+}
+
+std::optional<VGG::ImageFilter> AttrBridge::getPatternImageFilters(
+  layer::PaintNode* node,
+  size_t            index,
+  bool              effectOnFill)
+{
+  VGG::ImageFilter filter;
+
+  if (!getPatternAttr(
+        node,
+        index,
+        effectOnFill,
+        [&filter](auto&& arg) { filter = arg.imageFilter; }))
+  {
+    return {};
+  }
+
+  return filter;
 }
 
 std::optional<double> AttrBridge::getPatternImageFillRotation(
@@ -436,43 +529,23 @@ void AttrBridge::setPatternImageFileName(
   const std::string&          newName,
   bool                        effectOnFill)
 {
-  if (auto object = AttrBridge::getlayoutNodeObject(node))
-  {
-    if (effectOnFill)
+  setLayoutNodePatternAttr(
+    node,
+    index,
+    effectOnFill,
+    [&newName](auto&& arg)
     {
-      if (index >= object->style.fills.size())
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (
+        std::is_same_v<T, std::monostate> || std::is_same_v<T, VGG::Model::PatternLayerInstance>)
       {
-        return;
+        assert(false);
       }
-
-      auto& pattern = object->style.fills.at(index).pattern;
-      if (!pattern)
+      else
       {
-        return;
+        arg.imageFileName = newName;
       }
-
-      std::visit(
-        [&newName](auto&& arg)
-        {
-          using T = std::decay_t<decltype(arg)>;
-          if constexpr (
-            std::is_same_v<T, std::monostate> ||
-            std::is_same_v<T, VGG::Model::PatternLayerInstance>)
-          {
-            assert(false);
-          }
-          else
-          {
-            arg.imageFileName = newName;
-          }
-        },
-        pattern->instance);
-    }
-    else
-    {
-      // TODO not complete
-    }
-  }
+    });
 }
 
 void AttrBridge::setPatternImageFileName(
@@ -481,32 +554,11 @@ void AttrBridge::setPatternImageFileName(
   const std::string& newName,
   bool               effectOnFill)
 {
-  GET_PAINTNODE_ACCESSOR(node, accessor, void());
-
-  if (effectOnFill)
-  {
-    auto fills = accessor->getFills();
-    if (index >= fills.size())
-    {
-      return;
-    }
-
-    try
-    {
-      auto& pattern = std::get<VGG::Pattern>(fills.at(index).type);
-      std::visit([&newName](auto&& arg) { arg.guid = newName; }, pattern.instance);
-    }
-    catch (...)
-    {
-      return;
-    }
-
-    accessor->setFills(fills);
-  }
-  else
-  {
-    // TODO not complete
-  }
+  setPaintNodePatternAttr(
+    node,
+    index,
+    effectOnFill,
+    [&newName](auto&& arg) { arg.guid = newName; });
 }
 
 void AttrBridge::setPatternImageFillRotation(
@@ -544,6 +596,74 @@ void AttrBridge::setPatternImageFillRotation(
       // TODO not complete
     }
   }
+}
+
+void AttrBridge::setPatternImageFilters(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  const std::vector<double>&  value,
+  bool                        effectOnFill)
+{
+  setLayoutNodePatternAttr(
+    node,
+    index,
+    effectOnFill,
+    [value](auto&& arg)
+    {
+      assert(value.size() == 8);
+
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (
+        std::is_same_v<T, std::monostate> || std::is_same_v<T, VGG::Model::PatternLayerInstance>)
+      {
+        assert(false);
+      }
+      else
+      {
+        int   i = 0;
+        auto& filter = arg.imageFilters;
+        if (!filter)
+        {
+          filter = VGG::Model::ImageFilters();
+        }
+        filter->exposure = value.at(i++);
+        filter->contrast = value.at(i++);
+        filter->saturation = value.at(i++);
+        filter->temperature = value.at(i++);
+        filter->tint = value.at(i++);
+        filter->highlights = value.at(i++);
+        filter->shadows = value.at(i++);
+        filter->hue = value.at(i++);
+        filter->isEnabled = true;
+      }
+    });
+}
+
+void AttrBridge::setPatternImageFilters(
+  layer::PaintNode*          node,
+  size_t                     index,
+  const std::vector<double>& value,
+  bool                       effectOnFill)
+{
+  setPaintNodePatternAttr(
+    node,
+    index,
+    effectOnFill,
+    [&value](auto&& arg)
+    {
+      assert(value.size() == 8);
+
+      int   i = 0;
+      auto& filter = arg.imageFilter;
+      filter.exposure = static_cast<float>(value.at(i++));
+      filter.contrast = static_cast<float>(value.at(i++));
+      filter.saturation = static_cast<float>(value.at(i++));
+      filter.temperature = static_cast<float>(value.at(i++));
+      filter.tint = static_cast<float>(value.at(i++));
+      filter.highlight = static_cast<float>(value.at(i++));
+      filter.shadow = static_cast<float>(value.at(i++));
+      filter.hue = static_cast<float>(value.at(i++));
+    });
 }
 
 void AttrBridge::setPatternImageFillRotation(
@@ -1051,6 +1171,66 @@ bool AttrBridge::updateFillBlendMode(
 
   AttrBridge::setFillBlendMode(paintNode, index, blendMode->second);
   return true;
+}
+
+bool AttrBridge::updatePatternImageFilters(
+  std::shared_ptr<LayoutNode>        node,
+  layer::PaintNode*                  paintNode,
+  size_t                             index,
+  std::optional<Model::ImageFilters> imageFilters,
+  bool                               isOnlyUpdatePaint,
+  bool                               effectOnFill,
+  std::shared_ptr<NumberAnimate>     animate)
+{
+  GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
+
+  if (effectOnFill)
+  {
+    if (index >= *AttrBridge::getFillSize(paintNode))
+    {
+      return false;
+    }
+
+    auto update = [node, paintNode, index, isOnlyUpdatePaint](const std::vector<double>& value)
+    {
+      assert(value.size() == 8);
+
+      if (!isOnlyUpdatePaint)
+      {
+        AttrBridge::setPatternImageFilters(node, index, value, true);
+      }
+
+      AttrBridge::setPatternImageFilters(paintNode, index, value, true);
+    };
+
+    auto                nowFilter = *getPatternImageFilters(paintNode, index, true);
+    std::vector<double> oldValue{ nowFilter.exposure,    nowFilter.contrast, nowFilter.saturation,
+                                  nowFilter.temperature, nowFilter.tint,     nowFilter.highlight,
+                                  nowFilter.shadow,      nowFilter.hue };
+
+    std::vector<double> newValue(8);
+    if (imageFilters && imageFilters->isEnabled)
+    {
+      int i = 0;
+      newValue.at(i++) = imageFilters->exposure ? *imageFilters->exposure : 0;
+      newValue.at(i++) = imageFilters->contrast ? *imageFilters->contrast : 0;
+      newValue.at(i++) = imageFilters->saturation ? *imageFilters->saturation : 0;
+      newValue.at(i++) = imageFilters->temperature ? *imageFilters->temperature : 0;
+      newValue.at(i++) = imageFilters->tint ? *imageFilters->tint : 0;
+      newValue.at(i++) = imageFilters->highlights ? *imageFilters->highlights : 0;
+      newValue.at(i++) = imageFilters->shadows ? *imageFilters->shadows : 0;
+      newValue.at(i++) = imageFilters->hue ? *imageFilters->hue : 0;
+    }
+
+    updateSimpleAttr(oldValue, newValue, update, animate);
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
 }
 
 bool AttrBridge::updatePatternImageFillRotation(

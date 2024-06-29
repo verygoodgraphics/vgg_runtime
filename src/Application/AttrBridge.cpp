@@ -26,6 +26,8 @@
 #include "Layer/Memory/Ref.hpp"
 #include "Layer/Model/StructModel.hpp"
 #include "Layer/SceneBuilder.hpp"
+#include "Layer/Model/StructModelSerde.hpp"
+#include "Layer/CoordinateConvert.hpp"
 #include <map>
 
 using namespace VGG;
@@ -47,7 +49,7 @@ AttrBridge::AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManag
 }
 
 #define CHECK_EXPR(expr, resultWhenFailed)                                                         \
-  if (!expr)                                                                                       \
+  if (!(expr))                                                                                     \
   {                                                                                                \
     return resultWhenFailed;                                                                       \
   }
@@ -644,6 +646,119 @@ layer::PaintNode* AttrBridge::getPaintNode(std::shared_ptr<LayoutNode> node)
 std::shared_ptr<UIView> AttrBridge::getView()
 {
   return m_view;
+}
+
+bool AttrBridge::addFill(
+  std::shared_ptr<LayoutNode> node,
+  layer::PaintNode*           paintNode,
+  const VGG::Model::Fill&     value,
+  bool                        isOnlyUpdatePaint,
+  size_t                      index)
+{
+  CHECK_EXPR(paintNode, false);
+  GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
+
+  auto size = *getFillSize(paintNode);
+  if (index == -1)
+  {
+    index = size;
+  }
+
+  if (index > size)
+  {
+    return false;
+  }
+
+  // for LayoutNode
+  if (!isOnlyUpdatePaint)
+  {
+    auto object = AttrBridge::getlayoutNodeObject(node);
+    if (!object || index > object->style.fills.size())
+    {
+      return false;
+    }
+    else
+    {
+      auto& fills = object->style.fills;
+      fills.insert(fills.begin() + index, value);
+    }
+  }
+
+  // For PaintNode
+  {
+    auto fills = accessor->getFills();
+    fills.insert(fills.begin() + index, VGG::Fill());
+    VGG::layer::serde::serde_from(value, fills.at(index));
+
+    auto id = fills.at(index).type.index();
+    if (!id || 1 == id)
+    {
+      auto matrix = paintNode->getTransform().matrix();
+      TransformHelper::changeYDirection(matrix);
+
+      if (!id)
+      {
+        VGG::layer::CoordinateConvert::convertCoordinateSystem(
+          std::get<VGG::Gradient>(fills.at(index).type),
+          matrix);
+      }
+      else
+      {
+        VGG::layer::CoordinateConvert::convertCoordinateSystem(
+          std::get<VGG::Pattern>(fills.at(index).type),
+          matrix);
+      }
+    }
+
+    accessor->setFills(fills);
+  }
+
+  return true;
+}
+
+bool AttrBridge::delFill(
+  std::shared_ptr<LayoutNode> node,
+  layer::PaintNode*           paintNode,
+  bool                        isOnlyUpdatePaint,
+  size_t                      index)
+{
+  CHECK_EXPR(paintNode, false);
+  GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
+
+  auto size = *getFillSize(paintNode);
+  if (index == -1)
+  {
+    index = size - 1;
+  }
+
+  if (index >= size)
+  {
+    return false;
+  }
+
+  // for LayoutNode
+  if (!isOnlyUpdatePaint)
+  {
+    auto object = AttrBridge::getlayoutNodeObject(node);
+    if (!object || index >= object->style.fills.size())
+    {
+      return false;
+    }
+    else
+    {
+      auto& fills = object->style.fills;
+      fills.erase(fills.begin() + index);
+    }
+  }
+
+  // For PaintNode
+  {
+    auto fills = accessor->getFills();
+    fills.erase(fills.begin() + index);
+    accessor->setFills(fills);
+  }
+
+  return true;
 }
 
 bool AttrBridge::updateFillEnabled(

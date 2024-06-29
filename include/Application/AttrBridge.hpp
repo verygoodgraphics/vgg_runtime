@@ -43,6 +43,7 @@ class Accessor;
 namespace Model
 {
 struct Object;
+struct Fill;
 struct Color;
 } // namespace Model
 
@@ -58,6 +59,23 @@ public:
   AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManage);
 
 public:
+  // index equal -1 means push back.
+  // The updateFillEnabled interface can be used to enhance the animation capabilities.
+  bool addFill(
+    std::shared_ptr<LayoutNode> node,
+    layer::PaintNode*           paintNode,
+    const VGG::Model::Fill&     value,
+    bool                        isOnlyUpdatePaint,
+    size_t                      index = -1);
+
+  // index equal -1 means delete back.
+  // The updateFillEnabled interface can be used to enhance the animation capabilities.
+  bool delFill(
+    std::shared_ptr<LayoutNode> node,
+    layer::PaintNode*           paintNode,
+    bool                        isOnlyUpdatePaint,
+    size_t                      index = -1);
+
   // for fill.isEnabled
   bool updateFillEnabled(
     std::shared_ptr<LayoutNode>    node,

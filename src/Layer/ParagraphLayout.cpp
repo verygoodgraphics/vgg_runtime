@@ -23,6 +23,7 @@
 #include "VSkia.hpp"
 
 #include <algorithm>
+#include <core/SkColor.h>
 #include <core/SkFontArguments.h>
 #include <core/SkFontStyle.h>
 #include <core/SkTypes.h>
@@ -38,12 +39,31 @@ namespace
 {
 using namespace VGG::layer;
 using namespace VGG;
+constexpr SkScalar WEIGHT[] = { SkFontStyle::kInvisible_Weight,  SkFontStyle::kThin_Weight,
+                                SkFontStyle::kExtraLight_Weight, SkFontStyle::kLight_Weight,
+                                SkFontStyle::kNormal_Weight,     SkFontStyle::kMedium_Weight,
+                                SkFontStyle::kSemiBold_Weight,   SkFontStyle::kExtraBold_Weight,
+                                SkFontStyle::kBlack_Weight,      SkFontStyle::kExtraBlack_Weight };
+
+SkFontStyle::Weight skFontStyleWeightForWeightAxisValue(SkScalar weight)
+{
+  const int w = SkScalarRoundToInt(SkScalarInterpFunc(weight, WEIGHT, WEIGHT, 10));
+  return static_cast<SkFontStyle::Weight>(w);
+}
+
 float findWeight(std::string_view key)
 {
   static std::vector<std::pair<std::string_view, float>> s_fontWeightMap = {
-    { "ExtraBlack", 1000 }, { "Black", 900 },  { "ExtraBold", 800 },  { "SemiBold", 600 },
-    { "Bold", 700 },        { "Medium", 500 }, { "ExtraLight", 200 }, { "Light", 300 },
-    { "Thin", 100 },        { "Regular", 400 }
+    { "extrablack", SkFontStyle::kExtraBlack_Weight },
+    { "black", SkFontStyle::kBlack_Weight },
+    { "extrabold", SkFontStyle::kExtraBold_Weight },
+    { "semibold", SkFontStyle::kSemiBold_Weight },
+    { "bold", SkFontStyle::kBold_Weight },
+    { "medium", SkFontStyle::kMedium_Weight },
+    { "extralight", SkFontStyle::kExtraLight_Weight },
+    { "light", SkFontStyle::kLight_Weight },
+    { "thin", SkFontStyle::kThin_Weight },
+    { "regular", SkFontStyle::kNormal_Weight }
   };
   for (const auto& [k, v] : s_fontWeightMap)
   {
@@ -58,9 +78,9 @@ float findWeight(std::string_view key)
 float findWidth(std::string_view key)
 {
   static std::vector<std::pair<std::string_view, float>> s_fontWidthMap = {
-    { "SemiCondensed", 87.5 }, { "SemiExpanded", 112.5 },  { "ExtraExpanded", 150 },
-    { "UltraExpanded", 200 },  { "ExtraCondensed", 62.5 }, { "UltraCondensed", 50 },
-    { "Expanded", 125 },       { "Condensed", 75 }
+    { "semicondensed", 87.5 }, { "semiexpanded", 112.5 },  { "extraexpanded", 150 },
+    { "ultraexpanded", 200 },  { "extracondensed", 62.5 }, { "ultracondensed", 50 },
+    { "expanded", 125 },       { "condensed", 75 }
   };
   for (const auto& [k, v] : s_fontWidthMap)
   {
@@ -75,16 +95,22 @@ float findWidth(std::string_view key)
 std::pair<SkFontStyle, std::vector<Font::Axis>> toSkFontStyle(const Font& font)
 {
   std::string subFamilyName;
-  std::remove_copy(
+  // std::remove_copy(
+  //   font.subFamilyName.begin(),
+  //   font.subFamilyName.end(),
+  //   std::back_inserter(subFamilyName),
+  //   ' ');
+
+  std::transform(
     font.subFamilyName.begin(),
     font.subFamilyName.end(),
     std::back_inserter(subFamilyName),
-    ' ');
+    [](char c) { return std::tolower(c); });
 
   SkFontStyle::Slant slant = SkFontStyle::kUpright_Slant;
   if (
-    subFamilyName.find("Italic") != std::string::npos ||
-    font.fontName.find("Italic") != std::string::npos)
+    subFamilyName.find("italic") != std::string::npos ||
+    font.fontName.find("italic") != std::string::npos)
     slant = SkFontStyle::kItalic_Slant;
 
   static struct
@@ -103,8 +129,9 @@ std::pair<SkFontStyle, std::vector<Font::Axis>> toSkFontStyle(const Font& font)
   }
   finalAxis.insert(finalAxis.end(), font.axis.begin(), font.axis.end());
 
-  SkFontStyle::Weight weight = (SkFontStyle::Weight)Font::axisValue(finalAxis, Font::wght).value();
-  SkFontStyle::Width  width = SkFontDescriptor::SkFontStyleWidthForWidthAxisValue(
+  SkFontStyle::Weight weight =
+    skFontStyleWeightForWeightAxisValue(Font::axisValue(finalAxis, Font::wght).value());
+  SkFontStyle::Width width = SkFontDescriptor::SkFontStyleWidthForWidthAxisValue(
     Font::axisValue(finalAxis, Font::wdth).value());
 
   return { { weight, width, slant }, std::move(finalAxis) };

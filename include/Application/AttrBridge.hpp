@@ -112,6 +112,18 @@ public:
     bool                        isOnlyUpdatePaint);
 
 public:
+  // for patternImageFill.imageFileName
+  // for patternImageStretch.imageFileName
+  // for patternImageFit.imageFileName
+  // for patternImageTile.imageFileName
+  bool updatePatternImageFileName(
+    std::shared_ptr<LayoutNode> node,
+    layer::PaintNode*           paintNode,
+    size_t                      index,
+    std::string                 newName,
+    bool                        isOnlyUpdatePaint,
+    bool                        effectOnFill);
+
   // for patternImageFill.rotation
   bool updatePatternImageFillRotation(
     std::shared_ptr<LayoutNode>    node,
@@ -209,6 +221,10 @@ public:
   static std::optional<int>         getFillBlendMode(layer::PaintNode* node, size_t index);
   static std::optional<std::string> getFillPatternType(layer::PaintNode* node, size_t index);
 
+  static std::optional<std::string> getPatternImageFileName(
+    layer::PaintNode* node,
+    size_t            index,
+    bool              effectOnFill);
   static std::optional<double> getPatternImageFillRotation(
     layer::PaintNode* node,
     size_t            index,
@@ -238,6 +254,17 @@ private:
 
   static void setFillBlendMode(std::shared_ptr<LayoutNode> node, size_t index, int value);
   static void setFillBlendMode(layer::PaintNode* node, size_t index, const int value);
+
+  static void setPatternImageFileName(
+    std::shared_ptr<LayoutNode> node,
+    size_t                      index,
+    const std::string&          newName,
+    bool                        effectOnFill);
+  static void setPatternImageFileName(
+    layer::PaintNode*  node,
+    size_t             index,
+    const std::string& newName,
+    bool               effectOnFill);
 
   static void setPatternImageFillRotation(
     std::shared_ptr<LayoutNode> node,

@@ -196,6 +196,33 @@ std::optional<std::string> AttrBridge::getFillPatternType(layer::PaintNode* node
   return {};
 }
 
+std::optional<std::string> AttrBridge::getPatternImageFileName(
+  layer::PaintNode* node,
+  size_t            index,
+  bool              effectOnFill)
+{
+  GET_PAINTNODE_ACCESSOR(node, accessor, {});
+
+  if (effectOnFill)
+  {
+    if (index >= *getFillSize(node))
+    {
+      return {};
+    }
+
+    auto& pattern = std::get<VGG::Pattern>(accessor->getFills().at(index).type);
+
+    std::string name;
+    std::visit([&name](auto&& arg) { name = arg.guid; }, pattern.instance);
+    return name;
+  }
+  else
+  {
+    // TODO not complete.
+    return {};
+  }
+}
+
 std::optional<double> AttrBridge::getPatternImageFillRotation(
   layer::PaintNode* node,
   size_t            index,
@@ -205,6 +232,11 @@ std::optional<double> AttrBridge::getPatternImageFillRotation(
 
   if (effectOnFill)
   {
+    if (index >= *getFillSize(node))
+    {
+      return {};
+    }
+
     auto& pattern = std::get<VGG::Pattern>(accessor->getFills().at(index).type);
     auto& instance = std::get<VGG::PatternFill>(pattern.instance);
     return -instance.rotation;
@@ -396,6 +428,85 @@ void AttrBridge::setFillBlendMode(layer::PaintNode* node, size_t index, const in
 
   fills.at(index).contextSettings.blendMode = static_cast<VGG::EBlendMode>(value);
   accessor->setFills(fills);
+}
+
+void AttrBridge::setPatternImageFileName(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  const std::string&          newName,
+  bool                        effectOnFill)
+{
+  if (auto object = AttrBridge::getlayoutNodeObject(node))
+  {
+    if (effectOnFill)
+    {
+      if (index >= object->style.fills.size())
+      {
+        return;
+      }
+
+      auto& pattern = object->style.fills.at(index).pattern;
+      if (!pattern)
+      {
+        return;
+      }
+
+      std::visit(
+        [&newName](auto&& arg)
+        {
+          using T = std::decay_t<decltype(arg)>;
+          if constexpr (
+            std::is_same_v<T, std::monostate> ||
+            std::is_same_v<T, VGG::Model::PatternLayerInstance>)
+          {
+            assert(false);
+          }
+          else
+          {
+            arg.imageFileName = newName;
+          }
+        },
+        pattern->instance);
+    }
+    else
+    {
+      // TODO not complete
+    }
+  }
+}
+
+void AttrBridge::setPatternImageFileName(
+  layer::PaintNode*  node,
+  size_t             index,
+  const std::string& newName,
+  bool               effectOnFill)
+{
+  GET_PAINTNODE_ACCESSOR(node, accessor, void());
+
+  if (effectOnFill)
+  {
+    auto fills = accessor->getFills();
+    if (index >= fills.size())
+    {
+      return;
+    }
+
+    try
+    {
+      auto& pattern = std::get<VGG::Pattern>(fills.at(index).type);
+      std::visit([&newName](auto&& arg) { arg.guid = newName; }, pattern.instance);
+    }
+    catch (...)
+    {
+      return;
+    }
+
+    accessor->setFills(fills);
+  }
+  else
+  {
+    // TODO not complete
+  }
 }
 
 void AttrBridge::setPatternImageFillRotation(
@@ -977,6 +1088,40 @@ bool AttrBridge::updatePatternImageFillRotation(
       { newRotation },
       update,
       animate);
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
+}
+
+bool AttrBridge::updatePatternImageFileName(
+  std::shared_ptr<LayoutNode> node,
+  layer::PaintNode*           paintNode,
+  size_t                      index,
+  std::string                 newName,
+  bool                        isOnlyUpdatePaint,
+  bool                        effectOnFill)
+{
+  GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
+
+  if (effectOnFill)
+  {
+    if (index >= *AttrBridge::getFillSize(paintNode))
+    {
+      return false;
+    }
+
+    if (!isOnlyUpdatePaint)
+    {
+      AttrBridge::setPatternImageFileName(node, index, newName, true);
+    }
+
+    AttrBridge::setPatternImageFileName(paintNode, index, newName, true);
+
     return true;
   }
   else

@@ -799,7 +799,7 @@ void SmartAnimate::start()
     [attrBridge, from, isOnlyUpdatePaint, paintNodeFrom]()
     { attrBridge->updateVisible(from, paintNodeFrom, false, isOnlyUpdatePaint); });
 
-  const bool mergeTree = true;
+  const bool mergeTree = false;
 
   if (!mergeTree)
   {

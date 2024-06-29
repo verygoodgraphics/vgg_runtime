@@ -1046,7 +1046,11 @@ bool AttrBridge::updateFillColor(
   bool                           isOnlyUpdatePaint,
   std::shared_ptr<NumberAnimate> animate)
 {
-  GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
+  auto nowColor = getFillColor(paintNode, index);
+  if (!nowColor)
+  {
+    return false;
+  }
 
   if (index >= *AttrBridge::getFillSize(paintNode))
   {
@@ -1063,18 +1067,8 @@ bool AttrBridge::updateFillColor(
     AttrBridge::setFillColor(paintNode, index, value);
   };
 
-  VGG::Color color;
-  try
-  {
-    color = std::get<VGG::Color>(accessor->getFills().at(index).type);
-  }
-  catch (...)
-  {
-    return false;
-  }
-
   updateSimpleAttr(
-    { color.a, color.r, color.g, color.b },
+    { nowColor->a, nowColor->r, nowColor->g, nowColor->b },
     { newColor.alpha, newColor.red, newColor.green, newColor.blue },
     update,
     animate);

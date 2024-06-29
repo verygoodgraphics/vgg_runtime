@@ -140,6 +140,8 @@ public:
     std::shared_ptr<NumberAnimate>     animate = {});
 
   // for patternImageFill.rotation
+  // for patternImageFit.rotation
+  // for patternImageTile.rotation
   bool updatePatternImageFillRotation(
     std::shared_ptr<LayoutNode>    node,
     layer::PaintNode*              paintNode,

@@ -245,7 +245,7 @@ public:
     layer::PaintNode* node,
     size_t            index,
     bool              effectOnFill);
-  static std::optional<double> getPatternImageFillRotation( // TODO wait change.
+  static std::optional<double> getPatternRotation(
     layer::PaintNode* node,
     size_t            index,
     bool              effectOnFill);
@@ -297,12 +297,12 @@ private:
     const std::vector<double>& value,
     bool                       effectOnFill);
 
-  static void setPatternImageFillRotation(
+  static void setPatternRotation(
     std::shared_ptr<LayoutNode> node,
     size_t                      index,
     double                      value,
     bool                        effectOnFill);
-  static void setPatternImageFillRotation(
+  static void setPatternRotation(
     layer::PaintNode* node,
     size_t            index,
     double            value,

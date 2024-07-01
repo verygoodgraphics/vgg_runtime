@@ -290,6 +290,7 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("getElement", GetElement),
     DECLARE_NODE_API_PROPERTY("updateElement", UpdateElement),
     DECLARE_NODE_API_PROPERTY("updateElementProperties", updateElementProperties),
+    DECLARE_NODE_API_PROPERTY("getElementProperties", getElementProperties),
     DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
 
     DECLARE_NODE_API_PROPERTY("pushFrame", pushFrame),
@@ -1482,6 +1483,46 @@ napi_value VggSdkNodeAdapter::updateElementProperties(napi_env env, napi_callbac
     auto       status = napi_create_int32(env, successCount, &value);
     if (status == napi_ok)
       return value;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::getElementProperties(napi_env env, napi_callback_info info)
+{
+  size_t     argc = 1;
+  napi_value args[1];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 1)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto queries = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    std::string result;
+    SyncTaskInMainLoop<bool>{ [&result, sdk = sdkAdapter->m_vggSdk, queries]()
+                              {
+                                result = sdk->getElementProperties(queries);
+                                return true;
+                              },
+                              [](bool) {} }();
+    napi_value ret;
+    NODE_API_CALL(env, napi_create_string_utf8(env, result.data(), result.size(), &ret));
+
+    return ret;
   }
   catch (std::exception& e)
   {

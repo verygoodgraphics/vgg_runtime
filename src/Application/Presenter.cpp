@@ -460,4 +460,10 @@ int Presenter::updateElement(
   return m_view->updateElement(items, option);
 }
 
+std::vector<std::optional<app::ElementProperty>> Presenter::getElementProperties(
+  const std::vector<app::ElementGetProperty>& queries)
+{
+  return m_view->getElementProperties(queries);
+}
+
 } // namespace VGG

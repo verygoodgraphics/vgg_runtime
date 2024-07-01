@@ -70,7 +70,7 @@ public:
   void        updateElement(const std::string& id, const std::string& contentJsonString) override;
   int         updateElementProperties(const std::string& updates, const AnimationOptions& animation)
     override;
-  std::string getElementProperties(const std::string& items) override;
+  std::string getElementProperties(const std::string& queries) override;
 
   // -
   std::string getFramesInfo() const override;

@@ -74,8 +74,8 @@ public:
      const std::string&      updates, // json array string, std::vector<app::ElementUpdateProperty>
      const AnimationOptions& animation) = 0;
   virtual std::string getElementProperties(
-    const std::string& items // json array string, std::vector<app::GetElementItem>
-    ) = 0;                   // return json array string
+    const std::string& queries // json array string, std::vector<app::ElementGetProperty>
+    ) = 0;                     // return json array string
 
   // -
   virtual std::string getFramesInfo() const = 0;

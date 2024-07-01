@@ -26,6 +26,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include "Application/ElementGetProperty.hpp"
 #include "Application/ElementUpdateProperty.hpp"
 #include "Application/Event/EventListener.hpp"
 #include "Application/UIAnimation.hpp"
@@ -260,6 +261,8 @@ public:
   int updateElement(
     const std::vector<app::ElementUpdateProperty>& items,
     const app::UIAnimationOption&                  option);
+  std::vector<std::optional<app::ElementProperty>> getElementProperties(
+    const std::vector<app::ElementGetProperty>& queries);
 
 protected:
   float     scale() const;

@@ -872,7 +872,7 @@ bool AttrBridge::addFill(
   GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
 
   auto size = *getFillSize(paintNode);
-  if (index == -1)
+  if (index == static_cast<size_t>(-1))
   {
     index = size;
   }
@@ -939,7 +939,7 @@ bool AttrBridge::delFill(
   GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
 
   auto size = *getFillSize(paintNode);
-  if (index == -1)
+  if (index == static_cast<size_t>(-1))
   {
     index = size - 1;
   }

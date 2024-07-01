@@ -184,9 +184,9 @@ mat4 temperatureMatrix(float tem){
 mat4 tintMatrix(float tint, vec3 tintColor1, vec3 tintColor2){
     vec3 tc = vec3(1,1,1);
     if(tint > 0){
-       tc = tintColor1 * tint;
+       tc = mix(tc, tintColor1, tint);
     }else if(tint < 0){
-       tc = tintColor2 * -tint;
+       tc = mix(tc, tintColor2, -tint);
     }
     return mat4(
         tc.r, 0.0, 0.0, 0.0,

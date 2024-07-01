@@ -288,7 +288,7 @@
         "luminosity: luminosity of source with hue and saturation of destination",
         "plus darker",
         "plus lighter",
-        "pass through: ignore now layer"
+        "pass through: ignore current layer"
       ],
       "$id": "#BlendMode"
     },
@@ -3465,7 +3465,7 @@
   "properties": {
     "version": {
       "type": "string",
-      "const": "1.0.17",
+      "const": "1.0.19",
       "description": "Current VGG specs version, conforming to semantic version format like `major.minor.patch`.\n"
     },
     "fileType": {

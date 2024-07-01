@@ -1178,4 +1178,10 @@ int UIView::updateElement(
   return successCount;
 }
 
+std::vector<std::optional<app::ElementProperty>> UIView::getElementProperties(
+  const std::vector<app::ElementGetProperty>& queries)
+{
+  return m_impl->getElementProperties(queries);
+}
+
 } // namespace VGG

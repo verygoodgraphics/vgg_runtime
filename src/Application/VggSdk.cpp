@@ -569,9 +569,18 @@ int VggSdk::updateElementProperties(const std::string& updates, const AnimationO
   return 0;
 }
 
-std::string VggSdk::getElementProperties(const std::string& items)
+std::string VggSdk::getElementProperties(const std::string& queries)
 {
-  return "[]";
+  if (const auto& p = presenter())
+  {
+    const auto& j = nlohmann::json::parse(queries);
+    const auto& r = p->getElementProperties(j);
+
+    nlohmann::json result = r;
+    return result.dump();
+  }
+
+  return {};
 }
 
 } // namespace VGG

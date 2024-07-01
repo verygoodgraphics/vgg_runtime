@@ -22,6 +22,7 @@
 #include <vector>
 #include "Application/Animate.hpp"
 #include "Application/UIAnimation.hpp"
+#include "Application/ElementGetProperty.hpp"
 #include "Application/ElementUpdateProperty.hpp"
 #include "Application/ZoomerNodeController.hpp"
 #include "Domain/Layout/LayoutContext.hpp"
@@ -111,11 +112,14 @@ public:
   int updateElement(
     const std::vector<app::ElementUpdateProperty>& items,
     const app::UIAnimationOption&                  option);
+  std::vector<std::optional<app::ElementProperty>> getElementProperties(
+    const std::vector<app::ElementGetProperty>& queries);
 
   std::optional<UpdateBuilder> makeUpdateBuilder(
     const std::string&            id,
     const app::UIAnimationOption* anamation,
     Animate*                      parentAnimation);
+  layer::PaintNode* getPaintNode(const std::string& id);
 
 private:
   bool isUnitTest() const;

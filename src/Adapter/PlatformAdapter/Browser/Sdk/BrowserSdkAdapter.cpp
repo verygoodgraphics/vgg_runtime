@@ -71,6 +71,7 @@ EMSCRIPTEN_BINDINGS(vgg_sdk)
     .function("getElement", &VggSdk::getElement)
     .function("updateElement", &VggSdk::updateElement)
     .function("updateElementProperties", &VggSdk::updateElementProperties)
+    .function("getElementProperties", &VggSdk::getElementProperties)
     .function("getDesignDocument", &VggSdk::designDocument)
     .function("valueAt", &VggSdk::designDocumentValueAt)
     // frames

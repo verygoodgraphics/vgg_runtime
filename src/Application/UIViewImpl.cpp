@@ -26,6 +26,7 @@
 #include "AppRender.hpp"
 #include "Application/AppLayoutContext.hpp"
 #include "Application/Pager.hpp"
+#include "Application/ElementGetProperty.hpp"
 #include "Application/ElementUpdateProperty.hpp"
 #include "Application/ViewModel.hpp"
 #include "AttrBridge.hpp"
@@ -137,6 +138,117 @@ struct UpdateVisitor
   bool operator()(const app::ElementUpdateSize& u) const
   {
     return b.updater->updateSize(b.layoutNode, b.paintNode, u.width, u.height, false, b.animation);
+  }
+};
+
+struct GetPaintNodeVisitor
+{
+  UIViewImpl* viewImpl = nullptr;
+
+  layer::PaintNode* operator()(const std::monostate&) const
+  {
+    return nullptr;
+  }
+
+  layer::PaintNode* operator()(const app::BaseElementGet& p) const
+  {
+    return viewImpl->getPaintNode(p.id);
+  }
+};
+
+struct GetElementPropertyVisitor
+{
+  layer::PaintNode* n;
+
+  std::optional<app::ElementProperty> operator()(const std::monostate&) const
+  {
+    return std::nullopt;
+  }
+
+  std::optional<app::ElementProperty> operator()(const app::ElementGetFillBlendMode& p) const
+  {
+    if (auto r = AttrBridge::getFillBlendMode(n, p.index))
+      return app::ElementProperty(*r);
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(const app::ElementGetFillColor& p) const
+  {
+    if (auto r = AttrBridge::getFillColor(n, p.index))
+      return app::ElementProperty(
+        app::ElementColor{ .a = (*r).a, .r = (*r).r, .g = (*r).g, .b = (*r).b });
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(const app::ElementGetFillEnabled& p) const
+  {
+    if (auto r = AttrBridge::getFillEnabled(n, p.index))
+      return app::ElementProperty(*r);
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(const app::ElementGetFillOpacity& p) const
+  {
+    if (auto r = AttrBridge::getFillOpacity(n, p.index))
+      return app::ElementProperty(*r);
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(const app::ElementGetFillPatternType& p) const
+  {
+    if (auto r = AttrBridge::getFillPatternType(n, p.index))
+      return app::ElementProperty(*r);
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(const app::ElementGetFillSize& p) const
+  {
+    if (auto r = AttrBridge::getFillSize(n))
+      return app::ElementProperty(*r);
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(const app::ElementGetFillType& p) const
+  {
+    if (auto r = AttrBridge::getFillType(n, p.index))
+      return app::ElementProperty(*r);
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(const app::ElementGetMatrix& p) const
+  {
+    if (auto r = AttrBridge::getMatrix(n))
+      return app::ElementProperty(app::ElementMatrix{ .a = (*r)[0],
+                                                      .b = (*r)[1],
+                                                      .c = (*r)[2],
+                                                      .d = (*r)[3],
+                                                      .tx = (*r)[4],
+                                                      .ty = (*r)[5] });
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(const app::ElementGetOpacity& p) const
+  {
+    if (auto r = AttrBridge::getOpacity(n))
+      return app::ElementProperty(*r);
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(
+    const app::ElementGetPatternImageFillRotation& p) const
+  {
+    if (auto r = AttrBridge::getPatternRotation(n, p.index, p.effectOnFill))
+      return app::ElementProperty(*r);
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(const app::ElementGetVisible& p) const
+  {
+    if (auto r = AttrBridge::getVisible(n))
+      return app::ElementProperty(*r);
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(const app::ElementGetHeight& p) const
+  {
+    if (auto r = AttrBridge::getHeight(n))
+      return app::ElementProperty(*r);
+    return std::nullopt;
+  }
+  std::optional<app::ElementProperty> operator()(const app::ElementGetWidth& p) const
+  {
+    if (auto r = AttrBridge::getWidth(n))
+      return app::ElementProperty(*r);
+    return std::nullopt;
   }
 };
 
@@ -493,6 +605,34 @@ int UIViewImpl::updateElement(
   }
 
   return successCount;
+}
+
+std::vector<std::optional<app::ElementProperty>> UIViewImpl::getElementProperties(
+  const std::vector<app::ElementGetProperty>& queries)
+{
+  std::vector<std::optional<app::ElementProperty>> r;
+  for (auto& query : queries)
+  {
+    if (auto n = std::visit(GetPaintNodeVisitor{ this }, query))
+      r.push_back(std::visit(GetElementPropertyVisitor{ n }, query));
+    else
+      r.push_back(std::nullopt);
+  }
+
+  return r;
+}
+
+layer::PaintNode* UIViewImpl::getPaintNode(const std::string& id)
+{
+  const auto& root = m_viewModel->layoutTree();
+  if (!root)
+    return nullptr;
+
+  auto layoutNode = root->findDescendantNodeById(id);
+  if (!layoutNode)
+    return nullptr;
+
+  return m_sceneNode->nodeByID(layoutNode->elementNode()->idNumber());
 }
 
 } // namespace VGG::internal

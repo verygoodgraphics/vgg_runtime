@@ -22,6 +22,7 @@
 namespace VGG::app
 {
 
+// MARK: - IN parameter struct
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementGetFillBlendMode, type, id, index);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementGetFillColor, type, id, index);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementGetFillEnabled, type, id, index);
@@ -41,6 +42,10 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementGetVisible, type, id);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementGetHeight, type, id);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementGetWidth, type, id);
+
+// MARK: - Return value struct
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementColor, a, r, g, b);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementMatrix, a, b, c, d, tx, ty);
 
 } // namespace VGG::app
 
@@ -90,4 +95,9 @@ inline void adl_serializer<VGG::app::ElementGetProperty>::from_json(
     x = j.get<ElementGetWidth>();
 }
 
+template<>
+struct adl_serializer<VGG::app::ElementProperty>
+{
+  static void to_json(json& j, const VGG::app::ElementProperty& x);
+};
 } // namespace nlohmann

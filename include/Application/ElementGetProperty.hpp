@@ -102,4 +102,25 @@ using ElementGetProperty = std::variant<
   ElementGetHeight,
   ElementGetWidth>;
 
+// MARK: - Get Result
+struct ElementColor
+{
+  float a = 0;
+  float r = 0;
+  float g = 0;
+  float b = 0;
+};
+
+struct ElementMatrix
+{
+  double a = 0;
+  double b = 0;
+  double c = 0;
+  double d = 0;
+  double tx = 0;
+  double ty = 0;
+};
+
+using ElementProperty =
+  std::variant<bool, int, double, std::size_t, std::string, ElementColor, ElementMatrix>;
 } // namespace VGG::app

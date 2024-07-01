@@ -5,6 +5,7 @@ add_library(vgg_application STATIC
   AttrBridge.cpp
   Controller.cpp
   Editor.cpp
+  ElementGetPropertySerializer.cpp
   EventAPI.cpp
   MainComposer.cpp
   Pager.cpp

@@ -87,6 +87,7 @@ std::pair<sk_sp<SkImage>, int> loadImageFromStack(const std::string& imageGUID, 
     auto [img, res] = codec->getImage(codec->getInfo(), &options);
     if (res != SkCodec::Result::kSuccess)
     {
+      UNUSED(imageGUID);
       DEBUG("can not decode image [%d] %s", i, imageGUID.c_str());
       return nullptr;
     }

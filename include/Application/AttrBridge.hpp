@@ -151,6 +151,34 @@ public:
     bool                           effectOnFill,
     std::shared_ptr<NumberAnimate> animate = {});
 
+  // for patternImageTile.mirror
+  bool updatePatternImageTileMirror(
+    std::shared_ptr<LayoutNode> node,
+    layer::PaintNode*           paintNode,
+    size_t                      index,
+    bool                        newMirror,
+    bool                        isOnlyUpdatePaint,
+    bool                        effectOnFill);
+
+  // for patternImageTile.scale
+  bool updatePatternImageTileScale(
+    std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
+    size_t                         index,
+    double                         newScale,
+    bool                           isOnlyUpdatePaint,
+    bool                           effectOnFill,
+    std::shared_ptr<NumberAnimate> animate = {});
+
+  // for patternImageTile.mode
+  bool updatePatternImageTileMode(
+    std::shared_ptr<LayoutNode> node,
+    layer::PaintNode*           paintNode,
+    size_t                      index,
+    int                         newMode,
+    bool                        isOnlyUpdatePaint,
+    bool                        effectOnFill);
+
 public:
   // for contextSettings.opacity
   bool updateOpacity(
@@ -251,6 +279,18 @@ public:
     layer::PaintNode* node,
     size_t            index,
     bool              effectOnFill);
+  static std::optional<bool> getPatternImageTileMirror(
+    layer::PaintNode* node,
+    size_t            index,
+    bool              effectOnFill);
+  static std::optional<double> getPatternImageTileScale(
+    layer::PaintNode* node,
+    size_t            index,
+    bool              effectOnFill);
+  static std::optional<int> getPatternImageTileMode(
+    layer::PaintNode* node,
+    size_t            index,
+    bool              effectOnFill);
 
   static std::optional<double>                getOpacity(layer::PaintNode* node);
   static std::optional<bool>                  getVisible(layer::PaintNode* node);
@@ -308,6 +348,39 @@ private:
     layer::PaintNode* node,
     size_t            index,
     double            value,
+    bool              effectOnFill);
+
+  static void setPatternImageTileMirror(
+    std::shared_ptr<LayoutNode> node,
+    size_t                      index,
+    bool                        value,
+    bool                        effectOnFill);
+  static void setPatternImageTileMirror(
+    layer::PaintNode* node,
+    size_t            index,
+    bool              value,
+    bool              effectOnFill);
+
+  static void setPatternImageTileScale(
+    std::shared_ptr<LayoutNode> node,
+    size_t                      index,
+    double                      value,
+    bool                        effectOnFill);
+  static void setPatternImageTileScale(
+    layer::PaintNode* node,
+    size_t            index,
+    double            value,
+    bool              effectOnFill);
+
+  static void setPatternImageTileMode(
+    std::shared_ptr<LayoutNode> node,
+    size_t                      index,
+    int                         value,
+    bool                        effectOnFill);
+  static void setPatternImageTileMode(
+    layer::PaintNode* node,
+    size_t            index,
+    int               value,
     bool              effectOnFill);
 
   static void setOpacity(std::shared_ptr<LayoutNode> node, double value);

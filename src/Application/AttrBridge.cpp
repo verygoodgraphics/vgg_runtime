@@ -344,6 +344,102 @@ std::optional<double> AttrBridge::getPatternRotation(
   return rotation;
 }
 
+std::optional<bool> AttrBridge::getPatternImageTileMirror(
+  layer::PaintNode* node,
+  size_t            index,
+  bool              effectOnFill)
+{
+  bool mirror = false;
+
+  auto fun = [&mirror](auto&& arg)
+  {
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr (!std::is_same_v<T, VGG::PatternTile>)
+    {
+      assert(false);
+    }
+    else
+    {
+      mirror = arg.mirror;
+    }
+  };
+
+  if (!getPatternAttr(node, index, effectOnFill, fun))
+  {
+    return {};
+  }
+
+  return mirror;
+}
+
+std::optional<double> AttrBridge::getPatternImageTileScale(
+  layer::PaintNode* node,
+  size_t            index,
+  bool              effectOnFill)
+{
+  double scale = 1.0;
+
+  auto fun = [&scale](auto&& arg)
+  {
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr (!std::is_same_v<T, VGG::PatternTile>)
+    {
+      assert(false);
+    }
+    else
+    {
+      scale = arg.scale;
+    }
+  };
+
+  if (!getPatternAttr(node, index, effectOnFill, fun))
+  {
+    return {};
+  }
+
+  return scale;
+}
+
+std::optional<int> AttrBridge::getPatternImageTileMode(
+  layer::PaintNode* node,
+  size_t            index,
+  bool              effectOnFill)
+{
+  int mode = 0;
+
+  auto fun = [&mode](auto&& arg)
+  {
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr (!std::is_same_v<T, VGG::PatternTile>)
+    {
+      assert(false);
+    }
+    else
+    {
+      if (arg.mode == VGG::ETilePatternType::TILE_BOTH)
+      {
+        mode = 0;
+      }
+      else if (arg.mode == VGG::ETilePatternType::TILE_HORIZONTAL)
+      {
+        mode = 1;
+      }
+      else
+      {
+        assert(arg.mode == VGG::ETilePatternType::TILE_VERTICAL);
+        mode = 2;
+      }
+    }
+  };
+
+  if (!getPatternAttr(node, index, effectOnFill, fun))
+  {
+    return {};
+  }
+
+  return mode;
+}
+
 std::optional<bool> AttrBridge::getVisible(layer::PaintNode* node)
 {
   CHECK_EXPR(node, {});
@@ -678,6 +774,162 @@ void AttrBridge::setPatternRotation(
       else
       {
         arg.rotation = -value;
+      }
+    });
+}
+
+void AttrBridge::setPatternImageTileMirror(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  bool                        value,
+  bool                        effectOnFill)
+{
+  setLayoutNodePatternAttr(
+    node,
+    index,
+    effectOnFill,
+    [value](auto&& arg)
+    {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (!std::is_same_v<T, VGG::Model::PatternImageTile>)
+      {
+        assert(false);
+      }
+      else
+      {
+        arg.mirror = value;
+      }
+    });
+}
+
+void AttrBridge::setPatternImageTileMirror(
+  layer::PaintNode* node,
+  size_t            index,
+  bool              value,
+  bool              effectOnFill)
+{
+  setPaintNodePatternAttr(
+    node,
+    index,
+    effectOnFill,
+    [value](auto&& arg)
+    {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (!std::is_same_v<T, VGG::PatternTile>)
+      {
+        assert(false);
+      }
+      else
+      {
+        arg.mirror = value;
+      }
+    });
+}
+
+void AttrBridge::setPatternImageTileScale(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  double                      value,
+  bool                        effectOnFill)
+{
+  setLayoutNodePatternAttr(
+    node,
+    index,
+    effectOnFill,
+    [value](auto&& arg)
+    {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (!std::is_same_v<T, VGG::Model::PatternImageTile>)
+      {
+        assert(false);
+      }
+      else
+      {
+        arg.scale = value;
+      }
+    });
+}
+
+void AttrBridge::setPatternImageTileScale(
+  layer::PaintNode* node,
+  size_t            index,
+  double            value,
+  bool              effectOnFill)
+{
+  setPaintNodePatternAttr(
+    node,
+    index,
+    effectOnFill,
+    [value](auto&& arg)
+    {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (!std::is_same_v<T, VGG::PatternTile>)
+      {
+        assert(false);
+      }
+      else
+      {
+        arg.scale = value;
+      }
+    });
+}
+
+void AttrBridge::setPatternImageTileMode(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  int                         value,
+  bool                        effectOnFill)
+{
+  setLayoutNodePatternAttr(
+    node,
+    index,
+    effectOnFill,
+    [value](auto&& arg)
+    {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (!std::is_same_v<T, VGG::Model::PatternImageTile>)
+      {
+        assert(false);
+      }
+      else
+      {
+        arg.mode = value;
+      }
+    });
+}
+
+void AttrBridge::setPatternImageTileMode(
+  layer::PaintNode* node,
+  size_t            index,
+  int               value,
+  bool              effectOnFill)
+{
+  setPaintNodePatternAttr(
+    node,
+    index,
+    effectOnFill,
+    [value](auto&& arg)
+    {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (!std::is_same_v<T, VGG::PatternTile>)
+      {
+        assert(false);
+      }
+      else
+      {
+        if (!value)
+        {
+          arg.mode = VGG::ETilePatternType::TILE_BOTH;
+        }
+        else if (1 == value)
+        {
+          arg.mode = VGG::ETilePatternType::TILE_HORIZONTAL;
+        }
+        else
+        {
+          assert(value == 2);
+          arg.mode = VGG::ETilePatternType::TILE_VERTICAL;
+        }
       }
     });
 }
@@ -1244,6 +1496,113 @@ bool AttrBridge::updatePatternImageFillRotation(
       { newRotation },
       update,
       animate);
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
+}
+
+bool AttrBridge::updatePatternImageTileMirror(
+  std::shared_ptr<LayoutNode> node,
+  layer::PaintNode*           paintNode,
+  size_t                      index,
+  bool                        newMirror,
+  bool                        isOnlyUpdatePaint,
+  bool                        effectOnFill)
+{
+  if (effectOnFill)
+  {
+    if (index >= *AttrBridge::getFillSize(paintNode))
+    {
+      return false;
+    }
+
+    if (!isOnlyUpdatePaint)
+    {
+      AttrBridge::setPatternImageTileMirror(node, index, newMirror, true);
+    }
+
+    AttrBridge::setPatternImageTileMirror(paintNode, index, newMirror, true);
+
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
+}
+
+bool AttrBridge::updatePatternImageTileScale(
+  std::shared_ptr<LayoutNode>    node,
+  layer::PaintNode*              paintNode,
+  size_t                         index,
+  double                         newScale,
+  bool                           isOnlyUpdatePaint,
+  bool                           effectOnFill,
+  std::shared_ptr<NumberAnimate> animate)
+{
+  if (effectOnFill)
+  {
+    if (index >= *AttrBridge::getFillSize(paintNode))
+    {
+      return false;
+    }
+
+    auto update = [node, paintNode, index, isOnlyUpdatePaint](const std::vector<double>& value)
+    {
+      assert(value.size() == 1);
+
+      if (!isOnlyUpdatePaint)
+      {
+        AttrBridge::setPatternImageTileScale(node, index, value.at(0), true);
+      }
+
+      AttrBridge::setPatternImageTileScale(paintNode, index, value.at(0), true);
+    };
+
+    updateSimpleAttr(
+      { *getPatternImageTileScale(paintNode, index, true) },
+      { newScale },
+      update,
+      animate);
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
+}
+
+bool AttrBridge::updatePatternImageTileMode(
+  std::shared_ptr<LayoutNode> node,
+  layer::PaintNode*           paintNode,
+  size_t                      index,
+  int                         newMode,
+  bool                        isOnlyUpdatePaint,
+  bool                        effectOnFill)
+{
+  if (effectOnFill)
+  {
+    if (index >= *AttrBridge::getFillSize(paintNode))
+    {
+      return false;
+    }
+
+    if (!isOnlyUpdatePaint)
+    {
+      AttrBridge::setPatternImageTileMode(node, index, newMode, true);
+    }
+
+    AttrBridge::setPatternImageTileMode(paintNode, index, newMode, true);
+
     return true;
   }
   else

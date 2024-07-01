@@ -1054,7 +1054,7 @@ bool UIView::setCurrentFrameIndex(
   const VGG::app::AnimationCompletion completion)
 {
   if (m_impl->page() == static_cast<int>(index))
-    return true;
+    return false;
 
   const auto document = m_document.lock();
   if (!document)

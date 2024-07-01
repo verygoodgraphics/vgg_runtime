@@ -1003,13 +1003,13 @@ bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
 {
   if (m_isUpdatingFrame)
     return false;
-  m_isUpdatingFrame = true;
+  m_isUpdatingFrame = true; // #1, Must be set first
 
   ASSERT(m_model);
 
   const auto index = m_model->getFrameIndexById(id);
   scaleContentAndUpdate(index);
-  return m_presenter->pushFrame(
+  const auto success = m_presenter->pushFrame(
     index,
     true,
     opts,
@@ -1017,8 +1017,12 @@ bool Controller::pushFrame(const std::string& id, const app::FrameOptions& opts)
     {
       fitPage();
       m_presenter->triggerMouseEnter();
-      m_isUpdatingFrame = false;
+      m_isUpdatingFrame = false; // #2. If there is no animation, this settings will be synchronized
     });
+  if (!success)
+    m_isUpdatingFrame = false; // #3. Clear flag on failure
+
+  return success;
 }
 
 bool Controller::popFrame(const app::PopOptions& opts)
@@ -1027,7 +1031,7 @@ bool Controller::popFrame(const app::PopOptions& opts)
     return false;
   m_isUpdatingFrame = true;
 
-  return m_presenter->popFrame(
+  const auto success = m_presenter->popFrame(
     opts,
     [this](bool)
     {
@@ -1035,6 +1039,10 @@ bool Controller::popFrame(const app::PopOptions& opts)
       m_presenter->triggerMouseEnter();
       m_isUpdatingFrame = false;
     });
+  if (!success)
+    m_isUpdatingFrame = false;
+
+  return success;
 }
 
 bool Controller::presentFrame(const std::string& id, const app::FrameOptions& opts)
@@ -1047,7 +1055,7 @@ bool Controller::presentFrame(const std::string& id, const app::FrameOptions& op
 
   const auto index = m_model->getFrameIndexById(id);
   scaleContentAndUpdate(index);
-  return m_presenter->presentFrame(
+  const auto success = m_presenter->presentFrame(
     index,
     opts,
     [this](bool)
@@ -1056,6 +1064,10 @@ bool Controller::presentFrame(const std::string& id, const app::FrameOptions& op
       m_presenter->triggerMouseEnter();
       m_isUpdatingFrame = false;
     });
+  if (!success)
+    m_isUpdatingFrame = false;
+
+  return success;
 }
 
 LayoutContext* Controller::layoutContext()

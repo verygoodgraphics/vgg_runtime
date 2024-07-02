@@ -139,6 +139,28 @@ struct UpdateVisitor
   {
     return b.updater->updateSize(b.layoutNode, b.paintNode, u.width, u.height, false, b.animation);
   }
+
+  bool operator()(const app::ElementUpdatePatternImageFileName& u) const
+  {
+    return b.updater->updatePatternImageFileName(
+      b.layoutNode,
+      b.paintNode,
+      u.index,
+      u.newName,
+      false,
+      u.effectOnFill);
+  }
+
+  bool operator()(const app::ElementUpdatePatternImageFilters& u) const
+  {
+    return b.updater->updatePatternImageFilters(
+      b.layoutNode,
+      b.paintNode,
+      u.index,
+      u.imageFilters,
+      false,
+      u.effectOnFill);
+  }
 };
 
 struct GetPaintNodeVisitor

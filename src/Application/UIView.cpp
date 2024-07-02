@@ -1184,4 +1184,14 @@ std::vector<std::optional<app::ElementProperty>> UIView::getElementProperties(
   return m_impl->getElementProperties(queries);
 }
 
+bool UIView::addElementProperty(const app::ElementAddProperty& command)
+{
+  return m_impl->addElementProperty(command);
+}
+
+bool UIView::deleteElementProperty(const app::ElementDeleteProperty& command)
+{
+  return m_impl->deleteElementProperty(command);
+}
+
 } // namespace VGG

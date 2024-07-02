@@ -47,6 +47,21 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementUpdateOpacity, type, id, 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementUpdateVisible, type, id, visible);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementUpdateSize, type, id, width, height);
 
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+  ElementUpdatePatternImageFileName,
+  type,
+  id,
+  index,
+  newName,
+  effectOnFill);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+  ElementUpdatePatternImageFilters,
+  type,
+  id,
+  index,
+  newName,
+  imageFilters,
+  effectOnFill);
 } // namespace VGG::app
 
 namespace nlohmann
@@ -85,6 +100,10 @@ inline void adl_serializer<VGG::app::ElementUpdateProperty>::from_json(
     x = j.get<ElementUpdateVisible>();
   else if (t == "size")
     x = j.get<ElementUpdateSize>();
+  else if (t == "patternImageFileName")
+    x = j.get<ElementUpdatePatternImageFileName>();
+  else if (t == "patternImageFilters")
+    x = j.get<ElementUpdatePatternImageFilters>();
 }
 
 } // namespace nlohmann

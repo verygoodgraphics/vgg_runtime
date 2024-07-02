@@ -87,6 +87,21 @@ struct ElementUpdateSize : ElementUpdate
   float height = 0;
 };
 
+struct ElementUpdatePatternImageFileName : ElementUpdate
+{
+  std::size_t index = 0;
+  std::string newName;
+  bool        effectOnFill = false;
+};
+
+struct ElementUpdatePatternImageFilters : ElementUpdate
+{
+  std::size_t                        index = 0;
+  std::string                        newName;
+  std::optional<Model::ImageFilters> imageFilters;
+  bool                               effectOnFill = false;
+};
+
 using ElementUpdateProperty = std::variant<
   std::monostate,
   ElementUpdateFillBlendMode,
@@ -97,6 +112,8 @@ using ElementUpdateProperty = std::variant<
   ElementUpdateMatrix,
   ElementUpdateOpacity,
   ElementUpdateVisible,
-  ElementUpdateSize>;
+  ElementUpdateSize,
+  ElementUpdatePatternImageFileName,
+  ElementUpdatePatternImageFilters>;
 
 } // namespace VGG::app

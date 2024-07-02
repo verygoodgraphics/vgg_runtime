@@ -51,7 +51,7 @@ private:
   static napi_value GetElement(napi_env env, napi_callback_info info);
   static napi_value UpdateElement(napi_env env, napi_callback_info info);
   static napi_value updateElementProperties(napi_env env, napi_callback_info info);
-  static napi_value getElementProperties(napi_env env, napi_callback_info info);
+  static napi_value getElementProperty(napi_env env, napi_callback_info info);
   static napi_value addElementProperty(napi_env env, napi_callback_info info);
   static napi_value deleteElementProperty(napi_env env, napi_callback_info info);
 

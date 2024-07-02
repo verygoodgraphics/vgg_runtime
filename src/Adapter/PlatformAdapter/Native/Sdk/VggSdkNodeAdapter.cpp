@@ -290,7 +290,7 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("getElement", GetElement),
     DECLARE_NODE_API_PROPERTY("updateElement", UpdateElement),
     DECLARE_NODE_API_PROPERTY("updateElementProperties", updateElementProperties),
-    DECLARE_NODE_API_PROPERTY("getElementProperties", getElementProperties),
+    DECLARE_NODE_API_PROPERTY("getElementProperty", getElementProperty),
     DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
 
     DECLARE_NODE_API_PROPERTY("pushFrame", pushFrame),
@@ -1492,7 +1492,7 @@ napi_value VggSdkNodeAdapter::updateElementProperties(napi_env env, napi_callbac
   return nullptr;
 }
 
-napi_value VggSdkNodeAdapter::getElementProperties(napi_env env, napi_callback_info info)
+napi_value VggSdkNodeAdapter::getElementProperty(napi_env env, napi_callback_info info)
 {
   size_t     argc = 1;
   napi_value args[1];
@@ -1507,15 +1507,15 @@ napi_value VggSdkNodeAdapter::getElementProperties(napi_env env, napi_callback_i
 
   try
   {
-    auto queries = GetArgString(env, args[0]);
+    auto query = GetArgString(env, args[0]);
 
     VggSdkNodeAdapter* sdkAdapter;
     NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
 
     std::string result;
-    SyncTaskInMainLoop<bool>{ [&result, sdk = sdkAdapter->m_vggSdk, queries]()
+    SyncTaskInMainLoop<bool>{ [&result, sdk = sdkAdapter->m_vggSdk, query]()
                               {
-                                result = sdk->getElementProperties(queries);
+                                result = sdk->getElementProperty(query);
                                 return true;
                               },
                               [](bool) {} }();

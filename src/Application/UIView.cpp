@@ -1178,10 +1178,9 @@ int UIView::updateElement(
   return successCount;
 }
 
-std::vector<std::optional<app::ElementProperty>> UIView::getElementProperties(
-  const std::vector<app::ElementGetProperty>& queries)
+std::optional<app::ElementProperty> UIView::getElementProperty(const app::ElementGetProperty& query)
 {
-  return m_impl->getElementProperties(queries);
+  return m_impl->getElementProperty(query);
 }
 
 bool UIView::addElementProperty(const app::ElementAddProperty& command)

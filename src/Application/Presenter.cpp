@@ -460,10 +460,10 @@ int Presenter::updateElement(
   return m_view->updateElement(items, option);
 }
 
-std::vector<std::optional<app::ElementProperty>> Presenter::getElementProperties(
-  const std::vector<app::ElementGetProperty>& queries)
+std::optional<app::ElementProperty> Presenter::getElementProperty(
+  const app::ElementGetProperty& query)
 {
-  return m_view->getElementProperties(queries);
+  return m_view->getElementProperty(query);
 }
 
 bool Presenter::addElementProperty(const app::ElementAddProperty& command)

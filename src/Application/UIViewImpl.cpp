@@ -647,18 +647,12 @@ int UIViewImpl::updateElement(
   return successCount;
 }
 
-std::vector<std::optional<app::ElementProperty>> UIViewImpl::getElementProperties(
-  const std::vector<app::ElementGetProperty>& queries)
+std::optional<app::ElementProperty> UIViewImpl::getElementProperty(
+  const app::ElementGetProperty& query)
 {
-  std::vector<std::optional<app::ElementProperty>> r;
-  for (auto& query : queries)
-  {
-    if (auto n = std::visit(GetPaintNodeVisitor{ this }, query))
-      r.push_back(std::visit(GetElementPropertyVisitor{ n }, query));
-    else
-      r.push_back(std::nullopt);
-  }
-
+  std::optional<app::ElementProperty> r;
+  if (auto n = std::visit(GetPaintNodeVisitor{ this }, query))
+    r = std::visit(GetElementPropertyVisitor{ n }, query);
   return r;
 }
 

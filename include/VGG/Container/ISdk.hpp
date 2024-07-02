@@ -73,9 +73,9 @@ public:
   virtual int  updateElementProperties(
      const std::string&      updates, // json array string, std::vector<app::ElementUpdateProperty>
      const AnimationOptions& animation) = 0;
-  virtual std::string getElementProperties(
-    const std::string& queries // json array string, std::vector<app::ElementGetProperty>
-    ) = 0;                     // return json array string
+  virtual std::string getElementProperty(
+    const std::string& query                                 // json string, app::ElementGetProperty
+    ) = 0;                                                   // return json string
   virtual bool addElementProperty(const std::string& command // json string, app::ElementAddProperty
                                   ) = 0;
   virtual bool deleteElementProperty(

@@ -263,9 +263,8 @@ public:
   int updateElement(
     const std::vector<app::ElementUpdateProperty>& items,
     const app::UIAnimationOption&                  option);
-  std::vector<std::optional<app::ElementProperty>> getElementProperties(
-    const std::vector<app::ElementGetProperty>& queries);
-  bool addElementProperty(const app::ElementAddProperty& command);
+  std::optional<app::ElementProperty> getElementProperty(const app::ElementGetProperty& query);
+  bool                                addElementProperty(const app::ElementAddProperty& command);
   bool deleteElementProperty(const app::ElementDeleteProperty& command);
 
 protected:

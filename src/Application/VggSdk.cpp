@@ -571,12 +571,12 @@ int VggSdk::updateElementProperties(const std::string& updates, const AnimationO
   return 0;
 }
 
-std::string VggSdk::getElementProperties(const std::string& queries)
+std::string VggSdk::getElementProperty(const std::string& query)
 {
   if (const auto& p = presenter())
   {
-    const auto& j = nlohmann::json::parse(queries);
-    const auto& r = p->getElementProperties(j);
+    const auto& j = nlohmann::json::parse(query);
+    const auto& r = p->getElementProperty(j);
 
     nlohmann::json result = r;
     return result.dump();

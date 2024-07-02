@@ -252,6 +252,46 @@ struct GetElementPropertyVisitor
   }
 };
 
+struct MakeCommandContextVisitor
+{
+  UIViewImpl* viewImpl = nullptr;
+
+  std::optional<UIViewImpl::CommandContext> operator()(const std::monostate&) const
+  {
+    return std::nullopt;
+  }
+
+  std::optional<UIViewImpl::CommandContext> operator()(const app::BaseElementAdd& p) const
+  {
+    return viewImpl->makeCommandContext(p.id);
+  }
+
+  std::optional<UIViewImpl::CommandContext> operator()(const app::BaseElementDelete& p) const
+  {
+    return viewImpl->makeCommandContext(p.id);
+  }
+};
+
+struct ProcessCommandVisitor
+{
+  const UIViewImpl::CommandContext& c;
+
+  bool operator()(const std::monostate&)
+  {
+    return false;
+  }
+
+  bool operator()(const app::ElementAddFill& p)
+  {
+    return c.updater->addFill(c.layoutNode, c.paintNode, p.value, false, p.index);
+  }
+
+  bool operator()(const app::ElementDeleteFill& p)
+  {
+    return c.updater->delFill(c.layoutNode, c.paintNode, false, p.index);
+  }
+};
+
 } // namespace
 
 bool UIViewImpl::isUnitTest() const
@@ -633,6 +673,41 @@ layer::PaintNode* UIViewImpl::getPaintNode(const std::string& id)
     return nullptr;
 
   return m_sceneNode->nodeByID(layoutNode->elementNode()->idNumber());
+}
+
+bool UIViewImpl::addElementProperty(const app::ElementAddProperty& command)
+{
+  if (const auto& c = std::visit(MakeCommandContextVisitor{ this }, command); c.has_value())
+    return std::visit(ProcessCommandVisitor{ *c }, command);
+  return false;
+}
+
+bool UIViewImpl::deleteElementProperty(const app::ElementDeleteProperty& command)
+{
+  if (const auto& c = std::visit(MakeCommandContextVisitor{ this }, command); c.has_value())
+    return std::visit(ProcessCommandVisitor{ *c }, command);
+  return false;
+}
+
+std::optional<UIViewImpl::CommandContext> UIViewImpl::makeCommandContext(const std::string& id)
+{
+  const auto& root = m_viewModel->layoutTree();
+  if (!root)
+    return std::nullopt;
+
+  auto layoutNode = root->findDescendantNodeById(id);
+  if (!layoutNode)
+    return std::nullopt;
+
+  auto paintNode = m_sceneNode->nodeByID(layoutNode->elementNode()->idNumber());
+  if (!paintNode)
+    return std::nullopt;
+
+  auto updater = std::make_shared<AttrBridge>(
+    std::static_pointer_cast<UIView>(m_api->shared_from_this()),
+    m_animationManager);
+
+  return CommandContext{ updater, layoutNode->shared_from_this(), paintNode };
 }
 
 } // namespace VGG::internal

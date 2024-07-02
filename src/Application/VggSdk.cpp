@@ -15,6 +15,8 @@
  */
 #include "VggSdk.hpp"
 #include <unordered_set>
+#include "Application/ElementAddPropertySerializer.hpp"
+#include "Application/ElementDeletePropertySerializer.hpp"
 #include "Application/ElementGetPropertySerializer.hpp"
 #include "Application/ElementUpdatePropertySerializer.hpp"
 #include "Application/Presenter.hpp"
@@ -581,6 +583,26 @@ std::string VggSdk::getElementProperties(const std::string& queries)
   }
 
   return {};
+}
+
+bool VggSdk::addElementProperty(const std::string& command)
+{
+  if (const auto& p = presenter())
+  {
+    auto j = nlohmann::json::parse(command);
+    return p->addElementProperty(j);
+  }
+  return false;
+}
+
+bool VggSdk::deleteElementProperty(const std::string& command)
+{
+  if (const auto& p = presenter())
+  {
+    auto j = nlohmann::json::parse(command);
+    return p->deleteElementProperty(j);
+  }
+  return false;
 }
 
 } // namespace VGG

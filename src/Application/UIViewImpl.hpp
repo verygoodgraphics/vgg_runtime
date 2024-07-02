@@ -21,9 +21,11 @@
 #include <string>
 #include <vector>
 #include "Application/Animate.hpp"
-#include "Application/UIAnimation.hpp"
+#include "Application/ElementAddProperty.hpp"
+#include "Application/ElementDeleteProperty.hpp"
 #include "Application/ElementGetProperty.hpp"
 #include "Application/ElementUpdateProperty.hpp"
+#include "Application/UIAnimation.hpp"
 #include "Application/ZoomerNodeController.hpp"
 #include "Domain/Layout/LayoutContext.hpp"
 #include "Layer/Core/FrameNode.hpp"
@@ -57,6 +59,12 @@ public:
     std::shared_ptr<LayoutNode>    layoutNode;
     layer::PaintNode*              paintNode = nullptr;
     std::shared_ptr<NumberAnimate> animation;
+  };
+  struct CommandContext
+  {
+    std::shared_ptr<AttrBridge> updater;
+    std::shared_ptr<LayoutNode> layoutNode;
+    layer::PaintNode*           paintNode = nullptr;
   };
 
 public:
@@ -114,12 +122,15 @@ public:
     const app::UIAnimationOption&                  option);
   std::vector<std::optional<app::ElementProperty>> getElementProperties(
     const std::vector<app::ElementGetProperty>& queries);
+  bool addElementProperty(const app::ElementAddProperty& command);
+  bool deleteElementProperty(const app::ElementDeleteProperty& command);
 
   std::optional<UpdateBuilder> makeUpdateBuilder(
     const std::string&            id,
     const app::UIAnimationOption* anamation,
     Animate*                      parentAnimation);
-  layer::PaintNode* getPaintNode(const std::string& id);
+  std::optional<CommandContext> makeCommandContext(const std::string& id);
+  layer::PaintNode*             getPaintNode(const std::string& id);
 
 private:
   bool isUnitTest() const;

@@ -466,4 +466,14 @@ std::vector<std::optional<app::ElementProperty>> Presenter::getElementProperties
   return m_view->getElementProperties(queries);
 }
 
+bool Presenter::addElementProperty(const app::ElementAddProperty& command)
+{
+  return m_view->addElementProperty(command);
+}
+
+bool Presenter::deleteElementProperty(const app::ElementDeleteProperty& command)
+{
+  return m_view->deleteElementProperty(command);
+}
+
 } // namespace VGG

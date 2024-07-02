@@ -71,6 +71,8 @@ public:
   int         updateElementProperties(const std::string& updates, const AnimationOptions& animation)
     override;
   std::string getElementProperties(const std::string& queries) override;
+  bool        addElementProperty(const std::string& command) override;
+  bool        deleteElementProperty(const std::string& command) override;
 
   // -
   std::string getFramesInfo() const override;

@@ -1532,4 +1532,82 @@ napi_value VggSdkNodeAdapter::getElementProperties(napi_env env, napi_callback_i
   return nullptr;
 }
 
+napi_value VggSdkNodeAdapter::addElementProperty(napi_env env, napi_callback_info info)
+{
+  size_t     argc = 1;
+  napi_value args[1];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 1)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto command = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    bool success;
+    SyncTaskInMainLoop<bool>{ [&success, sdk = sdkAdapter->m_vggSdk, command]()
+                              {
+                                success = sdk->addElementProperty(command);
+                                return true;
+                              },
+                              [](bool) {} }();
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
+napi_value VggSdkNodeAdapter::deleteElementProperty(napi_env env, napi_callback_info info)
+{
+  size_t     argc = 1;
+  napi_value args[1];
+  napi_value _this;
+  NODE_API_CALL(env, napi_get_cb_info(env, info, &argc, args, &_this, NULL));
+
+  if (argc != 1)
+  {
+    napi_throw_error(env, nullptr, "Wrong number of arguments");
+    return nullptr;
+  }
+
+  try
+  {
+    auto command = GetArgString(env, args[0]);
+
+    VggSdkNodeAdapter* sdkAdapter;
+    NODE_API_CALL(env, napi_unwrap(env, _this, reinterpret_cast<void**>(&sdkAdapter)));
+
+    bool success;
+    SyncTaskInMainLoop<bool>{ [&success, sdk = sdkAdapter->m_vggSdk, command]()
+                              {
+                                success = sdk->deleteElementProperty(command);
+                                return true;
+                              },
+                              [](bool) {} }();
+    napi_value ret;
+    NODE_API_CALL(env, napi_get_boolean(env, success, &ret));
+    return ret;
+  }
+  catch (std::exception& e)
+  {
+    napi_throw_error(env, nullptr, e.what());
+  }
+
+  return nullptr;
+}
+
 } // namespace VGG

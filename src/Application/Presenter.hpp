@@ -20,12 +20,14 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "Application/ElementAddProperty.hpp"
+#include "Application/ElementDeleteProperty.hpp"
+#include "Application/ElementGetProperty.hpp"
+#include "Application/ElementUpdateProperty.hpp"
 #include "Application/UIAnimation.hpp"
 #include "Application/UIEvent.hpp"
 #include "Application/UIOptions.hpp"
 #include "Application/UIScrollView.hpp"
-#include "Application/ElementGetProperty.hpp"
-#include "Application/ElementUpdateProperty.hpp"
 #include "Application/UIView.hpp"
 #include "Domain/Layout/Rect.hpp"
 #include "Domain/ModelEvent.hpp"
@@ -299,6 +301,8 @@ public:
     const app::UIAnimationOption&                  option);
   std::vector<std::optional<app::ElementProperty>> getElementProperties(
     const std::vector<app::ElementGetProperty>& queries);
+  bool addElementProperty(const app::ElementAddProperty& command);
+  bool deleteElementProperty(const app::ElementDeleteProperty& command);
 
 public:
   bool updateViewNodeFillColor(

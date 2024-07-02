@@ -76,6 +76,11 @@ public:
   virtual std::string getElementProperties(
     const std::string& queries // json array string, std::vector<app::ElementGetProperty>
     ) = 0;                     // return json array string
+  virtual bool addElementProperty(const std::string& command // json string, app::ElementAddProperty
+                                  ) = 0;
+  virtual bool deleteElementProperty(
+    const std::string& command // json string, app::ElementDeleteProperty
+    ) = 0;
 
   // -
   virtual std::string getFramesInfo() const = 0;

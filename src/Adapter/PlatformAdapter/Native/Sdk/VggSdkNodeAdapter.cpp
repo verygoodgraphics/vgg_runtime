@@ -291,6 +291,8 @@ void VggSdkNodeAdapter::Init(napi_env env, napi_value exports)
     DECLARE_NODE_API_PROPERTY("updateElement", UpdateElement),
     DECLARE_NODE_API_PROPERTY("updateElementProperties", updateElementProperties),
     DECLARE_NODE_API_PROPERTY("getElementProperty", getElementProperty),
+    DECLARE_NODE_API_PROPERTY("addElementProperty", addElementProperty),
+    DECLARE_NODE_API_PROPERTY("deleteElementProperty", deleteElementProperty),
     DECLARE_NODE_API_PROPERTY("getDesignDocument", GetDesignDocument),
 
     DECLARE_NODE_API_PROPERTY("pushFrame", pushFrame),

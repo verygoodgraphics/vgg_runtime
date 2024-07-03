@@ -228,8 +228,8 @@ vec4 main(vec4 inColor){
     builder.uniform("highlight") = imageFilter.highlight;
     builder.uniform("shadow") = imageFilter.shadow;
     builder.uniform("tint") = imageFilter.tint;
-    builder.uniform("tintColor1") = SkV3{ 1.f, 0.9f, 0.2f };
-    builder.uniform("tintColor2") = SkV3{ 1.f, 0.5f, 0.9f };
+    builder.uniform("tintColor1") = SkV3{ 0.9f, 0.5f, 0.15f };
+    builder.uniform("tintColor2") = SkV3{ 0.15f, 0.5f, 0.9f };
     builder.uniform("hue") = imageFilter.hue;
     return builder.makeColorFilter();
   }

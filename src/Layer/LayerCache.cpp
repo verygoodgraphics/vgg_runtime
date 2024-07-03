@@ -39,39 +39,6 @@ ImageStackCache* getGlobalImageStackCache()
   return &s_imageStackCache;
 }
 
-ResourcesCache* getGlobalResourcesCache()
-{
-  static ResourcesCache s_blobCache(40);
-  return &s_blobCache;
-}
-
-sk_sp<SkData> loadBlob(const std::string& guid)
-{
-  if (auto cache = getGlobalResourcesCache(); cache)
-  {
-    if (auto it = cache->find(guid); it)
-    {
-      return *it;
-    }
-    else
-    {
-      if (auto repo = getGlobalResourceProvider(); repo)
-      {
-        if (auto data = repo->readData(guid); data)
-        {
-          cache->insert(guid, data);
-          return data;
-        }
-        else
-        {
-          WARN("Cannot find %s from resources repository", guid.data());
-        }
-      }
-    }
-  }
-  return nullptr;
-}
-
 std::pair<sk_sp<SkImage>, int> loadImageFromStack(const std::string& imageGUID, int i)
 {
   if (imageGUID.empty())
@@ -111,12 +78,12 @@ std::pair<sk_sp<SkImage>, int> loadImageFromStack(const std::string& imageGUID, 
     {
       if (auto data = repo->readData(imageGUID); data)
       {
-        auto blob = loadBlob(imageGUID);
-        if (!blob)
-        {
-          return { nullptr, 0 };
-        }
-        auto codec = SkCodec::MakeFromData(blob);
+        // auto blob = loadBlob(imageGUID);
+        // if (!blob)
+        // {
+        //   return { nullptr, 0 };
+        // }
+        auto codec = SkCodec::MakeFromData(data);
         if (!codec)
         {
           return { nullptr, 0 };

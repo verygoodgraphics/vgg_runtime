@@ -30,10 +30,8 @@ class PaintNode;
 
 using BlenderCacheKey = const char*;
 using EffectCacheKey = const char*;
-using ResourceGUID = std::string;
 using BlenderCache = LRUCache<BlenderCacheKey, sk_sp<SkBlender>>;
 using EffectCache = LRUCache<EffectCacheKey, sk_sp<SkRuntimeEffect>>;
-using ResourcesCache = LRUCache<ResourceGUID, sk_sp<SkData>>;
 using ImageCacheKey = std::string;
 using ImageStackCache =
   LRUCache<ImageCacheKey, std::pair<std::unique_ptr<SkCodec>, std::vector<sk_sp<SkImage>>>>;
@@ -42,12 +40,9 @@ using MaskMap = std::unordered_map<std::string, WeakRef<PaintNode>>;
 
 BlenderCache*    getGlobalBlenderCache();
 EffectCache*     getGlobalEffectCache();
-ResourcesCache*  getGlobalResourcesCache();
 ImageStackCache* getGlobalImageStackCache();
 
 std::pair<sk_sp<SkImage>, int> loadImageFromStack(const std::string& imageGUID, int i);
-
-sk_sp<SkData> loadBlob(const std::string& guid);
 
 MaskMap* getMaskMap();
 void     updateMaskMap(PaintNode* p);

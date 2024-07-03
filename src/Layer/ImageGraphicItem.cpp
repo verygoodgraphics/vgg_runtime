@@ -39,7 +39,10 @@ void ImageItem::render(Renderer* renderer)
 {
   DEBUG("render image");
   auto canvas = renderer->canvas();
-  canvas->drawPaint(m_brush->paint(getImageBounds()));
+  if (auto p = m_brush->paint(getImageBounds()); p.getShader())
+  {
+    canvas->drawPaint(p);
+  }
 }
 
 Bounds ImageItem::onRevalidate(Revalidation* inv, const glm::mat3& mat)

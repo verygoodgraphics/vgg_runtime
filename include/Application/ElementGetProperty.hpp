@@ -86,6 +86,18 @@ struct ElementGetHeight : BaseElementGet
 {
 };
 
+struct ElementGetPatternImageFileName : BaseElementGet
+{
+  std::size_t index = 0;
+  bool        effectOnFill = false;
+};
+
+struct ElementGetPatternImageFilters : BaseElementGet
+{
+  std::size_t index = 0;
+  bool        effectOnFill = false;
+};
+
 using ElementGetProperty = std::variant<
   std::monostate,
   ElementGetFillBlendMode,
@@ -100,7 +112,9 @@ using ElementGetProperty = std::variant<
   ElementGetPatternImageFillRotation,
   ElementGetVisible,
   ElementGetHeight,
-  ElementGetWidth>;
+  ElementGetWidth,
+  ElementGetPatternImageFileName,
+  ElementGetPatternImageFilters>;
 
 // MARK: - Get Result
 struct ElementColor
@@ -121,6 +135,18 @@ struct ElementMatrix
   double ty = 0;
 };
 
-using ElementProperty =
-  std::variant<bool, int, double, std::size_t, std::string, ElementColor, ElementMatrix>;
+struct ImageFilter
+{
+  float exposure = 0;
+  float contrast = 0;
+  float saturation = 0;
+  float temperature = 0;
+  float tint = 0;
+  float highlight = 0;
+  float shadow = 0;
+  float hue = 0;
+};
+
+using ElementProperty = std::
+  variant<bool, int, double, std::size_t, std::string, ElementColor, ElementMatrix, ImageFilter>;
 } // namespace VGG::app

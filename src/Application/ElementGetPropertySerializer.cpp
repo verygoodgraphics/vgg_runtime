@@ -57,13 +57,15 @@ struct ToJsonVisitor
   {
     j = x;
   }
+  void operator()(const VGG::app::ImageFilter& x)
+  {
+    j = x;
+  }
 };
 
 } // namespace
 
-void adl_serializer<VGG::app::ElementProperty>::to_json(
-  json&                               j,
-  const VGG::app::ElementProperty& x)
+void adl_serializer<VGG::app::ElementProperty>::to_json(json& j, const VGG::app::ElementProperty& x)
 {
   std::visit(ToJsonVisitor{ j }, x);
 }

@@ -272,6 +272,27 @@ struct GetElementPropertyVisitor
       return app::ElementProperty(*r);
     return std::nullopt;
   }
+
+  std::optional<app::ElementProperty> operator()(const app::ElementGetPatternImageFileName& p) const
+  {
+    if (auto r = AttrBridge::getPatternImageFileName(n, p.index, p.effectOnFill))
+      return app::ElementProperty(*r);
+    return std::nullopt;
+  }
+
+  std::optional<app::ElementProperty> operator()(const app::ElementGetPatternImageFilters& p) const
+  {
+    if (auto r = AttrBridge::getPatternImageFilters(n, p.index, p.effectOnFill))
+      return app::ElementProperty(app::ImageFilter{ .exposure = (*r).exposure,
+                                                    .contrast = (*r).contrast,
+                                                    .saturation = (*r).saturation,
+                                                    .temperature = (*r).temperature,
+                                                    .tint = (*r).tint,
+                                                    .highlight = (*r).highlight,
+                                                    .shadow = (*r).shadow,
+                                                    .hue = (*r).hue });
+    return std::nullopt;
+  }
 };
 
 struct MakeCommandContextVisitor

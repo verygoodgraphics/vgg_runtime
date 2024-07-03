@@ -42,10 +42,32 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementGetVisible, type, id);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementGetHeight, type, id);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementGetWidth, type, id);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+  ElementGetPatternImageFileName,
+  type,
+  id,
+  index,
+  effectOnFill);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+  ElementGetPatternImageFilters,
+  type,
+  id,
+  index,
+  effectOnFill);
 
 // MARK: - Return value struct
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementColor, a, r, g, b);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ElementMatrix, a, b, c, d, tx, ty);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+  ImageFilter,
+  exposure,
+  contrast,
+  saturation,
+  temperature,
+  tint,
+  highlight,
+  shadow,
+  hue);
 
 } // namespace VGG::app
 
@@ -93,6 +115,10 @@ inline void adl_serializer<VGG::app::ElementGetProperty>::from_json(
     x = j.get<ElementGetHeight>();
   else if (t == "width")
     x = j.get<ElementGetWidth>();
+  else if (t == "patternImageFileName")
+    x = j.get<ElementGetPatternImageFileName>();
+  else if (t == "patternImageFilters")
+    x = j.get<ElementGetPatternImageFilters>();
 }
 
 template<>

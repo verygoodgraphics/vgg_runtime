@@ -179,6 +179,34 @@ public:
     bool                        isOnlyUpdatePaint,
     bool                        effectOnFill);
 
+  // TODO patternImageStretch.matrix not complete.
+
+public:
+  // for gradient.from or gradient.to
+  // gradient includes gradientLinear, gradientRadial, gradientDiamond, gradientAngular
+  bool updateGradientFromOrTo(
+    std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
+    size_t                         index,
+    double                         newX,
+    double                         newY,
+    bool                           isOnlyUpdatePaint,
+    bool                           forFrom,
+    bool                           effectOnFill,
+    std::shared_ptr<NumberAnimate> animate = {});
+
+  // for gradient.stops.position
+  // gradient includes gradientLinear, gradientRadial, gradientDiamond, gradientAngular
+  bool updateGradientStopPosition(
+    std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
+    size_t                         index,
+    size_t                         indexForStops,
+    double                         newValue,
+    bool                           isOnlyUpdatePaint,
+    bool                           effectOnFill,
+    std::shared_ptr<NumberAnimate> animate = {});
+
 public:
   // for contextSettings.opacity
   bool updateOpacity(
@@ -292,6 +320,21 @@ public:
     size_t            index,
     bool              effectOnFill);
 
+  static std::optional<std::array<double, 2>> getGradientFromOrTo(
+    layer::PaintNode* node,
+    size_t            index,
+    bool              forFrom,
+    bool              effectOnFill);
+  static std::optional<size_t> getGradientStopsCount(
+    layer::PaintNode* node,
+    size_t            index,
+    bool              effectOnFill);
+  static std::optional<double> getGradientStopsPosition(
+    layer::PaintNode* node,
+    size_t            index,
+    size_t            indexForStops,
+    bool              effectOnFill);
+
   static std::optional<double>                getOpacity(layer::PaintNode* node);
   static std::optional<bool>                  getVisible(layer::PaintNode* node);
   static std::optional<TDesignMatrix>         getMatrix(layer::PaintNode* node);
@@ -383,6 +426,34 @@ private:
     int               value,
     bool              effectOnFill);
 
+  static void setGradientFromOrTo(
+    std::shared_ptr<LayoutNode> node,
+    size_t                      index,
+    double                      newX,
+    double                      newY,
+    bool                        forFrom,
+    bool                        effectOnFill);
+  static void setGradientFromOrTo(
+    layer::PaintNode* node,
+    size_t            index,
+    double            newX,
+    double            newY,
+    bool              forFrom,
+    bool              effectOnFill);
+
+  static void setGradientStopsPosition(
+    std::shared_ptr<LayoutNode> node,
+    size_t                      index,
+    size_t                      indexForStops,
+    double                      newValue,
+    bool                        effectOnFill);
+  static void setGradientStopsPosition(
+    layer::PaintNode* node,
+    size_t            index,
+    size_t            indexForStops,
+    double            newValue,
+    bool              effectOnFill);
+
   static void setOpacity(std::shared_ptr<LayoutNode> node, double value);
   static void setOpacity(layer::PaintNode* node, double value);
 
@@ -419,6 +490,8 @@ private:
     const std::vector<double>&                      to,
     std::function<void(const std::vector<double>&)> update,
     std::shared_ptr<NumberAnimate>                  animate);
+
+  static bool checkForAccessFill(layer::PaintNode* paintNode, size_t index);
 
 private:
   std::shared_ptr<UIView> m_view;

@@ -1,5 +1,25 @@
 # VGG Runtime Changelog
 
+## [daruma-v5.2 (Jul 4, 2024)](https://github.com/verygoodgraphics/vgg_runtime/releases/tag/daruma-v5.2)
+* Feature: add interface ([#424](https://github.com/verygoodgraphics/vgg_runtime/pull/424))
+* Feature: cache image ([#420](https://github.com/verygoodgraphics/vgg_runtime/pull/420))
+* Feature: more animate ([#412](https://github.com/verygoodgraphics/vgg_runtime/pull/412))
+* Feature: dirty rect on tile ([#402](https://github.com/verygoodgraphics/vgg_runtime/pull/402))
+* Feature: scrollto ([#397](https://github.com/verygoodgraphics/vgg_runtime/pull/397))
+* Feature: instance state override ([#395](https://github.com/verygoodgraphics/vgg_runtime/pull/395))
+* Feature: qt quick ([#394](https://github.com/verygoodgraphics/vgg_runtime/pull/394))
+* Bugfix: remove redundant cache ([#433](https://github.com/verygoodgraphics/vgg_runtime/pull/433))
+* Bugfix: image rendering ([#432](https://github.com/verygoodgraphics/vgg_runtime/pull/432))
+* Bugfix: tint ([#429](https://github.com/verygoodgraphics/vgg_runtime/pull/429))
+* Bugfix: font style matching ([#423](https://github.com/verygoodgraphics/vgg_runtime/pull/423))
+* Bugfix: pan gesture zero translation and velocity ([#414](https://github.com/verygoodgraphics/vgg_runtime/pull/414))
+* Bugfix: different wasm instances having same env key ([#406](https://github.com/verygoodgraphics/vgg_runtime/pull/406))
+* Bugfix: symbol instance state handle event ([#403](https://github.com/verygoodgraphics/vgg_runtime/pull/403))
+* Bugfix: text rounding ([#390](https://github.com/verygoodgraphics/vgg_runtime/pull/390))
+* Bugfix: set symbol instance state ([#391](https://github.com/verygoodgraphics/vgg_runtime/pull/391))
+
+Full changelog: [daruma-v5.1...daruma-v5.2](https://github.com/verygoodgraphics/vgg_runtime/compare/daruma-v5.1...daruma-v5.2)
+
 ## [daruma-v5.1 (Jun 14, 2024)](https://github.com/verygoodgraphics/vgg_runtime/releases/tag/daruma-v5.1)
 * Feature: damage rect ([#370](https://github.com/verygoodgraphics/vgg_runtime/pull/370))
 * Feature: layout text ([#367](https://github.com/verygoodgraphics/vgg_runtime/pull/367))

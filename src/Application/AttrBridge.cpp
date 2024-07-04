@@ -573,6 +573,37 @@ std::optional<double> AttrBridge::getGradientStopsPosition(
   return position;
 }
 
+std::optional<VGG::Color> AttrBridge::getGradientStopsColor(
+  layer::PaintNode* node,
+  size_t            index,
+  size_t            indexForStops,
+  bool              effectOnFill)
+{
+  auto size = getGradientStopsCount(node, index, effectOnFill);
+  if (!size)
+  {
+    return {};
+  }
+
+  if (indexForStops >= *size)
+  {
+    return {};
+  }
+
+  VGG::Color color;
+
+  if (!getGradientAttr(
+        node,
+        index,
+        effectOnFill,
+        [&color, indexForStops](auto&& arg) { color = arg.stops.at(indexForStops).color; }))
+  {
+    return {};
+  }
+
+  return color;
+}
+
 std::optional<bool> AttrBridge::getVisible(layer::PaintNode* node)
 {
   CHECK_EXPR(node, {});
@@ -1165,6 +1196,69 @@ void AttrBridge::setGradientStopsPosition(
     effectOnFill,
     [indexForStops, newValue](auto&& arg)
     { arg.stops[indexForStops].position = static_cast<float>(newValue); });
+}
+
+void AttrBridge::setGradientStopsColor(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  size_t                      indexForStops,
+  const std::vector<double>&  color,
+  bool                        effectOnFill)
+{
+  setLayoutNodeGradientAttr(
+    node,
+    index,
+    effectOnFill,
+    [indexForStops, &color](VGG::Model::GradientInstance& ins)
+    {
+      assert(color.size() == 4);
+
+      auto size = ins.stops.size();
+      if (indexForStops >= size)
+      {
+        assert(false);
+        return;
+      }
+
+      auto& item = ins.stops[indexForStops].color;
+      item.alpha = color[0];
+      item.red = color[1];
+      item.green = color[2];
+      item.blue = color[3];
+    });
+}
+
+void AttrBridge::setGradientStopsColor(
+  layer::PaintNode*          node,
+  size_t                     index,
+  size_t                     indexForStops,
+  const std::vector<double>& color,
+  bool                       effectOnFill)
+{
+  auto size = getGradientStopsCount(node, index, effectOnFill);
+  if (!size)
+  {
+    return;
+  }
+
+  if (indexForStops >= *size)
+  {
+    return;
+  }
+
+  setPaintNodeGradientAttr(
+    node,
+    index,
+    effectOnFill,
+    [indexForStops, &color](auto&& arg)
+    {
+      assert(color.size() == 4);
+      auto& item = arg.stops[indexForStops].color;
+      item.a = static_cast<float>(color[0]);
+      item.r = static_cast<float>(color[1]);
+      item.g = static_cast<float>(color[2]);
+      item.b = static_cast<float>(color[3]);
+    });
 }
 
 void AttrBridge::setOpacity(std::shared_ptr<LayoutNode> node, double value)
@@ -1864,9 +1958,7 @@ bool AttrBridge::updateGradientFromOrTo(
   bool                           effectOnFill,
   std::shared_ptr<NumberAnimate> animate)
 {
-  CHECK_EXPR(paintNode, false);
-
-  if (effectOnFill)
+    if (effectOnFill)
   {
     if (!checkForAccessFill(paintNode, index))
     {
@@ -1909,9 +2001,7 @@ bool AttrBridge::updateGradientStopPosition(
   bool                           effectOnFill,
   std::shared_ptr<NumberAnimate> animate)
 {
-  CHECK_EXPR(paintNode, false);
-
-  if (effectOnFill)
+    if (effectOnFill)
   {
     if (
       !checkForAccessFill(paintNode, index) ||
@@ -1936,6 +2026,112 @@ bool AttrBridge::updateGradientStopPosition(
     auto oldValue = *getGradientStopsPosition(paintNode, index, indexForStops, true);
 
     updateSimpleAttr({ oldValue }, { newValue }, update, animate);
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
+}
+
+bool AttrBridge::updateGradientStopColor(
+  std::shared_ptr<LayoutNode>    node,
+  layer::PaintNode*              paintNode,
+  size_t                         index,
+  size_t                         indexForStops,
+  const VGG::Model::Color&       newColor,
+  bool                           isOnlyUpdatePaint,
+  bool                           effectOnFill,
+  std::shared_ptr<NumberAnimate> animate)
+{
+  if (effectOnFill)
+  {
+    if (
+      !checkForAccessFill(paintNode, index) ||
+      indexForStops >= *getGradientStopsCount(paintNode, index, true))
+    {
+      return false;
+    }
+
+    auto nowColor = getGradientStopsColor(paintNode, index, indexForStops, true);
+    if (!nowColor)
+    {
+      return false;
+    }
+
+    auto update =
+      [node, paintNode, index, isOnlyUpdatePaint, indexForStops](const std::vector<double>& value)
+    {
+      assert(value.size() == 4);
+
+      if (!isOnlyUpdatePaint)
+      {
+        AttrBridge::setGradientStopsColor(node, index, indexForStops, value, true);
+      }
+
+      AttrBridge::setGradientStopsColor(paintNode, index, indexForStops, value, true);
+    };
+
+    updateSimpleAttr(
+      { nowColor->a, nowColor->r, nowColor->g, nowColor->b },
+      { newColor.alpha, newColor.red, newColor.green, newColor.blue },
+      update,
+      animate);
+
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
+}
+
+bool AttrBridge::delGradientStop(
+  std::shared_ptr<LayoutNode> node,
+  layer::PaintNode*           paintNode,
+  size_t                      index,
+  size_t                      indexForStops,
+  bool                        isOnlyUpdatePaint,
+  bool                        effectOnFill)
+{
+  if (effectOnFill)
+  {
+    if (
+      !checkForAccessFill(paintNode, index) ||
+      indexForStops >= *getGradientStopsCount(paintNode, index, true))
+    {
+      return false;
+    }
+
+    if (!isOnlyUpdatePaint)
+    {
+      setLayoutNodeGradientAttr(
+        node,
+        index,
+        effectOnFill,
+        [indexForStops](VGG::Model::GradientInstance& ins)
+        {
+          auto size = ins.stops.size();
+          if (indexForStops >= size)
+          {
+            assert(false);
+            return;
+          }
+
+          ins.stops.erase(ins.stops.begin() + indexForStops);
+        });
+    }
+
+    setPaintNodeGradientAttr(
+      paintNode,
+      index,
+      effectOnFill,
+      [indexForStops](auto&& arg) { arg.stops.erase(arg.stops.begin() + indexForStops); });
+
     return true;
   }
   else

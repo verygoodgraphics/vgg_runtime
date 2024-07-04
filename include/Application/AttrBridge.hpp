@@ -47,6 +47,7 @@ struct Object;
 struct Fill;
 struct Color;
 struct ImageFilters;
+struct GradientStop;
 } // namespace Model
 
 typedef std::array<double, 6> TDesignMatrix;
@@ -207,6 +208,28 @@ public:
     bool                           effectOnFill,
     std::shared_ptr<NumberAnimate> animate = {});
 
+  // for gradient.stops.color
+  // gradient includes gradientLinear, gradientRadial, gradientDiamond, gradientAngular
+  bool updateGradientStopColor(
+    std::shared_ptr<LayoutNode>    node,
+    layer::PaintNode*              paintNode,
+    size_t                         index,
+    size_t                         indexForStops,
+    const VGG::Model::Color&       newColor,
+    bool                           isOnlyUpdatePaint,
+    bool                           effectOnFill,
+    std::shared_ptr<NumberAnimate> animate = {});
+
+  // for delete gradient.stops
+  // gradient includes gradientLinear, gradientRadial, gradientDiamond, gradientAngular
+  bool delGradientStop(
+    std::shared_ptr<LayoutNode> node,
+    layer::PaintNode*           paintNode,
+    size_t                      index,
+    size_t                      indexForStops,
+    bool                        isOnlyUpdatePaint,
+    bool                        effectOnFill);
+
 public:
   // for contextSettings.opacity
   bool updateOpacity(
@@ -334,6 +357,11 @@ public:
     size_t            index,
     size_t            indexForStops,
     bool              effectOnFill);
+  static std::optional<VGG::Color> getGradientStopsColor(
+    layer::PaintNode* node,
+    size_t            index,
+    size_t            indexForStops,
+    bool              effectOnFill);
 
   static std::optional<double>                getOpacity(layer::PaintNode* node);
   static std::optional<bool>                  getVisible(layer::PaintNode* node);
@@ -453,6 +481,19 @@ private:
     size_t            indexForStops,
     double            newValue,
     bool              effectOnFill);
+
+  static void setGradientStopsColor(
+    std::shared_ptr<LayoutNode> node,
+    size_t                      index,
+    size_t                      indexForStops,
+    const std::vector<double>&  color,
+    bool                        effectOnFill);
+  static void setGradientStopsColor(
+    layer::PaintNode*          node,
+    size_t                     index,
+    size_t                     indexForStops,
+    const std::vector<double>& color,
+    bool                       effectOnFill);
 
   static void setOpacity(std::shared_ptr<LayoutNode> node, double value);
   static void setOpacity(layer::PaintNode* node, double value);

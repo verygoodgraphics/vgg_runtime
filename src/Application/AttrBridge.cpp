@@ -53,8 +53,8 @@ const std::map<int, VGG::EBlendMode> g_blendMode{
   auto accessor = node->attributeAccessor();                                                       \
   CHECK_EXPR(accessor, resultWhenFailed)
 
-template<typename T>
-bool getPatternAttr(layer::PaintNode* node, size_t index, bool effectOnFill, T fun)
+template<typename T, typename U>
+bool getPatternOrGradientAttr(layer::PaintNode* node, size_t index, bool effectOnFill, T fun)
 {
   GET_PAINTNODE_ACCESSOR(node, accessor, false);
 
@@ -65,8 +65,8 @@ bool getPatternAttr(layer::PaintNode* node, size_t index, bool effectOnFill, T f
       return false;
     }
 
-    auto& pattern = std::get<VGG::Pattern>(accessor->getFills().at(index).type);
-    std::visit(fun, pattern.instance);
+    auto& object = std::get<U>(accessor->getFills().at(index).type);
+    std::visit(fun, object.instance);
   }
   else
   {
@@ -75,6 +75,43 @@ bool getPatternAttr(layer::PaintNode* node, size_t index, bool effectOnFill, T f
   }
 
   return true;
+}
+
+template<typename T, typename U>
+void setPatternOrGradientAttr(layer::PaintNode* node, size_t index, bool effectOnFill, T fun)
+{
+  GET_PAINTNODE_ACCESSOR(node, accessor, void());
+
+  if (effectOnFill)
+  {
+    auto fills = accessor->getFills();
+    if (index >= fills.size())
+    {
+      return;
+    }
+
+    try
+    {
+      auto& object = std::get<U>(fills.at(index).type);
+      std::visit(fun, object.instance);
+    }
+    catch (...)
+    {
+      return;
+    }
+
+    accessor->setFills(fills);
+  }
+  else
+  {
+    // TODO not complete
+  }
+}
+
+template<typename T>
+bool getPatternAttr(layer::PaintNode* node, size_t index, bool effectOnFill, T fun)
+{
+  return getPatternOrGradientAttr<T, VGG::Pattern>(node, index, effectOnFill, fun);
 }
 
 template<typename T>
@@ -111,32 +148,50 @@ void setLayoutNodePatternAttr(
 template<typename T>
 void setPaintNodePatternAttr(layer::PaintNode* node, size_t index, bool effectOnFill, T fun)
 {
-  GET_PAINTNODE_ACCESSOR(node, accessor, void());
+  setPatternOrGradientAttr<T, VGG::Pattern>(node, index, effectOnFill, fun);
+}
 
+template<typename T>
+bool getGradientAttr(layer::PaintNode* node, size_t index, bool effectOnFill, T fun)
+{
+  return getPatternOrGradientAttr<T, VGG::Gradient>(node, index, effectOnFill, fun);
+}
+
+template<typename T>
+void setLayoutNodeGradientAttr(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  bool                        effectOnFill,
+  T                           fun)
+{
+  if (auto object = AttrBridge::getlayoutNodeObject(node))
+  {
   if (effectOnFill)
   {
-    auto fills = accessor->getFills();
-    if (index >= fills.size())
+      if (index >= object->style.fills.size())
     {
       return;
     }
 
-    try
-    {
-      auto& pattern = std::get<VGG::Pattern>(fills.at(index).type);
-      std::visit(fun, pattern.instance);
-    }
-    catch (...)
+      auto& gradient = object->style.fills.at(index).gradient;
+      if (!gradient)
     {
       return;
     }
 
-    accessor->setFills(fills);
+      fun(gradient->instance);
   }
   else
   {
     // TODO not complete
   }
+  }
+}
+
+template<typename T>
+void setPaintNodeGradientAttr(layer::PaintNode* node, size_t index, bool effectOnFill, T fun)
+{
+  setPatternOrGradientAttr<T, VGG::Gradient>(node, index, effectOnFill, fun);
 }
 
 AttrBridge::AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManage)
@@ -438,6 +493,84 @@ std::optional<int> AttrBridge::getPatternImageTileMode(
   }
 
   return mode;
+}
+
+std::optional<std::array<double, 2>> AttrBridge::getGradientFromOrTo(
+  layer::PaintNode* node,
+  size_t            index,
+  bool              forFrom,
+  bool              effectOnFill)
+{
+  double x = 0;
+  double y = 0;
+
+  auto fun = [&x, &y, forFrom](auto&& arg)
+  {
+    if (forFrom)
+    {
+      x = arg.from[0];
+      y = -arg.from[1];
+    }
+    else
+    {
+      x = arg.to[0];
+      y = -arg.to[1];
+    }
+  };
+
+  if (!getGradientAttr(node, index, effectOnFill, fun))
+  {
+    return {};
+  }
+
+  return std::array<double, 2>{ x, y };
+}
+
+std::optional<size_t> AttrBridge::getGradientStopsCount(
+  layer::PaintNode* node,
+  size_t            index,
+  bool              effectOnFill)
+{
+  size_t size = 0;
+
+  if (!getGradientAttr(node, index, effectOnFill, [&size](auto&& arg) { size = arg.stops.size(); }))
+  {
+    return {};
+  }
+
+  return size;
+}
+
+std::optional<double> AttrBridge::getGradientStopsPosition(
+  layer::PaintNode* node,
+  size_t            index,
+  size_t            indexForStops,
+  bool              effectOnFill)
+{
+  auto size = getGradientStopsCount(node, index, effectOnFill);
+  if (!size)
+  {
+    return {};
+  }
+
+  if (indexForStops >= *size)
+  {
+    return {};
+  }
+
+  double position = 0;
+
+  if (!getGradientAttr(
+        node,
+        index,
+        effectOnFill,
+        [&position, indexForStops](auto&& arg)
+        { position = arg.stops.at(indexForStops).position; }))
+  {
+    return {};
+  }
+
+  return position;
 }
 
 std::optional<bool> AttrBridge::getVisible(layer::PaintNode* node)
@@ -934,6 +1067,106 @@ void AttrBridge::setPatternImageTileMode(
     });
 }
 
+void AttrBridge::setGradientFromOrTo(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  double                      newX,
+  double                      newY,
+  bool                        forFrom,
+  bool                        effectOnFill)
+{
+  setLayoutNodeGradientAttr(
+    node,
+    index,
+    effectOnFill,
+    [newX, newY, forFrom](VGG::Model::GradientInstance& ins)
+    {
+      if (forFrom)
+      {
+        ins.from = { newX, newY };
+      }
+      else
+      {
+        ins.to = { newX, newY };
+      }
+    });
+}
+
+void AttrBridge::setGradientFromOrTo(
+  layer::PaintNode* node,
+  size_t            index,
+  double            newX,
+  double            newY,
+  bool              forFrom,
+  bool              effectOnFill)
+{
+  setPaintNodeGradientAttr(
+    node,
+    index,
+    effectOnFill,
+    [newX, newY, forFrom](auto&& arg)
+    {
+      if (forFrom)
+      {
+        arg.from = { newX, -newY };
+      }
+      else
+      {
+        arg.to = { newX, -newY };
+      }
+    });
+}
+
+void AttrBridge::setGradientStopsPosition(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  size_t                      indexForStops,
+  double                      newValue,
+  bool                        effectOnFill)
+{
+  setLayoutNodeGradientAttr(
+    node,
+    index,
+    effectOnFill,
+    [indexForStops, newValue](VGG::Model::GradientInstance& ins)
+    {
+      auto size = ins.stops.size();
+      if (indexForStops >= size)
+      {
+        assert(false);
+        return;
+      }
+
+      ins.stops[indexForStops].position = newValue;
+    });
+}
+
+void AttrBridge::setGradientStopsPosition(
+  layer::PaintNode* node,
+  size_t            index,
+  size_t            indexForStops,
+  double            newValue,
+  bool              effectOnFill)
+{
+  auto size = getGradientStopsCount(node, index, effectOnFill);
+  if (!size)
+  {
+    return;
+  }
+
+  if (indexForStops >= *size)
+  {
+    return;
+  }
+
+  setPaintNodeGradientAttr(
+    node,
+    index,
+    effectOnFill,
+    [indexForStops, newValue](auto&& arg)
+    { arg.stops[indexForStops].position = static_cast<float>(newValue); });
+}
+
 void AttrBridge::setOpacity(std::shared_ptr<LayoutNode> node, double value)
 {
   if (auto object = AttrBridge::getlayoutNodeObject(node))
@@ -1050,6 +1283,24 @@ void AttrBridge::updateSimpleAttr(
     animate->start();
     m_animateManage.addAnimate(animate);
   }
+}
+
+bool AttrBridge::checkForAccessFill(layer::PaintNode* paintNode, size_t index)
+{
+  if (!paintNode)
+  {
+    return false;
+  }
+
+  auto fillSize = AttrBridge::getFillSize(paintNode);
+  assert(fillSize);
+
+  if (index >= *fillSize)
+  {
+    return false;
+  }
+
+  return true;
 }
 
 Model::Object* AttrBridge::getlayoutNodeObject(std::shared_ptr<LayoutNode> node)
@@ -1245,8 +1496,6 @@ bool AttrBridge::updateFillEnabled(
     return true;
   }
 
-  GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
-
   auto update = [node, paintNode, index, isOnlyUpdatePaint, enabled]()
   {
     if (!isOnlyUpdatePaint)
@@ -1336,12 +1585,7 @@ bool AttrBridge::updateFillOpacity(
   bool                           isOnlyUpdatePaint,
   std::shared_ptr<NumberAnimate> animate)
 {
-  if (!paintNode)
-  {
-    return false;
-  }
-
-  if (index >= *AttrBridge::getFillSize(paintNode))
+  if (!checkForAccessFill(paintNode, index))
   {
     return false;
   }
@@ -1381,7 +1625,7 @@ bool AttrBridge::updateFillBlendMode(
     return false;
   }
 
-  if (!paintNode || index >= *AttrBridge::getFillSize(paintNode))
+  if (!checkForAccessFill(paintNode, index))
   {
     return false;
   }
@@ -1410,11 +1654,9 @@ bool AttrBridge::updatePatternImageFilters(
   bool                               effectOnFill,
   std::shared_ptr<NumberAnimate>     animate)
 {
-  GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
-
-  if (effectOnFill)
+    if (effectOnFill)
   {
-    if (index >= *AttrBridge::getFillSize(paintNode))
+    if (!checkForAccessFill(paintNode, index))
     {
       return false;
     }
@@ -1470,11 +1712,9 @@ bool AttrBridge::updatePatternImageFillRotation(
   bool                           effectOnFill,
   std::shared_ptr<NumberAnimate> animate)
 {
-  GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
-
-  if (effectOnFill)
+    if (effectOnFill)
   {
-    if (index >= *AttrBridge::getFillSize(paintNode))
+    if (!checkForAccessFill(paintNode, index))
     {
       return false;
     }
@@ -1516,7 +1756,7 @@ bool AttrBridge::updatePatternImageTileMirror(
 {
   if (effectOnFill)
   {
-    if (index >= *AttrBridge::getFillSize(paintNode))
+    if (!checkForAccessFill(paintNode, index))
     {
       return false;
     }
@@ -1549,7 +1789,7 @@ bool AttrBridge::updatePatternImageTileScale(
 {
   if (effectOnFill)
   {
-    if (index >= *AttrBridge::getFillSize(paintNode))
+    if (!checkForAccessFill(paintNode, index))
     {
       return false;
     }
@@ -1591,7 +1831,7 @@ bool AttrBridge::updatePatternImageTileMode(
 {
   if (effectOnFill)
   {
-    if (index >= *AttrBridge::getFillSize(paintNode))
+    if (!checkForAccessFill(paintNode, index))
     {
       return false;
     }
@@ -1613,6 +1853,99 @@ bool AttrBridge::updatePatternImageTileMode(
   }
 }
 
+bool AttrBridge::updateGradientFromOrTo(
+  std::shared_ptr<LayoutNode>    node,
+  layer::PaintNode*              paintNode,
+  size_t                         index,
+  double                         newX,
+  double                         newY,
+  bool                           isOnlyUpdatePaint,
+  bool                           forFrom,
+  bool                           effectOnFill,
+  std::shared_ptr<NumberAnimate> animate)
+{
+  CHECK_EXPR(paintNode, false);
+
+  if (effectOnFill)
+  {
+    if (!checkForAccessFill(paintNode, index))
+    {
+      return false;
+    }
+
+    auto update =
+      [node, paintNode, index, isOnlyUpdatePaint, forFrom](const std::vector<double>& value)
+    {
+      assert(value.size() == 2);
+
+      if (!isOnlyUpdatePaint)
+      {
+        AttrBridge::setGradientFromOrTo(node, index, value[0], value[1], forFrom, true);
+      }
+
+      AttrBridge::setGradientFromOrTo(paintNode, index, value[0], value[1], forFrom, true);
+    };
+
+    auto oldValue = *getGradientFromOrTo(paintNode, index, forFrom, true);
+
+    updateSimpleAttr({ oldValue[0], oldValue[1] }, { newX, newY }, update, animate);
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
+}
+
+bool AttrBridge::updateGradientStopPosition(
+  std::shared_ptr<LayoutNode>    node,
+  layer::PaintNode*              paintNode,
+  size_t                         index,
+  size_t                         indexForStops,
+  double                         newValue,
+  bool                           isOnlyUpdatePaint,
+  bool                           effectOnFill,
+  std::shared_ptr<NumberAnimate> animate)
+{
+  CHECK_EXPR(paintNode, false);
+
+  if (effectOnFill)
+  {
+    if (
+      !checkForAccessFill(paintNode, index) ||
+      indexForStops >= *getGradientStopsCount(paintNode, index, true))
+    {
+      return false;
+    }
+
+    auto update =
+      [node, paintNode, index, isOnlyUpdatePaint, indexForStops](const std::vector<double>& value)
+    {
+      assert(value.size() == 1);
+
+      if (!isOnlyUpdatePaint)
+      {
+        AttrBridge::setGradientStopsPosition(node, index, indexForStops, value[0], true);
+      }
+
+      AttrBridge::setGradientStopsPosition(paintNode, index, indexForStops, value[0], true);
+    };
+
+    auto oldValue = *getGradientStopsPosition(paintNode, index, indexForStops, true);
+
+    updateSimpleAttr({ oldValue }, { newValue }, update, animate);
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
+}
+
 bool AttrBridge::updatePatternImageFileName(
   std::shared_ptr<LayoutNode> node,
   layer::PaintNode*           paintNode,
@@ -1621,11 +1954,9 @@ bool AttrBridge::updatePatternImageFileName(
   bool                        isOnlyUpdatePaint,
   bool                        effectOnFill)
 {
-  GET_PAINTNODE_ACCESSOR(paintNode, accessor, false);
-
-  if (effectOnFill)
+    if (effectOnFill)
   {
-    if (index >= *AttrBridge::getFillSize(paintNode))
+    if (!checkForAccessFill(paintNode, index))
     {
       return false;
     }

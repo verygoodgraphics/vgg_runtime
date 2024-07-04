@@ -310,6 +310,7 @@ inline void serde_from(const Model::Border& b, Border& x)
     x.dashedPattern.insert(x.dashedPattern.end(), x.dashedPattern.begin(), x.dashedPattern.end());
   }
   x.flat = b.flat;
+  x.style = (EBorderStyle)b.style;
   x.lineCapStyle = (ELineCap)b.lineCapStyle;
   x.lineJoinStyle = (ELineJoin)b.lineJoinStyle;
   x.miterLimit = b.miterLimit;

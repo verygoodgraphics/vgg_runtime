@@ -256,6 +256,7 @@ struct Border
   float              flat;
   float              miterLimit;
   float              thickness;
+  EBorderStyle       style;
   ELineCap           lineCapStyle;
   ELineJoin          lineJoinStyle;
   EPathPosition      position;
@@ -266,8 +267,9 @@ struct Border
     return type == rhs.type && contextSettings == rhs.contextSettings &&
            dashedPattern == rhs.dashedPattern && dashedOffset == rhs.dashedOffset &&
            flat == rhs.flat && miterLimit == rhs.miterLimit && thickness == rhs.thickness &&
-           lineCapStyle == rhs.lineCapStyle && lineJoinStyle == rhs.lineJoinStyle &&
-           position == rhs.position && isEnabled == rhs.isEnabled;
+           style == rhs.style && lineCapStyle == rhs.lineCapStyle &&
+           lineJoinStyle == rhs.lineJoinStyle && position == rhs.position &&
+           isEnabled == rhs.isEnabled;
   }
 };
 

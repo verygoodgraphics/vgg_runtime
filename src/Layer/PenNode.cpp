@@ -15,8 +15,10 @@
  */
 #include "PenNode.hpp"
 #include "Effects.hpp"
+#include "Layer/Core/VType.hpp"
 #include "Layer/Pattern.hpp"
 #include "Layer/GlobalSettings.hpp"
+#include <effects/Sk1DPathEffect.h>
 
 namespace
 {
@@ -102,6 +104,7 @@ void BorderBrush::applyBorder(const Border& border)
   setOpacity(border.contextSettings.opacity);
   setDashPattern(border.dashedPattern);
   setDashPatternOffset(border.dashedOffset);
+  setBorderStyle(border.style);
   setPosition(border.position);
   setStrokeJoin(toSkPaintJoin(border.lineJoinStyle));
   setStrokeCap(toSkPaintCap(border.lineCapStyle));
@@ -122,9 +125,17 @@ void BorderBrush::applyBorder(const Border& border)
 void BorderBrush::onMakePaint(SkPaint* paint, const Bounds& bounds) const
 
 {
-  const auto& dashedPattern = getDashPattern();
-  paint->setPathEffect(
-    SkDashPathEffect::Make(dashedPattern.data(), dashedPattern.size(), getDashPatternOffset()));
+  if (getBorderStyle() == EBorderStyle::DASH)
+  {
+    const auto& dashedPattern = getDashPattern();
+    paint->setPathEffect(
+      SkDashPathEffect::Make(dashedPattern.data(), dashedPattern.size(), getDashPatternOffset()));
+  }
+  else if (getBorderStyle() == EBorderStyle::DOT)
+  {
+    const SkScalar points[] = { 5, 5 };
+    paint->setPathEffect(SkDashPathEffect::Make(points, 2, getDashPatternOffset()));
+  }
   Brush::onMakePaint(paint, bounds);
 }
 

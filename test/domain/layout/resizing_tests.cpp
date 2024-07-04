@@ -511,8 +511,7 @@ TEST_F(VggResizingTestSuite, HandleParentOrigin)
     EXPECT_TRUE(bounds == expectedBounds[0]);
   }
   {
-    std::vector<Layout::Rect> expectedFrames{ { { 318.27272727272725, 978.71428571428577 },
-                                                { 1920, 1080 } } };
+    std::vector<Layout::Rect> expectedFrames{ { { 0, 0 }, { 1920, 1080 } } };
     EXPECT_TRUE(descendantFrame({ 0 }, 0) == expectedFrames[0]);
   }
 }

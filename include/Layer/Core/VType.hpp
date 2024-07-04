@@ -53,6 +53,13 @@ enum EOverflow
   OF_SCROLL = 3
 };
 
+enum EBorderStyle
+{
+  SOLID = 0,
+  DOT = 1,
+  DASH = 2,
+};
+
 enum EBlendMode
 {
   // common in ai, sketch, octopus

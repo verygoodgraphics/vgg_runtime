@@ -527,7 +527,10 @@ void StackBorderEffectImpl::onRenderShape(Renderer* renderer, const VShape& bord
       border.draw(renderer->canvas(), strokePen);
 
       SkRect borderBounds;
-      strokePen.computeFastBounds(shapeBounds, &borderBounds);
+      if (strokePen.canComputeFastBounds())
+      {
+        strokePen.computeFastBounds(shapeBounds, &borderBounds);
+      }
       resultBounds.join(borderBounds);
       if (!inCenter)
       {

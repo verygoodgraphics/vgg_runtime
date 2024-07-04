@@ -155,6 +155,7 @@ public:
 
   VGG_ATTRIBUTE(Position, EPathPosition, m_position);
   VGG_ATTRIBUTE(DashPattern, const std::vector<float>&, m_dashPattern);
+  VGG_ATTRIBUTE(BorderStyle, EBorderStyle, m_style);
   VGG_ATTRIBUTE(DashPatternOffset, float, m_dashPatternOffset);
 
   VGG_CLASS_MAKE(BorderBrush);
@@ -166,6 +167,7 @@ protected:
 private:
   void               applyBorder(const Border& border);
   EPathPosition      m_position = EPathPosition::PP_CENTER;
+  EBorderStyle       m_style = EBorderStyle::SOLID;
   std::vector<float> m_dashPattern;
   float              m_dashPatternOffset = 0;
 };

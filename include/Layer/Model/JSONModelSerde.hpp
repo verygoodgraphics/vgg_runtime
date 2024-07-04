@@ -410,6 +410,7 @@ inline void from_json(const json& j, Border& x)
   {
     x.dashedPattern.insert(x.dashedPattern.end(), x.dashedPattern.begin(), x.dashedPattern.end());
   }
+  x.style = (EBorderStyle)j.value("style", 0);
   x.flat = j.value("flat", 0.f);
   x.isEnabled = j.value("isEnabled", false);
   x.lineCapStyle = j.value("lineCapStyle", ELineCap::LC_BUTT);

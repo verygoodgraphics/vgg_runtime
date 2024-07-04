@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "Layer/Renderable.hpp"
+#include "Layer/ImageType.hpp"
 #include "Layer/Core/RenderNode.hpp"
 #include "Layer/Core/TransformNode.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
@@ -34,34 +35,6 @@ class sk_sp;
 
 namespace VGG::layer
 {
-
-enum class EImageEncode
-{
-  IE_PNG,
-  IE_JPEG,
-  IE_WEBP,
-  IE_RAW
-};
-
-struct ImageOptions
-{
-  EImageEncode encode;
-  int          position[2] = { 0, 0 };
-  int          extend[2] = { 0, 0 };
-  int          quality{ 100 };
-};
-
-struct SVGOptions
-{
-  int position[2];
-  int extend[2];
-};
-
-struct PDFOptions
-{
-  int position[2];
-  int extend[2];
-};
 
 #define DEPRECATED(msg) [[deprecated(msg)]]
 

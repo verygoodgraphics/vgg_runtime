@@ -670,8 +670,9 @@ Layout::Rect LayoutNode::resize(
     }
   }
 
-  auto oldFrame = frame();
-  if (isResizingAroundCenter())
+  auto       oldFrame = frame();
+  const bool keepShapeWithRotation = hasRotation() && isResizingAroundCenter();
+  if (keepShapeWithRotation)
   {
     Layout::Point center{ oldFrame.width() / 2, oldFrame.height() / 2 };
     center = center.makeModelPoint().makeTransform(modelMatrix()).makeFromModelPoint();
@@ -682,7 +683,7 @@ Layout::Rect LayoutNode::resize(
   auto [y, h] = resizeV(oldContainerSize, newContainerSize, oldFrame, parentOrigin);
   Layout::Point newOrigin{ x, y };
   Layout::Rect  newFrame{ newOrigin, { w, h } };
-  if (isResizingAroundCenter())
+  if (keepShapeWithRotation)
   {
     newOrigin = (newOrigin - newFrame.center())
                   .makeModelPoint()
@@ -1234,13 +1235,18 @@ Layout::Size LayoutNode::rotatedSize(const Layout::Size& size)
 
 bool LayoutNode::shouldSwapWidthAndHeight()
 {
-  const auto& matrix = modelMatrix();
-  if (doubleNearlyZero(matrix.b) && doubleNearlyZero(matrix.c))
-  {
+  if (!hasRotation())
     return false;
-  }
-  const auto radian = std::abs(matrix.decomposeRotateRadian());
+
+  const auto& matrix = modelMatrix();
+  const auto  radian = std::abs(matrix.decomposeRotateRadian());
   return radian >= M_PI_4 && radian <= M_PI_4 * 3;
+}
+
+bool LayoutNode::hasRotation()
+{
+  const auto& matrix = modelMatrix();
+  return !doubleNearlyZero(matrix.b) || !doubleNearlyZero(matrix.c);
 }
 
 Layout::Size LayoutNode::swapWidthAndHeightIfNeeded(Layout::Size size)

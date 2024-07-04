@@ -288,6 +288,7 @@ private:
 
   bool shouldSkip();
   bool isBooleanGroup();
+  bool hasRotation();
 
   void updatePathNodeModel(
     const Layout::Rect&                     newFrame,

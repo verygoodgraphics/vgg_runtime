@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en-us">
+
+<head></head>
+
+<body>
+  <canvas id="myCanvas" style="width: 100vw; height: 100vh; " tabIndex="-1"></canvas>
+  <!-- <canvas id="myCanvas" style="width: 200px; height: 100px; " tabIndex="-1"></canvas> -->
+
+  <script type="text/javascript" src="./sut/vgg_runtime.js"></script>
+  <!-- <script type="text/javascript" src="https://s3.vgg.cool/test/runtime/latest/vgg_runtime.js"></script> -->
+  <!-- <script type="text/javascript"
+    src="https://s3.vgg.cool/test/runtime/e2d14862d15c159ca340e29fbc5d7c8cc1c719fc/vgg_runtime.js"></script> -->
+  <script type="text/javascript">
+    const saveByteArray = (function () {
+      var a = document.createElement("a");
+      document.body.appendChild(a);
+      a.style = "display: none";
+      return function (data, name) {
+        var blob = new Blob(data, { type: "octet/stream" }),
+          url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = name;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      };
+    }());
+
+    // defautl keys
+    const vggContainerKey = "vggInstances";
+    const vggInstanceKey = "instance";
+    const vggListenerKey = "listener";
+
+    const myFontUrl = '/fonts/ABeeZee-Italic.ttf';
+
+    async function setupAndRun() {
+      // 0. Given
+      const myCanvas = document.querySelector('#myCanvas');
+      const myDarumaUrl = 'zip/0516instanceSmartAnimation.zip';
+      const width = 800;
+      const height = 600;
+
+      myCanvas.addEventListener('mousedown', (e) =>
+        e.target.focus()
+      );
+
+      // 1. create wasm instance
+      const myInstance = await _vgg_createWasmInstance(
+        {
+          noInitialRun: true,
+          canvas: myCanvas,
+          locateFile: function (path, prefix) {
+            if (path.endsWith('.data')) {
+              return './sut/' + path;
+              return "https://s3.vgg.cool/test/runtime/latest/" + path;
+              return "https://s3.vgg.cool/test/runtime/e2d14862d15c159ca340e29fbc5d7c8cc1c719fc/" + path;
+            }
+            return prefix + path;
+          },
+        }
+      );
+
+      // myInstance.setUp(myCanvas);
+      const offscreenCanvas = myCanvas.transferControlToOffscreen();
+      myInstance.setUp(offscreenCanvas, myCanvas.clientWidth, myCanvas.clientHeight, window.devicePixelRatio);
+
+
+      // 2. call wasm main
+
+      // configure vgg before loading vgg file
+      {
+        const vggSdk = new myInstance.VggSdk();
+        vggSdk.setFitToViewportEnabled(false);
+        // vggSdk.setContentMode("topLeft");
+        // vggSdk.setContentMode("scaleAspectFill");
+        // vggSdk.setContentMode("scaleAspectFillTopCenter");
+        // vggSdk.setContentMode("scaleAspectFit");
+        if (vggSdk.delete) {
+          vggSdk.delete();
+        }
+      }
+
+      // 3. load vgg work
+      fetch(myDarumaUrl)
+        .then(res => {
+          if (res.ok) {
+            return res.arrayBuffer();
+          }
+          throw new Error(res.statusText);
+        })
+        .then(buf => {
+          const data = new Int8Array(buf);
+          if (!myInstance.load(data)) {
+            throw new Error('load failed!');
+          }
+
+        }).then(
+          (val) => {
+            // 4. use vgg sdk
+            // useVggSdk(myInstance);
+          }
+        )
+        .catch(err => {
+          console.error(`Failed to load work: ${err.message}`);
+        });
+
+    }
+
+    function setupEnv(myInstance) {
+      // Given
+      const theVggSdk = new myInstance.VggSdk();
+
+      // use defautl keys
+      const vggEnvName = theVggSdk.getEnv();
+      globalThis[vggContainerKey] = {};
+      globalThis[vggContainerKey][vggEnvName] = {};
+      globalThis[vggContainerKey][vggEnvName][vggInstanceKey] = myInstance;
+      globalThis[vggContainerKey][vggEnvName][vggListenerKey] = myVggListener;
+
+      return;
+
+      // myVggListener will receive all events.
+      myInstance.ccall(
+        'listenAllEvents',
+        'void',
+        ['boolean'],
+        [true]
+      );
+    }
+
+    function setupEnvWithCustomKeys(myInstance) {
+      // Given
+      const theVggSdk = new myInstance.VggSdk();
+
+      // set custom keys 
+      const myContainerKey = "myContainerKey";
+      const myInstanceKey = "myInstanceKey";
+      const myListnerKey = "myListnerKey";
+      theVggSdk.setContainerKey(myContainerKey);
+      theVggSdk.setInstanceKey(myInstanceKey);
+      theVggSdk.setListenerKey(myListnerKey);
+
+      // use custom keys 
+      const vggEnvName = theVggSdk.getEnv();
+      globalThis[myContainerKey] = {};
+      globalThis[myContainerKey][vggEnvName] = {};
+      globalThis[myContainerKey][vggEnvName][myInstanceKey] = myInstance;
+      globalThis[myContainerKey][vggEnvName][myListnerKey] = myVggListener;
+    }
+
+    function useVggSdk(myInstance) {
+      // Given
+      const theVggSdk = new myInstance.VggSdk();
+
+      globalThis.vggSdk = theVggSdk;
+
+      {
+        // vggSdk.setContentMode("scaleAspectFit");
+      }
+
+      // When
+      const documentString = theVggSdk.getDesignDocument();
+      // Then
+      console.log("got document json string from sdk, length:  ", documentString.length);
+
+      try {
+        // let v = theVggSdk.valueAt('/xxx');
+        let v2 = theVggSdk.valueAt('/frames/0');
+      } catch (e) {
+        console.log(getExceptionMessage(e).toString());
+      }
+
+      {
+        let frames = theVggSdk.getFramesInfo();
+        console.log('frames:', JSON.parse(frames));
+
+        // set current frame by id
+        console.log('before set frame by id, currentFrameId:', theVggSdk.currentFrameId());
+        theVggSdk.setCurrentFrameById('1:3', true);
+        console.log('after set frame by id, currentFrameId:', theVggSdk.currentFrameId());
+
+        // set launch frame by id
+        console.log('launchFrameId:', theVggSdk.launchFrameId());
+        theVggSdk.setLaunchFrameById('1:4');
+        console.log('launchFrameId:', theVggSdk.launchFrameId());
+      }
+
+      {
+        let fonts = theVggSdk.requiredFonts();
+        console.log('required fonts:', JSON.parse(fonts));
+        fetch(myFontUrl)
+          .then(res => {
+            if (res.ok) {
+              return res.arrayBuffer();
+            }
+            throw new Error(res.statusText);
+          })
+          .then(buf => {
+            const data = new Uint8Array(buf);
+            if (
+              !theVggSdk.addFont(data, 'ABeeZee-Italic')
+            ) {
+              throw new Error('add font failed!');
+            }
+          })
+          .catch(err => {
+            console.error(`Failed to add font: ${err.message}`);
+          });
+      }
+
+      {
+        let buffer = theVggSdk.vggFileUint8Array();
+        console.log('vgg file buffer:', buffer);
+      }
+
+      // save after screen resize 
+      setTimeout(() => {
+        // type: png, jpg, webp 
+        // quality: 0-100
+        let imageBytes = theVggSdk.makeImageSnapshot({ type: "png", quality: 0 });
+        console.log('vgg image bytes:', imageBytes);
+        // saveByteArray([imageBytes], 'example.png');
+      }, 1000);
+
+      {
+        // Matrix
+        var matrix = new myInstance.Matrix(1, 0, 0, 1, 0, 0);
+
+        var m2 = matrix.rotated(Math.PI);
+        console.log('rotated matrix:', m2.a, m2.b, m2.c, m2.d, m2.tx, m2.ty);
+
+        var angle = m2.rotationAngle();
+        console.log('rotation angle:', angle);
+
+        var xFlipped = matrix.scaled(-1, 1);
+        console.log('x flipped matrix', xFlipped.a, xFlipped.b, xFlipped.c, xFlipped.d, xFlipped.tx, xFlipped.ty);
+
+        var yFlipped = matrix.scaled(1, -1);
+        console.log('y flipped matrix', yFlipped.a, yFlipped.b, yFlipped.c, yFlipped.d, yFlipped.tx, yFlipped.ty);
+      }
+      {
+        let texts = theVggSdk.texts();
+        console.log('texts:', texts);
+      }
+    }
+
+    function myVggListener(vggEvent) {
+      console.log("got vgg event:  ", vggEvent);
+    }
+
+    setupAndRun();
+  </script>
+</body>
+
+</html>

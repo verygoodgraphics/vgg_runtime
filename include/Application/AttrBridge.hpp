@@ -19,6 +19,7 @@
 #include <string>
 #include <array>
 #include <functional>
+#include <variant>
 #include <Math/Algebra.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 
@@ -196,6 +197,19 @@ public:
     bool                           effectOnFill,
     std::shared_ptr<NumberAnimate> animate = {});
 
+  // for gradient.ellipse
+  // gradient includes gradientRadial, gradientDiamond, gradientAngular
+  // If the actual type of the newEllipse does not match the actual type of the corresponding
+  // ellipse, there will be no animation effect.
+  bool updateGradientEllipse(
+    std::shared_ptr<LayoutNode>                 node,
+    layer::PaintNode*                           paintNode,
+    size_t                                      index,
+    std::variant<double, std::array<double, 2>> newEllipse,
+    bool                                        isOnlyUpdatePaint,
+    bool                                        effectOnFill,
+    std::shared_ptr<NumberAnimate>              animate = {});
+
   // for gradient.stops.position
   // gradient includes gradientLinear, gradientRadial, gradientDiamond, gradientAngular
   bool updateGradientStopPosition(
@@ -220,6 +234,9 @@ public:
     bool                           effectOnFill,
     std::shared_ptr<NumberAnimate> animate = {});
 
+  // TODO The render does not implement the functionality of gradientStop.midPoint, so the
+  // corresponding update interface has not been added here.
+
   // for delete gradient.stops
   // gradient includes gradientLinear, gradientRadial, gradientDiamond, gradientAngular
   bool delGradientStop(
@@ -229,6 +246,17 @@ public:
     size_t                      indexForStops,
     bool                        isOnlyUpdatePaint,
     bool                        effectOnFill);
+
+  // for add gradient.stops
+  // gradient includes gradientLinear, gradientRadial, gradientDiamond, gradientAngular
+  bool addGradientStop(
+    std::shared_ptr<LayoutNode>     node,
+    layer::PaintNode*               paintNode,
+    size_t                          index,
+    size_t                          indexForStops,
+    const VGG::Model::GradientStop& gradientStop,
+    bool                            isOnlyUpdatePaint,
+    bool                            effectOnFill);
 
 public:
   // for contextSettings.opacity
@@ -347,6 +375,10 @@ public:
     layer::PaintNode* node,
     size_t            index,
     bool              forFrom,
+    bool              effectOnFill);
+  static std::optional<std::variant<double, std::array<double, 2>>> getGradientEllipse(
+    layer::PaintNode* node,
+    size_t            index,
     bool              effectOnFill);
   static std::optional<size_t> getGradientStopsCount(
     layer::PaintNode* node,
@@ -468,6 +500,17 @@ private:
     double            newY,
     bool              forFrom,
     bool              effectOnFill);
+
+  static void setGradientEllipse(
+    std::shared_ptr<LayoutNode> node,
+    size_t                      index,
+    const std::vector<double>&  value,
+    bool                        effectOnFill);
+  static void setGradientEllipse(
+    layer::PaintNode*          node,
+    size_t                     index,
+    const std::vector<double>& value,
+    bool                       effectOnFill);
 
   static void setGradientStopsPosition(
     std::shared_ptr<LayoutNode> node,

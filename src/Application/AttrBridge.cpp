@@ -166,25 +166,25 @@ void setLayoutNodeGradientAttr(
 {
   if (auto object = AttrBridge::getlayoutNodeObject(node))
   {
-  if (effectOnFill)
-  {
-      if (index >= object->style.fills.size())
+    if (effectOnFill)
     {
-      return;
-    }
+      if (index >= object->style.fills.size())
+      {
+        return;
+      }
 
       auto& gradient = object->style.fills.at(index).gradient;
       if (!gradient)
-    {
-      return;
-    }
+      {
+        return;
+      }
 
       fun(gradient->instance);
-  }
-  else
-  {
-    // TODO not complete
-  }
+    }
+    else
+    {
+      // TODO not complete
+    }
   }
 }
 
@@ -200,13 +200,13 @@ AttrBridge::AttrBridge(std::shared_ptr<UIView> view, AnimateManage& animateManag
 {
 }
 
-std::optional<VGG::Color> AttrBridge::getFillColor(layer::PaintNode* node, size_t index)
+std::optional<glm::vec4> AttrBridge::getFillColor(layer::PaintNode* node, size_t index)
 {
   GET_PAINTNODE_ACCESSOR(node, accessor, {});
 
   try
   {
-    return std::get<VGG::Color>(accessor->getFills().at(index).type);
+    return std::get<glm::vec4>(accessor->getFills().at(index).type);
   }
   catch (...)
   {
@@ -610,7 +610,7 @@ std::optional<double> AttrBridge::getGradientStopsPosition(
   return position;
 }
 
-std::optional<VGG::Color> AttrBridge::getGradientStopsColor(
+std::optional<glm::vec4> AttrBridge::getGradientStopsColor(
   layer::PaintNode* node,
   size_t            index,
   size_t            indexForStops,
@@ -627,7 +627,7 @@ std::optional<VGG::Color> AttrBridge::getGradientStopsColor(
     return {};
   }
 
-  VGG::Color color;
+  glm::vec4 color;
 
   if (!getGradientAttr(
         node,
@@ -761,7 +761,7 @@ void AttrBridge::setFillColor(layer::PaintNode* node, size_t index, const std::v
     return;
   }
 
-  VGG::Color color;
+  glm::vec4 color;
   color.a = static_cast<float>(argb.at(0));
   color.r = static_cast<float>(argb.at(1));
   color.g = static_cast<float>(argb.at(2));
@@ -1845,7 +1845,7 @@ bool AttrBridge::updatePatternImageFilters(
   bool                               effectOnFill,
   std::shared_ptr<NumberAnimate>     animate)
 {
-    if (effectOnFill)
+  if (effectOnFill)
   {
     if (!checkForAccessFill(paintNode, index))
     {
@@ -1903,7 +1903,7 @@ bool AttrBridge::updatePatternImageFillRotation(
   bool                           effectOnFill,
   std::shared_ptr<NumberAnimate> animate)
 {
-    if (effectOnFill)
+  if (effectOnFill)
   {
     if (!checkForAccessFill(paintNode, index))
     {
@@ -2055,7 +2055,7 @@ bool AttrBridge::updateGradientFromOrTo(
   bool                           effectOnFill,
   std::shared_ptr<NumberAnimate> animate)
 {
-    if (effectOnFill)
+  if (effectOnFill)
   {
     if (!checkForAccessFill(paintNode, index))
     {
@@ -2163,7 +2163,7 @@ bool AttrBridge::updateGradientStopPosition(
   bool                           effectOnFill,
   std::shared_ptr<NumberAnimate> animate)
 {
-    if (effectOnFill)
+  if (effectOnFill)
   {
     if (
       !checkForAccessFill(paintNode, index) ||
@@ -2375,7 +2375,7 @@ bool AttrBridge::updatePatternImageFileName(
   bool                        isOnlyUpdatePaint,
   bool                        effectOnFill)
 {
-    if (effectOnFill)
+  if (effectOnFill)
   {
     if (!checkForAccessFill(paintNode, index))
     {

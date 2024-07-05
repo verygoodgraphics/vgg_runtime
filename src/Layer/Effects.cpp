@@ -353,7 +353,7 @@ sk_sp<SkShader> makeGradientLinear(const Bounds& bounds, const GradientLinear& g
   std::vector<SkScalar> positions;
   for (auto it = g.stops.begin(); it != g.stops.end(); ++it)
   {
-    colors.push_back(it->color);
+    colors.push_back(toSkColor(it->color));
     auto p = it->position;
     positions.push_back((p - minPosition) / (maxPosition - minPosition));
   }
@@ -387,8 +387,9 @@ sk_sp<SkImageFilter> makeInnerShadowImageFilter(
   // )");
   //
   // auto alpha = SkImageFilters::Blend(blender, 0, 0);
-  auto f1 =
-    SkImageFilters::ColorFilter(SkColorFilters::Blend(shadow.color, SkBlendMode::kSrcOut), 0);
+  auto f1 = SkImageFilters::ColorFilter(
+    SkColorFilters::Blend(toSkColor(shadow.color), SkBlendMode::kSrcOut),
+    0);
   sk_sp<SkImageFilter> f2;
   if (overrideSpread || shadow.spread == 0)
   {
@@ -432,7 +433,7 @@ sk_sp<SkImageFilter> makeDropShadowImageFilter(
       shadow.offsetY,
       sigma,
       sigma,
-      shadow.color,
+      toSkColor(shadow.color),
       input);
   }
   const auto     halfWidth = bounds.width() / 2;
@@ -443,7 +444,7 @@ sk_sp<SkImageFilter> makeDropShadowImageFilter(
   SkMatrix       m = SkMatrix::I();
   m.postScale(scaleX, scaleY);
   m.postTranslate(shadow.offsetX + c.fX, shadow.offsetY + c.fY);
-  auto s = SkImageFilters::DropShadowOnly(0, 0, sigma, sigma, shadow.color, input);
+  auto s = SkImageFilters::DropShadowOnly(0, 0, sigma, sigma, toSkColor(shadow.color), input);
   return SkImageFilters::MatrixTransform(m, getGlobalSamplingOptions(), s);
 }
 
@@ -463,8 +464,6 @@ void StackFillEffectImpl::onRenderShape(Renderer* renderer, const VShape& vs)
 {
   for (const auto& p : m_pens)
   {
-    // auto r = vs.bounds();
-    // auto bounds = Bounds{ r.x(), r.y(), r.width(), r.height() };
     if (p->getEnabled())
     {
       auto paint = p->paint(bounds());

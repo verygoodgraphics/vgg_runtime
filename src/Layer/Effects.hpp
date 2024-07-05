@@ -118,7 +118,7 @@ inline sk_sp<SkShader> makeGradientRadial(const Bounds& bounds, const G& g)
   std::vector<SkScalar> positions;
   for (auto it = g.stops.begin(); it != g.stops.end(); ++it)
   {
-    colors.push_back(it->color);
+    colors.push_back(toSkColor(it->color));
     auto p = it->position;
     positions.push_back((p - minPosition) / (maxPosition - minPosition));
   }
@@ -154,20 +154,20 @@ inline sk_sp<SkShader> makeGradientAngular(const Bounds& bounds, const G& g)
       glm::mix(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 - maxPosition));
     // auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 -
     // maxPosition));
-    colors.push_back(c);
+    colors.push_back(toSkColor(c));
     positions.push_back(0);
     sz += 1;
   }
   for (auto iter = g.stops.begin(); iter != g.stops.end(); ++iter)
   {
-    colors.push_back(iter->color);
+    colors.push_back(toSkColor(iter->color));
     positions.push_back(iter->position);
   }
   if (maxPosition < 1)
   {
     auto c =
       glm::mix(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 - maxPosition));
-    colors.push_back(c);
+    colors.push_back(toSkColor(c));
     positions.push_back(1);
     sz += 1;
   }
@@ -193,7 +193,7 @@ inline sk_sp<SkShader> makeGradientDiamond(const Bounds& bounds, const G& g)
   std::vector<SkScalar> positions;
   for (auto it = g.stops.begin(); it != g.stops.end(); ++it)
   {
-    colors.push_back(it->color);
+    colors.push_back(toSkColor(it->color));
     auto p = it->position;
     positions.push_back((p - minPosition) / (maxPosition - minPosition));
   }
@@ -256,10 +256,10 @@ inline void populateSkPaint(
                   // paint.setAlphaf(st.opacity);
                   gs(g, st);
                 },
-                [&](const Color& c)
+                [&](const glm::vec4& color)
                 {
-                  paint.setColor(c);
-                  paint.setAlphaf(c.a * st.opacity);
+                  paint.setColor(toSkColor(color));
+                  paint.setAlphaf(color.a * st.opacity);
                 },
                 [&](const Pattern& p)
                 {

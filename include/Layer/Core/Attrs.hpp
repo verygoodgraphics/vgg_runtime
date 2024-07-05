@@ -16,7 +16,6 @@
 #pragma once
 
 #include "Layer/Core/Transform.hpp"
-#include "Layer/Core/VColor.hpp"
 #include "Layer/Core/VBounds.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Utility/Log.hpp"
@@ -153,9 +152,9 @@ struct AlphaMask
 
 struct GradientStop
 {
-  Color color{ 1., 1., 1., 1. };
-  float position{ 1.0 }; // [0,1]
-  float midPoint;
+  glm::vec4 color{ 1., 1., 1., 1. };
+  float     position{ 1.0 }; // [0,1]
+  float     midPoint;
 
   bool operator==(const GradientStop& rhs) const
   {
@@ -231,7 +230,7 @@ struct Gradient
   }
 };
 
-using FillType = std::variant<Gradient, Pattern, Color>;
+using FillType = std::variant<Gradient, Pattern, glm::vec4>;
 
 struct Fill
 {
@@ -276,7 +275,7 @@ struct Shadow
   /*Deprecated: Replaced by ShadowStyle in the future*/
   ContextSetting contextSettings;
   float          blur{ 0.f };
-  Color          color;
+  glm::vec4      color;
   float          offsetX{ 0.f };
   float          offsetY{ 0.f };
   float          spread{ 0.f };
@@ -288,7 +287,7 @@ struct InnerShadow
 {
   ContextSetting contextSettings;
   float          blur{ 0.f };
-  Color          color;
+  glm::vec4      color;
   float          offsetX{ 0.f };
   float          offsetY{ 0.f };
   float          spread{ 0.f };
@@ -306,7 +305,7 @@ struct DropShadow
 {
   ContextSetting contextSettings;
   float          blur{ 0.f };
-  Color          color;
+  glm::vec4      color;
   float          offsetX{ 0.f };
   float          offsetY{ 0.f };
   float          spread{ 0.f };

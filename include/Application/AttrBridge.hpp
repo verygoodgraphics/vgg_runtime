@@ -22,6 +22,7 @@
 #include <variant>
 #include <Math/Algebra.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
+#include <glm/glm.hpp>
 
 namespace VGG
 {
@@ -32,7 +33,6 @@ class Animate;
 class NumberAnimate;
 class ReplaceNodeAnimate;
 class AnimateManage;
-struct Color;
 struct ImageFilter;
 // enum EBlendMode;
 
@@ -341,7 +341,7 @@ public:
   static std::optional<size_t>      getFillSize(layer::PaintNode* node);
   static std::optional<int>         getFillType(layer::PaintNode* node, size_t index);
   static std::optional<bool>        getFillEnabled(layer::PaintNode* node, size_t index);
-  static std::optional<VGG::Color>  getFillColor(layer::PaintNode* node, size_t index);
+  static std::optional<glm::vec4>   getFillColor(layer::PaintNode* node, size_t index);
   static std::optional<double>      getFillOpacity(layer::PaintNode* node, size_t index);
   static std::optional<int>         getFillBlendMode(layer::PaintNode* node, size_t index);
   static std::optional<std::string> getFillPatternType(layer::PaintNode* node, size_t index);
@@ -389,7 +389,7 @@ public:
     size_t            index,
     size_t            indexForStops,
     bool              effectOnFill);
-  static std::optional<VGG::Color> getGradientStopsColor(
+  static std::optional<glm::vec4> getGradientStopsColor(
     layer::PaintNode* node,
     size_t            index,
     size_t            indexForStops,

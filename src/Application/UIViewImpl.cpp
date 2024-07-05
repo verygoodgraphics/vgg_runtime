@@ -40,7 +40,6 @@
 #include "Layer/Core/PaintNode.hpp"
 #include "Layer/Core/ResourceManager.hpp"
 #include "Layer/Core/ResourceProvider.hpp"
-#include "Layer/Core/VColor.hpp"
 #include "UIAnimation.hpp"
 #include "UIView.hpp"
 #include "Utility/Log.hpp"

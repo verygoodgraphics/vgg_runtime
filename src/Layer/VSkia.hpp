@@ -55,6 +55,15 @@ inline SkRect toSkRect(const VGG::Bounds& bounds)
   return SkRect{ b.topLeft().x, b.topLeft().y, b.bottomRight().x, b.bottomRight().y };
 }
 
+inline SkColor toSkColor(const glm::vec4& color)
+{
+  return SkColorSetARGB(
+    static_cast<uint8_t>(color.a * 255),
+    static_cast<uint8_t>(color.r * 255),
+    static_cast<uint8_t>(color.g * 255),
+    static_cast<uint8_t>(color.b * 255));
+}
+
 inline SkMatrix toSkMatrix(const glm::mat3& mat)
 {
   SkMatrix skMatrix;

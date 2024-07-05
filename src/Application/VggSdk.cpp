@@ -29,7 +29,7 @@
 #include "Domain/Saver/DirSaver.hpp"
 #include "Domain/Saver/ZipStreamSaver.hpp"
 #include "Layer/FontManager.hpp"
-#include "Layer/VGGLayer.hpp"
+#include "Application/VGGLayer.hpp"
 #include "UIAnimation.hpp"
 #include "UIOptions.hpp"
 #include "UseCase/SaveModel.hpp"

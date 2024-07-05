@@ -38,63 +38,6 @@ constexpr double Pi = 3.141592653589793;
 // NOLINTEND
 } // namespace math::number
 
-struct Vec2
-{
-  double x{ 0. };
-  double y{ 0. };
-
-  inline double dot(const Vec2& ov) const
-  {
-    return x * ov.x + y * ov.y;
-  }
-
-  inline double len() const
-  {
-    return std::sqrt(x * x + y * y);
-  }
-
-  inline Vec2 add(const Vec2& ov) const
-  {
-    return Vec2{ x + ov.x, y + ov.y };
-  }
-
-  inline Vec2 sub(const Vec2& ov) const
-  {
-    return Vec2{ x - ov.x, y - ov.y };
-  }
-
-  inline Vec2 scale(double s) const
-  {
-    return Vec2{ s * x, s * y };
-  }
-
-  inline Vec2 scale(double s, double t) const
-  {
-    return Vec2{ s * x, t * y };
-  }
-};
-
-inline Vec2 operator+(const Vec2& a, const Vec2& b)
-{
-  return a.add(b);
-}
-
-inline Vec2 operator-(const Vec2& a, const Vec2& b)
-{
-  return a.sub(b);
-}
-
-inline Vec2 operator*(const Vec2& a, double b)
-{
-  return a.scale(b);
-}
-
-inline Vec2 operator/(const Vec2& a, double b)
-{
-  assert(std::fabs(b) > FZERO);
-  return a.scale(1. / b);
-}
-
 template<typename T>
 inline T lerp(const T& a, const T& b, double t)
 {
@@ -143,8 +86,8 @@ inline std::vector<double> getBairstowPolyRoots(const std::vector<double>& coeff
   DEG2_CASE
   while (deg >= 3)
   {
-    double r = 0.1;
-    double s = 0.1;
+    double              r = 0.1;
+    double              s = 0.1;
     std::vector<double> b(deg + 1);
 
     for (int iter = 0; iter < 300; iter++)
@@ -234,11 +177,12 @@ inline double rad2deg(double rad)
 }
 
 template<typename T>
-inline void clampPairByLimits(T& low,
-                              T& high,
-                              const T& lowLimit,
-                              const T& highLimit,
-                              const T& precision)
+inline void clampPairByLimits(
+  T&       low,
+  T&       high,
+  const T& lowLimit,
+  const T& highLimit,
+  const T& precision)
 {
   if (low >= highLimit)
   {

@@ -23,6 +23,7 @@
 #include <glm/glm.hpp>
 #include <optional>
 #include <variant>
+#include <array>
 
 class SkCanvas;
 class SkPaint;

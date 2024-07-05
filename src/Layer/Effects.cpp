@@ -272,7 +272,7 @@ half4 main(float2 coord){
     return nullptr;
   }
   SkRuntimeShaderBuilder builder(std::move(result.effect));
-  builder.uniform("angle") = SkScalar(blur.angle) * (float)M_PI / 180.f;
+  builder.uniform("angle") = SkScalar(blur.angle) * glm::pi<float>() / 180.f;
   builder.uniform("radius") = blur.radius;
   return SkImageFilters::RuntimeShader(builder, blur.radius, "", nullptr);
 }

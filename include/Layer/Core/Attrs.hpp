@@ -17,8 +17,6 @@
 
 #include "Layer/Core/Transform.hpp"
 #include "Layer/Core/VColor.hpp"
-#include "Math/Hash.hpp"
-#include "Math/Math.hpp"
 #include "Layer/Core/VBounds.hpp"
 #include "Layer/Core/VType.hpp"
 #include "Utility/Log.hpp"

@@ -20,7 +20,6 @@
 #include "Layer/SkSL.hpp"
 
 #include "Math/Algebra.hpp"
-#include "Math/Math.hpp"
 #include "Utility/Log.hpp"
 #include "glm/gtx/transform.hpp"
 

@@ -57,7 +57,7 @@ public:
 
   SurfaceCreateProc surfaceCreateProc()
   {
-    return [this](GrDirectContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
+    return [this](GrRecordingContext* context, int w, int h, const VGG::layer::ContextConfig& cfg)
     {
       ASSERT(emscripten_webgl_get_current_context() == m_glContext);
 
@@ -65,7 +65,8 @@ public:
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
       glGetIntegerv(GL_SAMPLES, &numSamples);
       glGetIntegerv(GL_STENCIL_BITS, &numStencilBits);
-      context->resetContext(kRenderTarget_GrGLBackendState);
+      // context is m_context
+      static_cast<GrDirectContext*>(context)->resetContext(kRenderTarget_GrGLBackendState);
 
       GrGLFramebufferInfo framebufferInfo;
       framebufferInfo.fFBOID = 0;

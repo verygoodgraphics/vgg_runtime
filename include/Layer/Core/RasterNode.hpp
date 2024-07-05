@@ -19,7 +19,6 @@
 #include "Layer/Core/VNode.hpp"
 #include "Layer/RasterManager.hpp"
 #include "Layer/Renderable.hpp"
-#include "Layer/VGGLayer.hpp"
 #include "Layer/Core/RasterCache.hpp"
 #include "Layer/Core/ZoomerNode.hpp"
 #include "Layer/Core/FrameNode.hpp"

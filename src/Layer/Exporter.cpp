@@ -19,7 +19,6 @@
 #include "Layer/Exporter/SVGExporter.hpp"
 #include "Layer/Exporter/ImageExporter.hpp"
 #include "Layer/Renderer.hpp"
-#include "Layer/VGGLayer.hpp"
 #include "Layer/Core/FrameNode.hpp"
 #include "Utility/Log.hpp"
 

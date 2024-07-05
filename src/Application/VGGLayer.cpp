@@ -15,7 +15,6 @@
  */
 #include <algorithm>
 #include <core/SkColor.h>
-// #include <format>
 #include <iterator>
 #include <ostream>
 #include <sstream>
@@ -24,6 +23,7 @@
 #include <gpu/GrDirectContext.h>
 #include <encode/SkJpegEncoder.h>
 #include <encode/SkWebpEncoder.h>
+#include "Application/VGGLayer.hpp"
 
 #include "Layer/Core/EventManager.hpp"
 #include "Layer/Core/Timer.hpp"
@@ -36,14 +36,10 @@
 #include "Layer/Graphics/VSkiaGL.hpp" // this header and the skia headers must be included first for ios build
 #include "Layer/SimpleRasterExecutor.hpp"
 
-#ifdef VGG_USE_VULKAN
-#include "Layer/Graphics/VSkiaVK.hpp"
-#endif
-#include "Renderer.hpp"
+#include "Layer/Renderer.hpp"
+#include "Layer/Stream.hpp"
 #include "Layer/Graphics/VSkiaContext.hpp"
-#include "Stream.hpp"
 
-#include "Layer/VGGLayer.hpp"
 #include "Layer/Graphics/GraphicsLayer.hpp"
 #include "Layer/Graphics/GraphicsContext.hpp"
 #include "Layer/Graphics/ContextSkBase.hpp"
@@ -341,17 +337,6 @@ std::optional<ELayerError> VLayer::onInit()
     auto* ctx = reinterpret_cast<ContextInfoGL*>(context()->contextInfo());
     _->skiaContext =
       std::make_unique<SkiaContext>(gl::glContextCreateProc(ctx), gl::glSurfaceCreateProc(), cfg);
-  }
-  else if (api == EGraphicsAPIBackend::API_VULKAN)
-  {
-#ifdef VGG_USE_VULKAN
-    auto* ctx = reinterpret_cast<ContextInfoVulkan*>(context()->contextInfo());
-    _->skiaContext =
-      std::make_unique<SkiaContext>(vk::vkContextCreateProc(ctx), vk::vkSurfaceCreateProc(), cfg);
-#else
-    ASSERT(false && "Vulkan is not support on the platform");
-    _->skiaContext = nullptr;
-#endif
   }
   else if (api == EGraphicsAPIBackend::API_CUSTOM)
   {

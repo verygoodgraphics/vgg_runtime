@@ -24,7 +24,7 @@
 #include "Event/Keycode.hpp"
 #include "Layer/Core/EventManager.hpp"
 #include "Layer/Graphics/GraphicsContext.hpp"
-#include "Layer/VGGLayer.hpp"
+#include "Application/VGGLayer.hpp"
 #include "UIScrollView.hpp"
 
 namespace VGG

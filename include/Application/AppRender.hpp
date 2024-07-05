@@ -18,7 +18,7 @@
 #include "Utility/HelperMacro.hpp"
 #include "AppRenderable.hpp"
 
-#include "Layer/VGGLayer.hpp"
+#include "Application/VGGLayer.hpp"
 
 #include <queue>
 

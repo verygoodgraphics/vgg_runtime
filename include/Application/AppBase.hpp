@@ -20,7 +20,6 @@
 #include "Utility/Log.hpp"
 
 #include "Layer/Graphics/GraphicsContext.hpp"
-#include "Layer/VGGLayer.hpp"
 
 #include <memory>
 #include <optional>

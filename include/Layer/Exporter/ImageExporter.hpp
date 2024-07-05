@@ -16,7 +16,7 @@
 #pragma once
 
 #include <Utility/Log.hpp>
-#include <Layer/VGGLayer.hpp>
+#include "Layer/ImageType.hpp"
 #include <optional>
 #include <vector>
 

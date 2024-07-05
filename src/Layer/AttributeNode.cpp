@@ -23,8 +23,4 @@
 namespace VGG::layer
 {
 
-// Bounds StyleObjectAttribute::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
-// {
-// }
-
 } // namespace VGG::layer

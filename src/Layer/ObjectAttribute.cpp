@@ -110,7 +110,7 @@ void ObjectAttribute::render(Renderer* renderer)
   // }
 }
 
-Bounds ObjectAttribute::onRevalidate(Revalidation* inv, const glm::mat3 & mat)
+Bounds ObjectAttribute::onRevalidate(Revalidation* inv, const glm::mat3& mat)
 {
   ASSERT(m_graphicItem);
   m_graphicItem->revalidate();
@@ -123,34 +123,7 @@ Bounds ObjectAttribute::onRevalidate(Revalidation* inv, const glm::mat3 & mat)
       break;
     }
   }
-  // m_effectBounds =
-  //   m_renderObjectAttr->effectBounds(); // FIXME: maybe this could be done in the current
-  // object rather than m_renderObjectAttr
   return m_graphicItem->bounds();
-  // m_shapeAttr->revalidate();
-  // if (m_shapeAttr)
-  // {
-  //   const auto& shape = m_shapeAttr->getShape();
-  //   auto [bounds, paint] = revalidateObjectBounds(m_borders, shape.bounds());
-  //   ObjectRecorder rec;
-  //   auto           recorder = rec.beginRecording(bounds, SkMatrix::I());
-  //   SkPaint        fillPaint;
-  //   fillPaint.setAntiAlias(true);
-  //   fillPaint.setStyle(SkPaint::kFill_Style);
-  //   fillPaint.setAlphaf(1.0f);
-  //   shape.draw(recorder->canvas(), fillPaint);
-  //   if (auto strokePen = paint; strokePen)
-  //   {
-  //     strokePen->setAlphaf(1.0f);
-  //     shape.draw(recorder->canvas(), *strokePen);
-  //   }
-  //   auto mat = SkMatrix::Translate(bounds.x(), bounds.y());
-  //   auto object = rec.finishRecording(bounds, &mat);
-  //   m_maskFilter = object.asImageFilter();
-  //   ASSERT(m_maskFilter);
-  //   return Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
-  // }
-  // return Bounds();
 }
 
 } // namespace VGG::layer

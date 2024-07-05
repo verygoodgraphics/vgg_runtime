@@ -53,8 +53,6 @@ public:
     m_paragraphLayout->setLineStyle(std::move(parStyle));
   }
 
-  // VGG_ATTRIBUTE(ParagraphBounds, Bounds, m_fixedBounds);
-
   void setParagraphBounds(const Bounds& bounds)
   {
     m_paragraphLayout->setParagraphHintBounds(bounds);
@@ -109,7 +107,7 @@ public:
 
   VGG_CLASS_MAKE(ParagraphItem);
 
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
 
 private:
   VParagraphPainterPtr     m_painter;

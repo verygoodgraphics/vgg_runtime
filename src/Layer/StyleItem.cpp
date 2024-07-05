@@ -297,11 +297,7 @@ Bounds StyleItem::onRevalidate(Revalidation* inv, const glm::mat3& mat)
   auto bounds = onRevalidateStyle(); // this must be the first, workaround
   m_shapeMaskAttr->revalidate();
   m_alphaMaskAttr->revalidate();
-  // m_styleAttr->revalidate();
   revalidateEffectsBounds();
-  // auto [pic, bounds] = revalidatePicture(toSkRect(m_objectAttr->effectBounds()));
-  // m_effectsBounds = Bounds{ bounds.x(), bounds.y(), bounds.width(), bounds.height() };
-  // m_picture = std::move(pic);
   return bounds;
 }
 

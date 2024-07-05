@@ -1,7 +1,6 @@
 #include "Layer/Core/ResourceManager.hpp"
 #include "Layer/Core/DefaultResourceProvider.hpp"
 #include "Layer/GlobalSettings.hpp"
-#include "Layer/VGGLayer.hpp"
 #include "loader.hpp"
 #include "Utility/ConfigManager.hpp"
 #include "Utility/Log.hpp"

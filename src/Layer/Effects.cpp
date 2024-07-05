@@ -620,43 +620,4 @@ void StackBorderEffectImpl::applyBorderStyle(const std::vector<Border>& borders)
   invalidate();
 }
 
-// StackBorderEffectImpl end
-
-// Bounds InnerShadowEffectImpl::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
-// {
-//   return Bounds();
-// }
-//
-// Ref<InnerShadowEffectImpl> InnerShadowEffectImpl::MakeFrom(
-//   Ref<RenderNode>                 child,
-//   const std::vector<InnerShadow>& shadows)
-// {
-//   ASSERT(!shadows.empty());
-//   ASSERT(child);
-//   auto first = InnerShadowEffectImpl::Make(child, shadows[0]);
-//   for (size_t i = 1; i < shadows.size(); ++i)
-//   {
-//     first = InnerShadowEffectImpl::Make(first, shadows[i]);
-//   }
-//   return first;
-// }
-//
-// Bounds DropShadowEffectImpl::onRevalidate(Invalidator* inv, const glm::mat3 & mat)
-// {
-//   return Bounds();
-// }
-//
-// Ref<DropShadowEffectImpl> DropShadowEffectImpl::MakeFrom(
-//   Ref<RenderNode>                child,
-//   const std::vector<DropShadow>& shadows)
-// {
-//   ASSERT(!shadows.empty());
-//   ASSERT(child);
-//   auto first = DropShadowEffectImpl::Make(child, shadows[0]);
-//   for (size_t i = 1; i < shadows.size(); ++i)
-//   {
-//     first = DropShadowEffectImpl::Make(first, shadows[i]);
-//   }
-//   return first;
-// }
 } // namespace VGG::layer

@@ -35,7 +35,6 @@ public:
   }
   ShapeItem(VRefCnt* cnt, Ref<ShapeAttribute> shapeAttr, StyleItem* styleItem)
     : GraphicItem(cnt)
-    //, m_styleItem(styleItem)
     , m_shapeAttr(std::move(shapeAttr))
   {
     observe(m_shapeAttr);
@@ -53,7 +52,7 @@ public:
     // return m_maskFilter;
     return nullptr;
   }
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
   VGG_CLASS_MAKE(ShapeItem);
 
 private:
@@ -61,13 +60,8 @@ private:
     const std::vector<Border>& borders,
     const SkRect&              bounds);
 
-  // Bounds revalidateMaskFilter();
-
-  // WeakRef<StyleItem>  m_styleItem;
   Ref<ShapeAttribute> m_shapeAttr;
-  // sk_sp<SkImageFilter> m_maskFilter;
   Bounds              m_effectBounds;
-  // std::optional<ObjectShader> m_objectShader;
 };
 
 } // namespace VGG::layer

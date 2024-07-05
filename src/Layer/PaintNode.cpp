@@ -85,22 +85,17 @@ public:
   std::string guid{};
   std::string name{};
 
-  EMaskType      maskType{ MT_NONE };
-  EMaskShowType  maskShowType{ MST_INVISIBLE };
-  EBoolOp        clipOperator{ BO_NONE };
-  EOverflow      overflow{ OF_HIDDEN };
-  EWindingType   windingRule{ WR_EVEN_ODD };
-  ContextSetting contextSetting;
-  ContourData    contour;
-  ContourOption  maskOption;
-  bool           visible{ true };
-
-  // std::vector<LayerFX>      layerEffects;
-  // std::vector<BackgroundFX> backgroundEffects;
+  EMaskType           maskType{ MT_NONE };
+  EMaskShowType       maskShowType{ MST_INVISIBLE };
+  EBoolOp             clipOperator{ BO_NONE };
+  EOverflow           overflow{ OF_HIDDEN };
+  EWindingType        windingRule{ WR_EVEN_ODD };
+  ContextSetting      contextSetting;
+  ContourData         contour;
+  ContourOption       maskOption;
+  bool                visible{ true };
   std::vector<Border> borders;
   std::vector<Fill>   fills;
-  // std::vector<InnerShadow>  innerShadow;
-  // std::vector<DropShadow>   dropShadow;
 
   const EObjectType  type;
   const int          uniqueID{ 0 };
@@ -437,12 +432,6 @@ VShape PaintNode::makeContour(ContourOption option, const Transform* mat)
         [&](const VectorNetwork& p) {},
       },
       *_->contour);
-    // if (mat)
-    // {
-    //   VShape res;
-    //   path.transform(res, toSkMatrix(mat->matrix()));
-    //   return res;
-    // }
     return path;
   }
 
@@ -571,12 +560,8 @@ void PaintNode::setStyle(const Style& style)
 {
   VGG_IMPL(PaintNode);
   auto aa = _->accessor.get();
-  // auto item = aa->styleItem();
   aa->setFills(style.fills);
   aa->setBorders(style.borders);
-  // _->fills = style.fills;
-  // _->borders = style.borders;
-
   aa->setInnerShadows(style.innerShadow);
   aa->setDropShadows(style.dropShadow);
   aa->setLayerBlurs(style.layerEffects);
@@ -742,18 +727,8 @@ void PaintNode::paintChildren(Renderer* renderer)
     }
   };
 
-  // const auto clip = (overflow() == OF_HIDDEN || overflow() == OF_SCROLL);
-  // {
-  //   auto                canvas = renderer->canvas();
-  //   SkAutoCanvasRestore acr(canvas, clip);
-  //   if (clip)
-  //   {
-  //     auto boundsPath = makeBoundsPath();
-  //     boundsPath.clip(canvas, SkClipOp::kIntersect);
-  //   }
   paintCall(masked);
   paintCall(noneMasked);
-  //}
 }
 
 Accessor* PaintNode::attributeAccessor()

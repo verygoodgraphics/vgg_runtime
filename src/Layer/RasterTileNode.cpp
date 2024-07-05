@@ -111,55 +111,25 @@ Bounds TileRasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
     }
     else
     {
-      if (true)
+      auto newMatrix = getTransform()->getMatrix();
+      auto changeType = changed(m_matrix, newMatrix);
+      if (changeType)
       {
-        auto newMatrix = getTransform()->getMatrix();
-        auto changeType = changed(m_matrix, newMatrix);
-        if (changeType)
-        {
-          m_raster->invalidate(*changeType);
-          m_matrix = newMatrix;
-          needRaster = true;
-        }
-        else
-        {
-          m_raster->invalidate(layer::Rasterizer::EReason::CONTENT);
-          needRaster = true;
-        }
-        if (viewport() && viewport()->hasInvalidate())
-        {
-          m_raster->invalidate(layer::Rasterizer::EReason::VIEWPORT);
-          viewport()->revalidate();
-          needRaster = true;
-          finalBounds = viewport()->bounds();
-        }
+        m_raster->invalidate(*changeType);
+        m_matrix = newMatrix;
+        needRaster = true;
       }
       else
       {
-        // auto z = asZoom(getTransform());
-        // if (z)
-        // {
-        //   if (z->hasInvalScale())
-        //   {
-        //     DEBUG("zoom scale changed");
-        //     m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_SCALE);
-        //     needRaster = true;
-        //   }
-        //   if (z->hasOffsetInval())
-        //   {
-        //     DEBUG("zoom translation changed");
-        //     m_raster->invalidate(layer::Rasterizer::EReason::ZOOM_TRANSLATION);
-        //     needRaster = true;
-        //   }
-        //   z->revalidate();
-        // }
-        // if (m_viewport && m_viewport->hasInvalidate())
-        // {
-        //   m_raster->invalidate(layer::Rasterizer::EReason::VIEWPORT);
-        //   m_viewport->revalidate();
-        //   needRaster = true;
-        //   finalBounds = m_viewport->bounds();
-        // }
+        m_raster->invalidate(layer::Rasterizer::EReason::CONTENT);
+        needRaster = true;
+      }
+      if (viewport() && viewport()->hasInvalidate())
+      {
+        m_raster->invalidate(layer::Rasterizer::EReason::VIEWPORT);
+        viewport()->revalidate();
+        needRaster = true;
+        finalBounds = viewport()->bounds();
       }
     }
   }
@@ -173,14 +143,6 @@ Bounds TileRasterNode::onRevalidate(Revalidation* inv, const glm::mat3& mat)
     }
 
     int lod = -1;
-    // auto z = asZoom(getTransform());
-    // if (z)
-    // {
-    //   std::visit(
-    //     layer::Overloaded{ [&](ZoomerNode::EScaleLevel level) { lod = level; },
-    //                        [&](ZoomerNode::OtherLevel other) { lod = -1; } },
-    //     z->scaleLevel());
-    // }
 
     if (c->picture())
     {

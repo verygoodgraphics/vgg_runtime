@@ -21,7 +21,6 @@
 #include "Application/Event/Keycode.hpp"
 
 #include "Layer/Core/PaintNode.hpp"
-#include "Layer/VGGLayer.hpp"
 #include "Layer/Exporter/SVGExporter.hpp"
 #include "Layer/Exporter/PDFExporter.hpp"
 #include "Layer/Config.hpp"

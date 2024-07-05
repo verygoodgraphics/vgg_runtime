@@ -151,19 +151,13 @@ private:
     int       m_saveCount;
   };
 
-  // Ref<TransformAttribute> m_transformAttr; // Removed from StyleItem
-
   ////////////////////// StyleAttribute begin
   Ref<InnerShadowAttribute> m_innerShadowAttr;
   Ref<DropShadowAttribute>  m_dropShadowAttr;
 
   ////////////////////// ObjectAttribute begin
 
-  // Ref<ObjectAttribute> m_objectAttr;
-
   Ref<GraphicItem> m_graphicItem;
-  // std::vector<Fill>   m_fills;
-  // std::vector<Border> m_borders;
   bool             m_hasFill{ false };
 
   Bounds onRevalidateObject();

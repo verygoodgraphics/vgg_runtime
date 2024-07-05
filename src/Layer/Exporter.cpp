@@ -46,7 +46,6 @@ static void renderInternal(SkCanvas* canvas, VGG::layer::FrameNode* frame)
   canvas->save();
   canvas->clear(SK_ColorWHITE);
   frame->revalidate();
-  // canvas->drawPicture(frame->picture());
   VGG::layer::Renderer r;
   r = r.createNew(canvas);
   frame->render(&r);

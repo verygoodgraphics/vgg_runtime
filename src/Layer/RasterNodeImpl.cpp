@@ -332,39 +332,6 @@ Bounds RasterNodeImpl::onRevalidate(Revalidation* inv, const glm::mat3& ctm)
 {
   const auto bounds = RasterNode::onRevalidate(inv, ctm);
   return bounds;
-  // Bounds bounds;
-  // if (getTransform())
-  // {
-  //   getTransform()->revalidate();
-  // }
-  // if (getChild())
-  // {
-  //   if (getTransform())
-  //   {
-  //     const auto matrix = getTransform()->getMatrix();
-  //     bounds = getChild()->revalidate(inv, ctm);
-  //     bounds = bounds.map(matrix);
-  //   }
-  //   else
-  //   {
-  //     bounds = getChild()->revalidate(inv, ctm);
-  //   }
-  // }
-  //
-  // if (m_viewport)
-  //   m_viewport->revalidate();
-  //
-  // auto t = getTransform();
-  // if (t)
-  // {
-  //   const auto& totalMatrix = t->getMatrix();
-  //   m_localMatrix[2][0] = totalMatrix[2][0];
-  //   m_localMatrix[2][1] = totalMatrix[2][1];
-  //   m_rasterMatrix = totalMatrix;
-  //   m_rasterMatrix[2][0] = 0.0f;
-  //   m_rasterMatrix[2][1] = 0.0f;
-  // }
-  // return bounds;
 }
 
 namespace raster

@@ -28,9 +28,7 @@ public:
   void render(Renderer* renderer)
   {
     SkPaint p;
-    // p.setShader(asShader());
     p.setAntiAlias(true);
-    // renderer->canvas()->drawRect(bounds(), p);
     renderer->canvas()->drawPicture(m_picture);
   }
 

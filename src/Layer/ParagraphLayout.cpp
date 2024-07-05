@@ -95,12 +95,6 @@ float findWidth(std::string_view key)
 std::pair<SkFontStyle, std::vector<Font::Axis>> toSkFontStyle(const Font& font)
 {
   std::string subFamilyName;
-  // std::remove_copy(
-  //   font.subFamilyName.begin(),
-  //   font.subFamilyName.end(),
-  //   std::back_inserter(subFamilyName),
-  //   ' ');
-
   std::transform(
     font.subFamilyName.begin(),
     font.subFamilyName.end(),
@@ -251,10 +245,6 @@ void drawParagraphDebugInfo(
   int                  curY,
   int                  index)
 {
-  // static SkColor s_colorTable[9] = {
-  //   SK_ColorBLUE,   SK_ColorGREEN,  SK_ColorRED,  SK_ColorCYAN,   SK_ColorMAGENTA,
-  //   SK_ColorYELLOW, SK_ColorDKGRAY, SK_ColorGRAY, SK_ColorLTGRAY,
-  // };
   canvas.get()->save();
   canvas.get()->translate(curX, curY);
   auto    h = p->getHeight();

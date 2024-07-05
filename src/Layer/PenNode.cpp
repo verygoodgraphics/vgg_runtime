@@ -47,7 +47,7 @@ void Brush::onMakePaint(SkPaint* paint, const Bounds& bounds) const
 {
   std::visit(
     Overloaded{ [&](const Gradient& g) { paint->setShader(makeGradientShader(bounds, g)); },
-                [&](const Color& c) { paint->setColor(c); },
+                [&](const glm::vec4& color) { paint->setColor(toSkColor(color)); },
                 [&](const Pattern& p)
                 {
                   if (!this->m_pattern)

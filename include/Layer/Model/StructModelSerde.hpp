@@ -56,7 +56,7 @@ inline void serde_from(const Model::ImageFilters& t, ImageFilter& x) // NOLINT
   x.hue = t.hue.value_or(0.0);
 }
 
-inline void serde_from(const Model::Color& c, Color& x)
+inline void serde_from(const Model::Color& c, glm::vec4& x)
 {
   x.r = c.red;
   x.g = c.green;
@@ -235,7 +235,7 @@ inline void serde_from(const Model::Border& b, FillType& x)
     {
       if (b.color)
       {
-        Color c;
+        glm::vec4 c;
         serde::serde_from(*b.color, c);
         x = c;
       }
@@ -270,7 +270,7 @@ inline void serde_from(const Model::Fill& b, FillType& x)
     {
       if (b.color)
       {
-        Color c;
+        glm::vec4 c;
         serde::serde_from(*b.color, c);
         x = c;
       }

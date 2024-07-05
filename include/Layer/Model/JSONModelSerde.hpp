@@ -41,6 +41,20 @@ struct adl_serializer<glm::mat3>
 };
 
 template<>
+struct adl_serializer<glm::vec4>
+{
+  static void from_json(const json& j, glm::vec4& m)
+  {
+    if (!j.is_object())
+      return;
+    m.a = j.value("alpha", 0.f);
+    m.b = j.value("blue", 0.f);
+    m.g = j.value("green", 0.f);
+    m.r = j.value("red", 0.f);
+  }
+};
+
+template<>
 struct adl_serializer<std::variant<float, glm::vec2>>
 {
   static void from_json(const json& j, std::variant<float, glm::vec2>& x)
@@ -169,16 +183,6 @@ template<typename T>
 inline std::optional<T> getStackOptional(const json& j, const std::string& property)
 {
   return getStackOptional<T>(j, property.data());
-}
-
-inline void from_json(const json& j, Color& x)
-{
-  if (!j.is_object())
-    return;
-  x.a = j.value("alpha", 0.f);
-  x.b = j.value("blue", 0.f);
-  x.g = j.value("green", 0.f);
-  x.r = j.value("red", 0.f);
 }
 
 inline void from_json(const json& j, glm::vec2& x)
@@ -380,7 +384,7 @@ inline FillType makeFillType(const nlohmann::json& j)
   switch (j.value("fillType", EPathFillType{}))
   {
     case FT_COLOR:
-      type = j.value("color", Color{});
+      type = j.value("color", glm::vec4{});
       break;
     case FT_PATTERN:
       type = j.value("pattern", Pattern{});
@@ -396,10 +400,6 @@ inline FillType makeFillType(const nlohmann::json& j)
 
 inline void from_json(const json& j, Border& x)
 {
-  // x.color = get_stack_optional<Color>(j, "color");
-  // x.fillType = j.at("fillType").get<EPathFillType>();
-  // x.gradient = get_stack_optional<Gradient>(j, "gradient");
-  // x.pattern = get_stack_optional<Pattern>(j, "pattern");
   if (!j.is_object())
     return;
   x.type = makeFillType(j);
@@ -425,7 +425,7 @@ inline void from_json(const json& j, Shadow& x)
   if (!j.is_object())
     return;
   x.blur = j.value("blur", 0.f);
-  x.color = j.value("color", Color());
+  x.color = j.value("color", glm::vec4());
   x.contextSettings = j.value("contextSettings", ContextSetting());
   x.inner = j.value("inner", false);
   x.isEnabled = j.value("isEnabled", false);
@@ -438,7 +438,7 @@ inline void from_json(const json& j, Shadow& x)
 inline void from_json(const json& j, InnerShadow& x)
 {
   x.blur = j.value("blur", 0.f);
-  x.color = j.value("color", Color());
+  x.color = j.value("color", glm::vec4());
   x.contextSettings = j.value("contextSettings", ContextSetting());
   x.isEnabled = j.value("isEnabled", false);
   const auto p = glm::vec2{ j.value("offsetX", 0.f), j.value("offsetY", 0.f) };
@@ -450,7 +450,7 @@ inline void from_json(const json& j, InnerShadow& x)
 inline void from_json(const json& j, DropShadow& x)
 {
   x.blur = j.value("blur", 0.f);
-  x.color = j.value("color", Color());
+  x.color = j.value("color", glm::vec4());
   x.contextSettings = j.value("contextSettings", ContextSetting());
   x.isEnabled = j.value("isEnabled", false);
   const auto p = glm::vec2{ j.value("offsetX", 0.f), j.value("offsetY", 0.f) };
@@ -467,10 +467,6 @@ inline void from_json(const json& j, Fill& x)
   x.isEnabled = j.value("isEnabled", false);
   x.contextSettings = j.value("contextSettings", ContextSetting());
   x.type = makeFillType(j);
-  // x.fillType = (EPathFillType)j.at("fillType").get<int>();
-  // x.gradient = get_stack_optional<Gradient>(j, "gradient");
-  // x.pattern = get_stack_optional<Pattern>(j, "pattern");
-  // x.color = j.value("color", Color{});
 }
 
 inline void from_json(const json& j, Style& x)

@@ -150,7 +150,7 @@ TextStyle createTextStyle(const TextStyleAttr& attr, F&& fun)
     style.setForegroundPaintID(painterID);
     std::visit(
       Overloaded{ [&](const Gradient& g) { WARN("Don't support gradient decoration"); },
-                  [&](const Color& c) { style.setDecorationColor(c); },
+                  [&](const glm::vec4& color) { style.setDecorationColor(toSkColor(color)); },
                   [&](const Pattern& p) { WARN("Don't support pattern decoration"); } },
       attr.fills[0].type);
   }

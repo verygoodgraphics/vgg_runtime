@@ -195,7 +195,7 @@ public:
         Overloaded{
           [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
           [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
-          [&](Color& c) {},
+          [&](glm::vec4& c) {},
         },
         f.type);
     }
@@ -209,7 +209,7 @@ public:
         Overloaded{
           [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
           [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
-          [&](Color& c) {},
+          [&](glm::vec4& c) {},
         },
         b.type);
     }
@@ -219,7 +219,7 @@ public:
         Overloaded{
           [&](Gradient& g) { convertCoordinateSystem(g, totalMatrix); },
           [&](Pattern& p) { convertCoordinateSystem(p, totalMatrix); },
-          [&](Color& c) {},
+          [&](glm::vec4& c) {},
         },
         f.type);
     }

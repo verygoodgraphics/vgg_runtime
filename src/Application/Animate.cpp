@@ -811,6 +811,8 @@ void SmartAnimate::start()
 
   if (mergeTree)
   {
+    // TODO when animate stoped, already changed order should be rechanged?
+    // NOTE: This feature is currently disabled here.
     changeOrderForMergeTree(paintNodeFrom, paintNodeTo);
     addTwinAnimateWithMergeTree(from, to, paintNodeFrom, paintNodeTo);
   }
@@ -826,8 +828,6 @@ void SmartAnimate::addTwinAnimate(
   std::shared_ptr<LayoutNode> nodeTo)
 {
   typedef std::shared_ptr<Domain::Element> TElement;
-
-  auto attrBridge = getAttrBridge();
 
   std::list<TElement> noteToDirectChildrenSorted;
   do

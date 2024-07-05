@@ -526,6 +526,43 @@ std::optional<std::array<double, 2>> AttrBridge::getGradientFromOrTo(
   return std::array<double, 2>{ x, y };
 }
 
+std::optional<std::variant<double, std::array<double, 2>>> AttrBridge::getGradientEllipse(
+  layer::PaintNode* node,
+  size_t            index,
+  bool              effectOnFill)
+{
+  std::optional<std::variant<double, std::array<double, 2>>> result;
+
+  auto fun = [&result](auto&& arg)
+  {
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr (std::is_same_v<T, VGG::GradientLinear>)
+    {
+      assert(false);
+    }
+    else
+    {
+      const auto& item = arg.ellipse;
+      if (!item.index())
+      {
+        result = std::get<float>(item);
+      }
+      else
+      {
+        const auto& point = std::get<glm::vec2>(item);
+        result = std::array<double, 2>{ point[0], -point[1] };
+      }
+    }
+  };
+
+  if (!getGradientAttr(node, index, effectOnFill, fun))
+  {
+    return {};
+  }
+
+  return result;
+}
+
 std::optional<size_t> AttrBridge::getGradientStopsCount(
   layer::PaintNode* node,
   size_t            index,
@@ -1144,6 +1181,66 @@ void AttrBridge::setGradientFromOrTo(
       else
       {
         arg.to = { newX, -newY };
+      }
+    });
+}
+
+void AttrBridge::setGradientEllipse(
+  std::shared_ptr<LayoutNode> node,
+  size_t                      index,
+  const std::vector<double>&  value,
+  bool                        effectOnFill)
+{
+  setLayoutNodeGradientAttr(
+    node,
+    index,
+    effectOnFill,
+    [&value](VGG::Model::GradientInstance& ins)
+    {
+      if (value.size() == 1)
+      {
+        ins.ellipse = value[0];
+      }
+      else
+      {
+        assert(value.size() == 2);
+        ins.ellipse = value;
+      }
+    });
+}
+
+void AttrBridge::setGradientEllipse(
+  layer::PaintNode*          node,
+  size_t                     index,
+  const std::vector<double>& value,
+  bool                       effectOnFill)
+{
+  setPaintNodeGradientAttr(
+    node,
+    index,
+    effectOnFill,
+    [value](auto&& arg)
+    {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (std::is_same_v<T, VGG::GradientLinear>)
+      {
+        assert(false);
+      }
+      else
+      {
+        if (value.size() == 1)
+        {
+          arg.ellipse = static_cast<float>(value[0]);
+        }
+        else
+        {
+          assert(value.size() == 2);
+
+          glm::vec2 tmp;
+          tmp[0] = static_cast<float>(value.at(0));
+          tmp[1] = -static_cast<float>(value.at(1));
+          arg.ellipse = tmp;
+        }
       }
     });
 }
@@ -1991,6 +2088,71 @@ bool AttrBridge::updateGradientFromOrTo(
   }
 }
 
+bool AttrBridge::updateGradientEllipse(
+  std::shared_ptr<LayoutNode>                 node,
+  layer::PaintNode*                           paintNode,
+  size_t                                      index,
+  std::variant<double, std::array<double, 2>> newEllipse,
+  bool                                        isOnlyUpdatePaint,
+  bool                                        effectOnFill,
+  std::shared_ptr<NumberAnimate>              animate)
+{
+  if (effectOnFill)
+  {
+    if (!checkForAccessFill(paintNode, index))
+    {
+      return false;
+    }
+
+    auto update = [node, paintNode, index, isOnlyUpdatePaint](const std::vector<double>& value)
+    {
+      assert(value.size() == 1 || value.size() == 2);
+
+      if (!isOnlyUpdatePaint)
+      {
+        AttrBridge::setGradientEllipse(node, index, value, true);
+      }
+
+      AttrBridge::setGradientEllipse(paintNode, index, value, true);
+    };
+
+    auto oldValue = getGradientEllipse(paintNode, index, true);
+    if (!oldValue)
+    {
+      return false;
+    }
+
+    if (oldValue->index() != newEllipse.index())
+    {
+      animate = nullptr;
+    }
+
+    if (!oldValue->index())
+    {
+      updateSimpleAttr(
+        { std::get<double>(*oldValue) },
+        { std::get<double>(newEllipse) },
+        update,
+        animate);
+    }
+    else
+    {
+      const auto& v0 = std::get<std::array<double, 2>>(*oldValue);
+      const auto& v1 = std::get<std::array<double, 2>>(newEllipse);
+
+      updateSimpleAttr({ v0[0], v0[1] }, { v1[0], v1[1] }, update, animate);
+    }
+
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
+}
+
 bool AttrBridge::updateGradientStopPosition(
   std::shared_ptr<LayoutNode>    node,
   layer::PaintNode*              paintNode,
@@ -2140,6 +2302,69 @@ bool AttrBridge::delGradientStop(
 
     return false;
   }
+}
+
+bool AttrBridge::addGradientStop(
+  std::shared_ptr<LayoutNode>     node,
+  layer::PaintNode*               paintNode,
+  size_t                          index,
+  size_t                          indexForStops,
+  const VGG::Model::GradientStop& gradientStop,
+  bool                            isOnlyUpdatePaint,
+  bool                            effectOnFill)
+{
+  if (effectOnFill)
+  {
+    if (
+      !checkForAccessFill(paintNode, index) ||
+      indexForStops > *getGradientStopsCount(paintNode, index, true))
+    {
+      return false;
+    }
+
+    if (!isOnlyUpdatePaint)
+    {
+      setLayoutNodeGradientAttr(
+        node,
+        index,
+        effectOnFill,
+        [indexForStops, &gradientStop](VGG::Model::GradientInstance& ins)
+        {
+          auto size = ins.stops.size();
+          if (indexForStops > size)
+          {
+            assert(false);
+            return;
+          }
+
+          ins.stops.emplace(ins.stops.begin() + indexForStops, gradientStop);
+        });
+    }
+
+    VGG::GradientStop value;
+    value.color.a = static_cast<float>(gradientStop.color.alpha);
+    value.color.r = static_cast<float>(gradientStop.color.red);
+    value.color.g = static_cast<float>(gradientStop.color.green);
+    value.color.b = static_cast<float>(gradientStop.color.blue);
+    value.midPoint = static_cast<float>(gradientStop.midPoint);
+    value.position = static_cast<float>(gradientStop.position);
+    setPaintNodeGradientAttr(
+      paintNode,
+      index,
+      effectOnFill,
+      [indexForStops, &value](auto&& arg)
+      { arg.stops.emplace(arg.stops.begin() + indexForStops, std::move(value)); });
+
+    return true;
+  }
+  else
+  {
+    // TODO not complete.
+
+    return false;
+  }
+
+  return false;
 }
 
 bool AttrBridge::updatePatternImageFileName(

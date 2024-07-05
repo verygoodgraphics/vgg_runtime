@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #pragma once
-#include "Layer/VGGLayer.hpp"
 #include "Layer/Core/FrameNode.hpp"
 #include "Layer/Config.hpp"
 
@@ -46,7 +45,7 @@ public:
 
   Bounds effectBounds() const override;
 
-  Bounds onRevalidate(Revalidation* inv, const glm::mat3 & mat) override;
+  Bounds onRevalidate(Revalidation* inv, const glm::mat3& mat) override;
 
   glm::mat3 getMatrix() const;
 

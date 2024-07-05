@@ -16,7 +16,6 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VShape.hpp"
 #include "ShapePath.hpp"
-#include "Math/Math.hpp"
 
 namespace
 {
@@ -30,9 +29,11 @@ inline ContourPtr fromPolygon(const Polygon& poly)
   c.closed = true;
   c.cornerSmooth = poly.cornerSmoothing;
   c.reserve(poly.count * 2);
+
+  constexpr auto PI = glm::pi<float>();
   for (int i = 0; i < poly.count; ++i)
   {
-    float angle = -VGG::math::number::Pi / 2 + 2 * i * VGG::math::number::Pi / poly.count;
+    float angle = -PI / 2 + 2 * i * PI / poly.count;
     float x = (0.5 + cos(angle) * 0.5) * poly.bounds.width();
     float y = (0.5 + sin(angle) * 0.5) * poly.bounds.height();
     c.emplace_back(glm::vec2{ x, y }, poly.radius, std::nullopt, std::nullopt, std::nullopt);
@@ -47,16 +48,16 @@ inline ContourPtr fromStar(const Star& star)
   c.closed = true;
   c.cornerSmooth = star.cornerSmoothing;
 
-  const auto pointCount = star.count;
-  const auto pi = VGG::math::number::Pi;
-  const auto ratio = star.ratio;
-  const auto radius = star.radius;
-  const auto w = star.bounds.width();
-  const auto h = star.bounds.height();
+  const auto     pointCount = star.count;
+  constexpr auto PI = glm::pi<float>();
+  const auto     ratio = star.ratio;
+  const auto     radius = star.radius;
+  const auto     w = star.bounds.width();
+  const auto     h = star.bounds.height();
   for (int i = 0; i < pointCount; ++i)
   {
-    const float angle = -pi / 2 + 2 * i * pi / pointCount;
-    const float angle2 = angle + pi / pointCount;
+    const float angle = -PI / 2 + 2 * i * PI / pointCount;
+    const float angle2 = angle + PI / pointCount;
     const float x1 = (0.5 + (cos(angle) * 0.5)) * w;
     const float y1 = (0.5 + (sin(angle) * 0.5)) * h;
     c.emplace_back(glm::vec2{ x1, y1 }, radius, std::nullopt, std::nullopt, std::nullopt);

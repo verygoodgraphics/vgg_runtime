@@ -18,8 +18,8 @@
 #include "Layer/Core/Attrs.hpp"
 #include "Layer/Core/VUtils.hpp"
 #include "Layer/Renderer.hpp"
-#include "Math/Math.hpp"
 #include "Utility/VggFloat.hpp"
+#include "glm/ext/scalar_constants.hpp"
 
 #include <glm/ext/matrix_float3x3.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -135,8 +135,8 @@ bool inline computeAdjacent5PointsInfo(
     glm::normalize(curPoint.point - nextPoint.point));
 
   if (
-    floatNearlyEqual(prevAngle, math::number::Pi) || floatNearlyEqual(curAngle, math::number::Pi) ||
-    floatNearlyEqual(nextAngle, math::number::Pi))
+    floatNearlyEqual(prevAngle, glm::pi<float>()) || floatNearlyEqual(curAngle, glm::pi<float>()) ||
+    floatNearlyEqual(nextAngle, glm::pi<float>()))
   {
     return false;
   }
@@ -187,12 +187,12 @@ std::optional<SmoothResult> addSmoothingRadiusCurveInLocalSpace(
 
   const float consume = (1.0f + smooth) * roundedLength;
 
-  const auto halfArcRadian = (1.0f - smooth) * (math::number::Pi - theta) / 2.0f;
+  const auto halfArcRadian = (1.0f - smooth) * (glm::pi<float>() - theta) / 2.0f;
   auto       pointOnCircle =
     [](const glm::vec2& center, float radius, float radianFromBisect, float theta, int sign)
     -> glm::vec2
   {
-    const auto radian = sign * ((math::number::Pi - theta / 2.f) - radianFromBisect);
+    const auto radian = sign * ((glm::pi<float>() - theta / 2.f) - radianFromBisect);
     return glm::vec2{ center.x + radius * std::cos(radian), center.y + radius * std::sin(radian) };
   };
 

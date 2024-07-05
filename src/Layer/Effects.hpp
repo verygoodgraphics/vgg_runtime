@@ -98,7 +98,7 @@ inline SkMatrix makeMatrix(
   SkMatrix mat = SkMatrix::I();
   mat.postTranslate(-from.x, -from.y);
   mat.postScale(1.0, ratio);
-  mat.postRotate(rad2deg(theta(from, to)));
+  mat.postRotate(glm::degrees(theta(from, to)));
   mat.postTranslate(from.x, from.y);
   return mat;
 }
@@ -150,7 +150,10 @@ inline sk_sp<SkShader> makeGradientAngular(const Bounds& bounds, const G& g)
 
   if (minPosition > 0)
   {
-    auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 - maxPosition));
+    auto c =
+      glm::mix(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 - maxPosition));
+    // auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 -
+    // maxPosition));
     colors.push_back(c);
     positions.push_back(0);
     sz += 1;
@@ -162,7 +165,8 @@ inline sk_sp<SkShader> makeGradientAngular(const Bounds& bounds, const G& g)
   }
   if (maxPosition < 1)
   {
-    auto c = lerp(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 - maxPosition));
+    auto c =
+      glm::mix(minPosColor, maxPosColor, (float)minPosition / (minPosition + 1 - maxPosition));
     colors.push_back(c);
     positions.push_back(1);
     sz += 1;

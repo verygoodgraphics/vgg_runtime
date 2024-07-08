@@ -160,10 +160,11 @@ inline void serde_from(const Model::Gradient& t, VGG::Gradient& x)
       serde::serde_ellipse(g.ellipse, radial.ellipse);
       x.instance = radial;
     }
+    break;
     case GradientInstanceClass::GRADIENT_BASIC:
     {
-      DEBUG("not support");
     }
+    DEBUG("not supported: unknown gradient type");
     break;
   }
 }

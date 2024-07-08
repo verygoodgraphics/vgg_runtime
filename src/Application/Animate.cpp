@@ -363,7 +363,7 @@ bool AnimateManage::deleteFinishedAnimate()
 
   if (it != m_animates.end())
   {
-    DEBUG("animate stopped");
+    //DEBUG("animate stopped");
     m_animates.erase(it, m_animates.end());
     return true;
   }

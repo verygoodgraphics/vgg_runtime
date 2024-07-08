@@ -46,7 +46,7 @@ if(MSVC)
         STATUS DOWNLOAD_STATUS SHOW_PROGRESS)
       if(NOT DOWNLOAD_STATUS MATCHES "^0;")
         message(FATAL_ERROR "Downloading failed with ${DOWNLOAD_STATUS}")
-      endif()  
+      endif()
     endif()
 
     file(ARCHIVE_EXTRACT INPUT ${DOWNLOAD_AT_PATH} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
@@ -252,7 +252,13 @@ else()
     ${NODE_FOLDER}/out/Release/obj/tools/v8_gypfiles
   )
   if (VGG_VAR_TARGET_ARCH STREQUAL "ARM")
-    message(FATAL "Not yet support ARM platforms")
+    #message(FATAL_ERROR "Not yet support ARM platforms")
+    target_link_libraries(vgg_libnode PRIVATE
+      "-Wl,--whole-archive"
+      ${LIBNODE_DEPS}
+      base64_neon64
+      "-Wl,--no-whole-archive"
+    )
   elseif (VGG_VAR_TARGET_ARCH STREQUAL "RISCV")
     target_link_libraries(vgg_libnode PRIVATE
       "-Wl,--whole-archive"
@@ -277,7 +283,7 @@ endif()
 install(TARGETS vgg_libnode_stub DESTINATION lib)
 if(VGG_CONTAINER_FOR_QT)
   if(NOT MSVC)
-    install(TARGETS zlib 
+    install(TARGETS zlib
       COMPONENT container
       DESTINATION lib
     )

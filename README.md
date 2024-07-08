@@ -6,15 +6,15 @@ VGG Runtime supports reading and rendering of `.daruma` files, which you can use
 
 ## Cross Platform Support
 
-| Platform\\Arch | X86  | ARM  | RISC-V | WASM |
-| -------------- | ---- | ---- | ------ | ---- |
-| Linux          | ✅    | ⛏️    | ✅      | N/A  |
-| Android        | ❌    | ⛏️    | ⭕️      | N/A  |
-| Harmony        | ❌    | ⛏️    | ⭕️      | N/A  |
-| iOS            | N/A  | ✅    | N/A    | N/A  |
-| macOS          | ✅    | ✅    | N/A    | N/A  |
-| Windows        | ✅    | ❌    | N/A    | N/A  |
-| WASM           | N/A  | N/A  | N/A    | ✅    |
+| Platform\\Arch | X86  | ARM          | RISC-V        | WASM |
+| -------------- | ---- | ------------ | ------------- | ---- |
+| Linux          | ✅    | ✅ Macbook M2 | ✅ Lichee Pi4A | N/A  |
+| Android        | ❌    | ⛏️            | ⭕️             | N/A  |
+| Harmony        | ❌    | ⛏️            | ⭕️             | N/A  |
+| iOS            | N/A  | ✅            | N/A           | N/A  |
+| macOS          | ✅    | ✅            | N/A           | N/A  |
+| Windows        | ✅    | ❌            | N/A           | N/A  |
+| WASM           | N/A  | N/A          | N/A           | ✅    |
 
 ✅ Supported
 
@@ -152,4 +152,8 @@ where an example of `config.json` is provided in [asset/etc/config.json](https:/
 
 ## LICENSE
 
-VGG Runtime is licensed under [VGG License](./LICENSE), which includes a royalty fee under certain conditions. You can find a simplified explanation in VGG [FAQ](https://docs.verygoodgraphics.com/start/faq) if you don't want to read the tedious license.
+VGG Runtime is licensed under [VGG License](./LICENSE), which includes a royalty fee under certain conditions.
+
+You can find a simplified explanation in VGG [FAQ](https://docs.verygoodgraphics.com/start/faq) if you don't want to read the tedious license.
+
+And you are welcome to contribute to this project under VGG's [Contributor Reward Program](https://docs.verygoodgraphics.com/community/contributor-reward-program).

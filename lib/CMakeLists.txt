@@ -174,6 +174,7 @@ target_include_directories(vgg_libnode_stub PUBLIC
   ${NODE_FOLDER}/deps/v8/include)
 
 set(LIBNODE_DEPS
+  ada
   base64
   brotli
   cares
@@ -236,6 +237,7 @@ elseif(MSVC)
 else()
   target_link_directories(vgg_libnode PUBLIC
     ${NODE_FOLDER}/out/Release/obj
+    ${NODE_FOLDER}/out/Release/obj/deps/ada
     ${NODE_FOLDER}/out/Release/obj/deps/base64
     ${NODE_FOLDER}/out/Release/obj/deps/brotli
     ${NODE_FOLDER}/out/Release/obj/deps/cares
@@ -272,6 +274,7 @@ else()
       nghttp3
       base64_avx
       base64_avx2
+      base64_avx512
       base64_sse41
       base64_sse42
       base64_ssse3

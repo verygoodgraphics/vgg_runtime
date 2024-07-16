@@ -1,8 +1,8 @@
 # VGG Runtime
 
-VGG Runtime is an implementation of [VGG Specs](https://docs.verygoodgraphics.com/specs/overview) with cross-platform rendering and scripting capabilities.
+VGG Runtime is an implementation of [VGG Specs](https://docs.verygoodgraphics.com/specs/overview) with cross-platform vector graphics rendering and user interaction capabilities. It accepts any file conforming to the VGG Specs as input.
 
-VGG Runtime supports reading and rendering of `.daruma` files, which you can use [VGG Command-line tool](https://github.com/verygoodgraphics/vgg_cli) to convert from other design files.
+>  NOTE A `.daruma` file is one such type of input that you can convert from other design files using the [VGG Command-line tool](https://github.com/verygoodgraphics/vgg_cli).
 
 ## Cross Platform Support
 
@@ -26,25 +26,31 @@ VGG Runtime supports reading and rendering of `.daruma` files, which you can use
 
 ## How To Build
 
-This project can be built with CMake using common practice.
+This project can be built straightforwardly with CMake using common practices, though the dependencies might be a bit complicated.
 
 ### 1. Build Requirements
 
 - C++ compiler supports C++20 or higher
-- Make, CMake and Ninja
-- Python3
+- CMake >= 3.19
+- [Ninja](https://ninja-build.org/) and Python3 is required for building Skia and Nodejs
+- [Netwide Assembler (NASM)](https://nasm.us/) for building Nodejs under Windows
+
+> NOTE For the Python 3.12, you have to `pip install setuptools` when building Nodejs
 
 ### 2. Dependent Libraries
 
 - Use `git submodule update --init --recursive` to fetch VGG submodules.
-- `Nodejs` and `Skia` would be automatically prepared during building.
-- System/user-provided installation of the following libraries
-  - SDL >= 2.26
-  - (optional) Vulkan SDK (with SPIR-V tools)
+- Libraries that will be automatically downloaded and built
+  - Nodejs
+  - Skia
+  - (windows only) SDL2
+- System/user-provided libraries
+  - (except for windows) SDL >= 2.26
+  - (optional) Vulkan SDK with SPIR-V tools
 
-#### Optinal: Specify Skia manually
+#### Optional: Specify Skia manually
 
-You can also use your own skia by specifying `SKIA_DIR`:
+You can also use your own Skia by specifying `SKIA_DIR`:
 
 ```bash
 cmake .. -DSKIA_DIR=/path/to/your/skia
@@ -134,7 +140,7 @@ Make sure you have built the `sdl_runtime` target. Then in the build directory, 
 ./sdl_runtime /path/to/your/file.daruma
 ```
 
-where `file.daruma` is a file conforming to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Command-line tool](https://github.com/verygoodgraphics/vgg_cli).
+where `file.daruma` is a file conforming to [VGG Specs](https://docs.verygoodgraphics.com/specs/overview), which can be generated using [VGG Command-line tool](https://github.com/verygoodgraphics/vgg_cli). An example could be downloaded [here](https://verygoodgraphics.com/vgg.daruma).
 
 ### Running with custom font configuration
 

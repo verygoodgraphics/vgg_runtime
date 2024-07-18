@@ -20,8 +20,8 @@ if(ENABLE_IMGUI)
   # and set the ENABLE_IMGUI as ON
   target_include_directories(viewer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
   file(GLOB IMGUI_SRC ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui*.cpp)
-  set(IMGUI_IMPL_SRC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_opengl3.cpp 
+  set(IMGUI_IMPL_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_opengl3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_sdl2.cpp)
   target_sources(viewer PRIVATE ${IMGUI_SRC} ${IMGUI_IMPL_SRC})
   target_compile_definitions(viewer PRIVATE -DIMGUI_ENABLED)
@@ -57,5 +57,10 @@ if(MSVC)
     "${SKIA_EXTERNAL_PROJECT_DIR}/${SKIA_LIB_BUILD_PREFIX}/icudtl.dat"
     "${SDL2_DLL_PATH}"
     "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}"
-  )  
+  )
+endif()
+
+if (VGG_VAR_TARGET MATCHES "^Linux")
+add_executable(fb_viewer fb_viewer.cpp)
+set_target_properties(fb_viewer PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 endif()

@@ -63,4 +63,9 @@ endif()
 if (VGG_VAR_TARGET MATCHES "^Linux")
 add_executable(fb_viewer fb_viewer.cpp)
 set_target_properties(fb_viewer PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+target_link_libraries(fb_viewer PRIVATE vgg_utility vgg_layer vgg_application)
+get_target_property(VGG_LAYER_RPATH vgg_layer BUILD_RPATH)
+set_target_properties(
+  fb_viewer PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+                    BUILD_RPATH ${VGG_LAYER_RPATH})
 endif()

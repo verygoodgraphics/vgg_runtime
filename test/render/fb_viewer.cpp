@@ -3,7 +3,14 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <string>
-#include <../include/Utility/Log.hpp>
+
+#include <core/SkColor.h>
+#include <core/SkImage.h>
+#include <core/SkSurface.h>
+#include <core/SkCanvas.h>
+
+#include "Utility/Log.hpp"
+
 
 class LinuxFrameBuffer
 {
@@ -74,9 +81,14 @@ public:
     deinit();
   }
 
+  inline bool isValid()
+  {
+    return m_fbfd > 0;
+  }
+
   int getBPP()
   {
-    if (m_fbfd > 0)
+    if (isValid())
     {
       return m_vinfo.bits_per_pixel;
     }
@@ -85,7 +97,7 @@ public:
 
   char* getBuffer()
   {
-    if (m_fbfd > 0)
+    if (isValid())
     {
       return m_fbp;
     }
@@ -94,7 +106,7 @@ public:
 
   size_t getBufferSize()
   {
-    if (m_fbfd > 0)
+    if (isValid())
     {
       return m_screensize;
     }
@@ -103,16 +115,25 @@ public:
 
   size_t getBufferWidth()
   {
-    if (m_fbfd > 0)
+    if (isValid())
     {
-      return m_vinfo.yres;
+      return m_vinfo.xres;
     }
     return 0;
   }
 
   size_t getBufferHeight()
   {
-    if (m_fbfd > 0)
+    if (isValid())
+    {
+      return m_vinfo.yres;
+    }
+    return 0;
+  }
+
+  size_t getBufferRowSize()
+  {
+    if (isValid())
     {
       return m_finfo.line_length;
     }
@@ -123,13 +144,18 @@ public:
 int main()
 {
   LinuxFrameBuffer fb;
-  int              bpp = fb.getBPP();
+  if (!fb.isValid())
+  {
+    return -1;
+  }
+
+  int bpp = fb.getBPP();
   if (bpp != 32)
   {
     FAIL("Only 32 bits per pixel is supported for now");
     return -1;
   }
-
+#if 0
   char*  buf = fb.getBuffer();
   size_t size = fb.getBufferSize();
   for (size_t i = 0; i < size; i++)
@@ -152,5 +178,16 @@ int main()
         break;
     }
   }
+#else
+  SkImageInfo info = SkImageInfo::Make(fb.getBufferWidth(), fb.getBufferHeight(), SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kPremul_SkAlphaType);
+  sk_sp<SkSurface> surface = SkSurfaces::WrapPixels(info, fb.getBuffer(), fb.getBufferRowSize());
+  SkCanvas* canvas = surface->getCanvas();
+  SkPaint pen;
+  pen.setColor(SK_ColorRED);
+  canvas->clear(SK_ColorGREEN);
+  canvas->drawRect(SkRect::MakeXYWH(100, 100, 50, 50), pen);
+  canvas->drawCircle(200, 200, 50, pen);
+#endif
+
   return 0;
 }

@@ -175,6 +175,7 @@ target_include_directories(vgg_libnode_stub PUBLIC
 
 set(LIBNODE_DEPS
   ada
+  atomic
   base64
   brotli
   cares

@@ -150,7 +150,7 @@ endif()
 
 # this is an empty library for linking purpose only
 add_library(vgg_libnode STATIC empty.cpp)
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "$ENV{name}" STREQUAL "nix-shell")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND VGG_VAR_TARGET MATCHES "^Linux")
   target_link_libraries(vgg_libnode INTERFACE atomic)
 endif()
 target_include_directories(vgg_libnode PUBLIC
@@ -175,7 +175,6 @@ target_include_directories(vgg_libnode_stub PUBLIC
 
 set(LIBNODE_DEPS
   ada
-  atomic
   base64
   brotli
   cares

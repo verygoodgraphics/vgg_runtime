@@ -20,7 +20,9 @@
 #include <string>
 #include <stdlib.h>
 #include <cstring>
+#ifdef STD_RANGES_SUPPORT
 #include <ranges>
+#endif
 #include <unordered_map>
 #include <iostream>
 #include <algorithm>
@@ -41,6 +43,7 @@ std::vector<std::pair<std::string_view, std::string_view>> parse(const char* var
    * stream can be 'stderr', 'stdout', 'null' or a file name
    */
   std::vector<std::pair<std::string_view, std::string_view>> result;
+#ifdef STD_RANGES_SUPPORT
   result.reserve(4);
   std::string_view inputSV(var);
 
@@ -57,6 +60,7 @@ std::vector<std::pair<std::string_view, std::string_view>> parse(const char* var
       result.emplace_back(categoryStream[0], categoryStream[1]);
     }
   }
+#endif
   return result;
 }
 
@@ -115,6 +119,9 @@ namespace VGG::layer
 
 FILE* getLogStream(const char* category)
 {
+#ifndef STD_RANGES_SUPPORT
+  return nullptr;
+#else
   if (!g_configVars.enableLog)
   {
     return nullptr;
@@ -176,6 +183,7 @@ FILE* getLogStream(const char* category)
     return it->second.get();
   }
   return stderr;
+#endif
 }
 
 } // namespace VGG::layer

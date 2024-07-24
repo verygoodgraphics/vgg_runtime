@@ -6,23 +6,22 @@ VGG Runtime is an implementation of [VGG Specs](https://docs.verygoodgraphics.co
 
 ## Cross Platform Support
 
-| Platform\\Arch | X86  | ARM          | RISC-V        | WASM |
-| -------------- | ---- | ------------ | ------------- | ---- |
-| Linux          | ✅    | ✅ Macbook M2 | ✅ Lichee Pi4A | N/A  |
-| Android        | ❌    | ⛏️            | ⭕️             | N/A  |
-| Harmony        | ❌    | ⛏️            | ⭕️             | N/A  |
-| iOS            | N/A  | ✅            | N/A           | N/A  |
-| macOS          | ✅    | ✅            | N/A           | N/A  |
-| Windows        | ✅    | ❌            | N/A           | N/A  |
-| WASM           | N/A  | N/A          | N/A           | ✅    |
+| Platform\\Arch | X86  | ARM  | RISC-V | WASM |
+| -------------- | ---- | ---- | ------ | ---- |
+| Linux          | ✅    | ✅    | ✅      | N/A  |
+| Android        | ❌    | ⛏️    | ⭕️      | N/A  |
+| Harmony        | ❌    | ⛏️    | ⭕️      | N/A  |
+| iOS            | N/A  | ✅    | N/A    | N/A  |
+| macOS          | ✅    | ✅    | N/A    | N/A  |
+| Windows        | ✅    | ❌    | N/A    | N/A  |
+| WASM           | N/A  | N/A  | N/A    | ✅    |
 
-✅ Supported
+✅ Supported ⛏️ Working in process ⭕️ Not supported (but planned) ❌ Not supported (no official plan)
 
-⛏️ Working in process
+### Tested embedded devices on Linux
 
-⭕️ Not supported (but planned)
-
-❌ Not supported (no official plan)
+- __ARM__: Macbook M2, Raspberry Pi 4B
+- __RISC-V__: Lichee Pi 4A
 
 ## How To Build
 

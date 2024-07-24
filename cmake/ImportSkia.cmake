@@ -73,22 +73,25 @@ else()
   set(SKIA_EXTERNAL_PROJECT_DIR ${SKIA_SOURCE_DIR} CACHE STRING "" FORCE)
 endif()
 
+message(STATUS "SKIA_EXTERNAL_PROJECT_DIR=${SKIA_EXTERNAL_PROJECT_DIR}")
+
 if(MSVC)
-  #message(STATUS "Run skia git-sync-deps")
-  #execute_process(COMMAND "python3" "tools/git-sync-deps" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib/skia")
-  if(NOT EXISTS "${SKIA_SOURCE_DIR}/bin/gn.exe")
-    execute_process(COMMAND "python3" "bin/fetch-gn" WORKING_DIRECTORY ${SKIA_SOURCE_DIR} COMMAND_ERROR_IS_FATAL ANY)
-  endif()
+  set(GN "bin/gn.exe")
+else()
+  set(GN "bin/gn")
 endif()
 
-message(STATUS "Use skia ${SKIA_EXTERNAL_PROJECT_DIR}")
-
-# test gn if is for the current platform
-execute_process(COMMAND ./bin/gn --version WORKING_DIRECTORY ${SKIA_SOURCE_DIR} ERROR_VARIABLE GN_RUNNABLE_TEST)
-if(GN_RUNNABLE_TEST)
-   message(STATUS ${GN_RUNNABLE_TEST})
-   message(STATUS "Try to sync gn")
-   execute_process(COMMAND bin/fetch-gn WORKING_DIRECTORY ${SKIA_SOURCE_DIR} COMMAND_ERROR_IS_FATAL ANY)
+# test gn if it's for the current platform
+message(STATUS "Testing ${SKIA_EXTERNAL_PROJECT_DIR}/${GN}...")
+if(NOT EXISTS "${SKIA_EXTERNAL_PROJECT_DIR}/${GN}")
+  execute_process(COMMAND "python3" "bin/fetch-gn" WORKING_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR} COMMAND_ERROR_IS_FATAL ANY)
+else()
+  message(STATUS "${SKIA_EXTERNAL_PROJECT_DIR}/${GN} exists. Testing if runnable...")
+  execute_process(COMMAND "${GN}" --version WORKING_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR} RESULT_VARIABLE GN_RUN_RESULT)
+  if(NOT GN_RUN_RESULT EQUAL 0)
+     message(STATUS "Try to fetch the correct gn executable...")
+     execute_process(COMMAND "python3" "bin/fetch-gn" WORKING_DIRECTORY ${SKIA_EXTERNAL_PROJECT_DIR} COMMAND_ERROR_IS_FATAL ANY)
+  endif()
 endif()
 
 unset(NINJA_COMMAND CACHE)
@@ -121,7 +124,6 @@ set(SKIA_LIB_DIR "${SKIA_EXTERNAL_PROJECT_DIR}/${SKIA_LIB_BUILD_PREFIX}" CACHE S
 set(SKIA_INCLUDE_DIRS "${SKIA_EXTERNAL_PROJECT_DIR}" "${SKIA_EXTERNAL_PROJECT_DIR}/include/" CACHE STRING "" FORCE)
 set(SKIA_LIBS)
 
-set(GN "bin/gn")
 include(SkiaUtils)
 
 # setup features for skia compilation for different platform

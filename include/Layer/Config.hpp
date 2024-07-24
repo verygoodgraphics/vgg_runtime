@@ -36,6 +36,7 @@ FILE* getLogStream(const char* category);
 #include <format>
 #define STD_FORMAT_SUPPORT
 #define STD_FORMAT(...) std::format(__VA_ARGS__)
+#define STD_RANGES_SUPPORT
 #else
 #define STD_FORMAT(...) ((void)sizeof(__VA_ARGS__), std::string(""))
 #endif

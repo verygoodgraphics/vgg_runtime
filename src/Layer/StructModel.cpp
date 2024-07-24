@@ -244,7 +244,8 @@ std::vector<StructObject> StructObject::getChildObjects() const
       objects.reserve(m->childObjects().size());
       if (m->isFirstOnTop())
       {
-        for (const auto& c : *m | std::views::reverse)
+        //for (const auto& c : *m | std::views::reverse) TODO rewrite this logic without std::views
+        for (const auto& c : *m) // TODO delete this temp line
         {
           toType(
             c.get(),

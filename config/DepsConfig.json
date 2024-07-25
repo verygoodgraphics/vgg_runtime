@@ -14,7 +14,9 @@
         "url": "https://github.com/nodejs-mobile/nodejs-mobile/archive/refs/tags/v18.17.2.tar.gz",
         "filename": "nodejs-mobile-v18.17.2.tar.gz",
         "ios-binary-url": "https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v18.17.2/nodejs-mobile-v18.17.2-ios.zip",
-        "ios-binary-filename": "nodejs-mobile-v18.17.2-ios.zip"
+        "ios-binary-filename": "nodejs-mobile-v18.17.2-ios.zip",
+        "android-binary-url": "https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v18.17.2/nodejs-mobile-v18.17.2-android.zip",
+        "android-binary-filename": "nodejs-mobile-v18.17.2-android.zip"
     },
     "sdl2": {
         "url": "https://github.com/libsdl-org/SDL/releases/download/release-2.28.5/SDL2-devel-2.28.5-VC.zip",

@@ -1,14 +1,29 @@
 # Please refer to the skia build document for all supported featuers.
 # Only those needed are covered here.
 # https://skia.org/docs/user/build/
-if(NOT VGG_CONTAINER_FOR_QT AND NOT VGG_VAR_TARGET MATCHES "^iOS")
+if(NOT VGG_CONTAINER_FOR_QT 
+  AND NOT VGG_VAR_TARGET MATCHES "^iOS"
+  AND NOT VGG_VAR_TARGET MATCHES "^Android")
   find_package(Vulkan)
 endif()
-if(Vulkan_FOUND)
-set(VULKAN_AVAILABLE "true")
+
+if (VGG_VAR_TARGET MATCHES "^Android")
+  string(REPLACE "android-" "" api_level ${ANDROID_PLATFORM})
+  if(NOT api_level LESS 24)
+    message(STATUS "Found Android API Level ${api_level}, vulkan enabled.")
+    set(VULKAN_AVAILABLE "true")
+  else()
+    message(STATUS "Found Android API Level ${api_level}, vulkan only support API_LEVEL>=24, disabled")
+    set(VULKAN_AVAILABLE "false")
+  endif()
 else()
-set(VULKAN_AVAILABLE "false")
+  if(Vulkan_FOUND)
+    set(VULKAN_AVAILABLE "true")
+  else()
+    set(VULKAN_AVAILABLE "false")
+  endif()
 endif()
+
 set(SKIA_PRESET_FEATURES_FOR_LINUX
 "skia_use_egl=true
 skia_use_freetype=true
@@ -208,6 +223,20 @@ skia_use_system_zlib=false
 skia_use_vulkan=false
 skia_use_zlib=true")
 
+set(SKIA_PRESET_FEATURES_FOR_ANDROID
+"is_official_build=true
+ndk_api=${api_level}
+skia_use_system_freetype2=false
+skia_use_system_libpng=false
+skia_use_system_libjpeg_turbo=false
+skia_use_system_harfbuzz=false
+skia_use_system_libwebp=false
+skia_use_expat=true
+skia_use_freetype=true
+skia_use_system_expat=false
+skia_use_system_icu=false
+skia_use_vulkan=${VULKAN_AVAILABLE}")
+
 cmake_minimum_required(VERSION 3.19) # for string(JSON ...)
 
 function(list_from_json out_var json)
@@ -266,6 +295,20 @@ elseif(platform MATCHES "^iOS")
   endif()
 
   foreach(OPT ${SKIA_PRESET_FEATURES_FOR_IOS})
+    string(APPEND OPTIONS " ${OPT}")
+  endforeach(OPT)
+elseif(platform MATCHES "^Android")
+  if(platform STREQUAL "Android-armeabi-v7a")
+    string(APPEND OPTIONS " target_cpu=\"arm\"")
+  elseif(platform STREQUAL "Android-arm64-v8a")
+    string(APPEND OPTIONS " target_cpu=\"arm64\"")
+  elseif(platform STREQUAL "Android-x86_64")
+    string(APPEND OPTIONS " target_cpu=\"x64\"")
+  else()
+    message(FATAL_ERROR "target type for skia build is not supported: " ${platform})
+  endif()
+  string(APPEND OPTIONS " ndk=\"${ANDROID_NDK}\"")
+  foreach(OPT ${SKIA_PRESET_FEATURES_FOR_ANDROID})
     string(APPEND OPTIONS " ${OPT}")
   endforeach(OPT)
 else()

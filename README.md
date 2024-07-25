@@ -106,6 +106,25 @@ cmake --build . --parallel -t vgg_container
 cmake --install . --prefix <path/to/vgg_ios/VggRuntime/external>
 ```
 
+#### Android Building example
+
+We currently only support Android NDK = 27 and Android API_LEVEL >= 24.
+
+You need to download Android NDK r27 from here: https://github.com/android/ndk/releases/tag/r27
+
+Build & install `vgg_container` libraries for [vgg_android](https://github.com/verygoodgraphics/vgg_android).
+
+```bash
+mkdir build.android
+cd build.android
+# For x86_64
+cmake .. -DCMAKE_TOOLCHAIN_FILE=<android_ndk_path>/build/cmake/android.toolchain.cmake -DVGG_VAR_TARGET="Android-x86_64" -DANDROID_NDK=<android_ndk_path> -DANDROID_PLATFORM=android-24
+# For arm64
+cmake .. -DCMAKE_TOOLCHAIN_FILE=<android_ndk_path>/build/cmake/android.toolchain.cmake -DVGG_VAR_TARGET="Android-arm64-v8a" -DANDROID_NDK=<android_ndk_path> -DANDROID_PLATFORM=android-24
+cmake --build . --parallel
+cmake --install . --prefix <path/to/vgg_android/VggRuntime/external>
+```
+
 #### Qt building example
 
 Build & install `vgg_container` libraries for [vgg_qt](https://github.com/verygoodgraphics/vgg_qt).

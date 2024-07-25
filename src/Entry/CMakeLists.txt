@@ -1,5 +1,8 @@
 if(NOT EMSCRIPTEN)
-  add_subdirectory(SDL)
+  if (NOT VGG_VAR_TARGET MATCHES "^iOS"
+    AND NOT VGG_VAR_TARGET MATCHES "^Android")
+      add_subdirectory(SDL)
+  endif()
   add_subdirectory(Exporter)
   add_subdirectory(Container)
 else()

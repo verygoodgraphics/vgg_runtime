@@ -692,7 +692,7 @@ struct VkSwapchainObject
     swapInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     swapInfo.presentMode = this->surface->m_supportedPresentMode[0];
     swapInfo.clipped = true;
-    swapInfo.oldSwapchain = NULL;
+    swapInfo.oldSwapchain = VK_NULL_HANDLE;
     swapInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 
     // Destroy old swap chain

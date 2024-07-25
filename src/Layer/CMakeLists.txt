@@ -5,7 +5,8 @@ if(LAYER_SHARED_LIBRARY)
   target_compile_definitions(vgg_layer PUBLIC -DLAYER_SHARED_LIBRARY)
 else()
   add_library(vgg_layer STATIC)
-  if(VGG_VAR_TARGET MATCHES "^iOS")
+  if(VGG_VAR_TARGET MATCHES "^iOS"
+    OR VGG_VAR_TARGET MATCHES "^Android")
     target_compile_options(vgg_layer PUBLIC -fno-rtti)
   endif()
 endif()
@@ -27,7 +28,8 @@ target_include_directories(
   ${VGG_CONTRIB_JSON_INCLUDE}
   ${VGG_CONTRIB_RAPIDFUZZCPP_INCLUDE})
 
-if(NOT VGG_VAR_TARGET MATCHES "^iOS")
+if(NOT VGG_VAR_TARGET MATCHES "^iOS"
+  AND NOT VGG_VAR_TARGET MATCHES "^Android")
   # find OpenGL library
   cmake_policy(SET CMP0072 NEW)
   find_package(OpenGL REQUIRED)
@@ -37,7 +39,9 @@ target_include_directories(vgg_layer PUBLIC ${VGG_CONTRIB_JSON_INCLUDE})
 # REFACTOR:: make skia hidden from public
 target_link_libraries(vgg_layer PUBLIC ${SKIA_LIBS} glm)
 target_link_libraries(vgg_layer PRIVATE ${OPENGL_LIBRARIES} vgg_utility)
-if(NOT VGG_CONTAINER_FOR_QT AND NOT VGG_VAR_TARGET MATCHES "^iOS")
+if(NOT VGG_CONTAINER_FOR_QT 
+  AND NOT VGG_VAR_TARGET MATCHES "^iOS"
+  AND NOT VGG_VAR_TARGET MATCHES "^Android")
   find_package(Vulkan)
 endif()
 if(Vulkan_FOUND)

@@ -1,4 +1,6 @@
-if (EMSCRIPTEN)
+if (EMSCRIPTEN
+  OR VGG_VAR_TARGET MATCHES "^iOS"
+  OR VGG_VAR_TARGET MATCHES "^Android")
 else()
   add_subdirectory(render)
   if(NOT ENABLE_UNIT_TEST)

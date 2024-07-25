@@ -21,7 +21,7 @@ function(prepare_skia_source_dir)
   set(SKIA_ARCHIVE_LOCATION "${CMAKE_SOURCE_DIR}/downloads/${SKIA_ARCHIVE_FILENAME}")
   message(STATUS "Downloading ${SKIA_URL} to ${SKIA_ARCHIVE_LOCATION}")
   file(DOWNLOAD ${SKIA_URL} ${SKIA_ARCHIVE_LOCATION}
-    EXPECTED_MD5 ${SKIA_ARCHIVE_MD5_CHECKSUM}
+    EXPECTED_HASH MD5=${SKIA_ARCHIVE_MD5_CHECKSUM}
     STATUS DOWNLOAD_STATUS
     SHOW_PROGRESS
   )
@@ -103,7 +103,8 @@ message(STATUS "${NINJA_COMMAND} is found.")
 
 set(SKIA_LIB_LINK_TYPE "dynamic")
 if(VGG_VAR_TARGET STREQUAL "WASM"
-  OR VGG_VAR_TARGET MATCHES "^iOS")
+  OR VGG_VAR_TARGET MATCHES "^iOS"
+  OR VGG_VAR_TARGET MATCHES "^Android")
     set(SKIA_LIB_LINK_TYPE "static")
 endif()
 
@@ -167,7 +168,8 @@ endforeach(ITEM)
 
 foreach(LIB_NAME ${SKIA_LIB_NAMES})
   unset(FOUND_LIB_${LIB_NAME} CACHE)
-  if(VGG_VAR_TARGET STREQUAL "WASM")
+  if(VGG_VAR_TARGET STREQUAL "WASM"
+    OR VGG_VAR_TARGET MATCHES "^Android")
     set(FOUND_LIB_${LIB_NAME} "${SKIA_LIB_DIR}/lib${LIB_NAME}.a")
   else()
     find_library(FOUND_LIB_${LIB_NAME} NAMES ${LIB_NAME} ${LIB_NAME}.dll PATHS ${SKIA_LIB_DIR})
@@ -185,6 +187,6 @@ foreach(LIB_NAME ${SKIA_LIB_NAMES})
     target_include_directories(skia::${LIB_NAME} INTERFACE ${SKIA_INCLUDE_DIRS})
     list(APPEND SKIA_LIBS skia::${LIB_NAME})
   else()
-    message(STATUS "${LIB_NAME} not found in " ${SKIA_LIB_DIR})
+    message(FATAL_ERROR "${LIB_NAME} not found in " ${SKIA_LIB_DIR})
   endif()
 endforeach(LIB_NAME)

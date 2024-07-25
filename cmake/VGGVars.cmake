@@ -176,6 +176,10 @@ else()
     set(VGG_VAR_TARGET_PLATFORM "WASM" CACHE STRING "" FORCE)
     set(VGG_VAR_TARGET_ARCH "WASM" CACHE STRING "" FORCE)
   else()
+    if (VGG_VAR_TARGET MATCHES "^Android" AND NOT DEFINED ANDROID_NDK)
+      message(FATAL_ERROR "ANDROID_NDK must be set.")
+    endif()
+
     # Set target platform and arch by VGG_VAR_TARGET
     string(FIND "${VGG_VAR_TARGET}" "-" POS0)
     if (POS0 EQUAL -1)

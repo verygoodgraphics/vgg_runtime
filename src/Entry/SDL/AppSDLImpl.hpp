@@ -158,7 +158,7 @@ public:
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, appConfig().graphicsContextConfig.multiSample > 0);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, appConfig().graphicsContextConfig.multiSample);
     // SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
-#if defined(EMSCRIPTEN) || defined(VGG_TARGET_ARCH_RISCV) || defined(VGG_TARGET_ARCH_ARM)
+#if defined(EMSCRIPTEN) || defined(VGG_TARGET_ARCH_RISCV) || (defined(VGG_TARGET_ARCH_ARM) && !defined(VGG_TARGET_PLATFORM_macOS))
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);

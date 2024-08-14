@@ -20,9 +20,6 @@
 #include <string>
 #include <stdlib.h>
 #include <cstring>
-#ifdef STD_RANGES_SUPPORT
-#include <ranges>
-#endif
 #include <unordered_map>
 #include <iostream>
 #include <algorithm>
@@ -42,32 +39,31 @@ std::vector<std::pair<std::string_view, std::string_view>> parse(const char* var
    * other categories streamed to file with name <stream>.log
    * stream can be 'stderr', 'stdout', 'null' or a file name
    */
-  std::vector<std::pair<std::string_view, std::string_view>> result;
-#ifdef STD_RANGES_SUPPORT
-  result.reserve(4);
-  std::string_view inputSV(var);
 
-  auto categoryStreamPairs = inputSV | std::views::split(';');
-  for (auto&& pair : categoryStreamPairs)
+  std::vector<std::pair<std::string_view, std::string_view>> result;
+  std::string                                                input(var);
+  size_t                                                     pos = 0;
+  while (pos < input.size())
   {
-    std::vector<std::string_view> categoryStream;
-    for (auto&& part : pair | std::views::split(':'))
+    size_t nextPos = input.find(';', pos);
+    if (nextPos == std::string::npos)
     {
-      categoryStream.emplace_back(&*part.begin(), std::ranges::distance(part));
+      nextPos = input.size();
     }
-    if (categoryStream.size() == 2)
+    std::string_view categoryStream(input.c_str() + pos, nextPos - pos);
+    size_t           colonPos = categoryStream.find(':');
+    if (colonPos != std::string::npos)
     {
-      result.emplace_back(categoryStream[0], categoryStream[1]);
+      result.emplace_back(categoryStream.substr(0, colonPos), categoryStream.substr(colonPos + 1));
     }
+    pos = nextPos + 1;
   }
-#endif
   return result;
 }
 
 struct ConfigVars
 {
-  std::once_flag flag;
-
+  std::once_flag                                             flag;
   std::vector<std::pair<std::string_view, std::string_view>> logConfigs;
   bool                                                       enableLog{ false };
   ConfigVars()
@@ -119,9 +115,6 @@ namespace VGG::layer
 
 FILE* getLogStream(const char* category)
 {
-#ifndef STD_RANGES_SUPPORT
-  return nullptr;
-#else
   if (!g_configVars.enableLog)
   {
     return nullptr;
@@ -130,7 +123,6 @@ FILE* getLogStream(const char* category)
   {
     return stderr;
   }
-  namespace sv = std::views;
   auto it = g_categoryMap.find(category);
   if (it == g_categoryMap.end())
   {
@@ -183,7 +175,6 @@ FILE* getLogStream(const char* category)
     return it->second.get();
   }
   return stderr;
-#endif
 }
 
 } // namespace VGG::layer

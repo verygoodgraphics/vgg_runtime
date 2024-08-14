@@ -36,7 +36,6 @@ FILE* getLogStream(const char* category);
 #include <format>
 #define STD_FORMAT_SUPPORT
 #define STD_FORMAT(...) std::format(__VA_ARGS__)
-#define STD_RANGES_SUPPORT
 #else
 #define STD_FORMAT(...) ((void)sizeof(__VA_ARGS__), std::string(""))
 #endif
@@ -51,7 +50,7 @@ FILE* getLogStream(const char* category);
     auto UNI_NAME(s) = std::format(__VA_ARGS__);                                                   \
     if (!UNI_NAME(s).empty())                                                                      \
     {                                                                                              \
-      fprintf(UNI_NAME(f), "[" STRINGIFY(label) "]:%s\n", UNI_NAME(s).c_str());                     \
+      fprintf(UNI_NAME(f), "[" STRINGIFY(label) "]:%s\n", UNI_NAME(s).c_str());                    \
     }                                                                                              \
   } while (0);
 #else

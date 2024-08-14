@@ -244,15 +244,14 @@ std::vector<StructObject> StructObject::getChildObjects() const
       objects.reserve(m->childObjects().size());
       if (m->isFirstOnTop())
       {
-        //for (const auto& c : *m | std::views::reverse) TODO rewrite this logic without std::views
-        for (const auto& c : *m) // TODO delete this temp line
+        for (auto it = m->childObjects().rbegin(); it != m->childObjects().rend(); ++it)
         {
           toType(
-            c.get(),
+            it->get(),
             [&](EModelObjectType objectType)
-            { objects.emplace_back(dispatchObject(objectType, c.get())); },
+            { objects.emplace_back(dispatchObject(objectType, it->get())); },
             [&](EModelShapeType shapeType)
-            { objects.emplace_back(dispatchObject(shapeType, c.get())); });
+            { objects.emplace_back(dispatchObject(shapeType, it->get())); });
         }
       }
       else

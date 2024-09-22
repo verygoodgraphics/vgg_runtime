@@ -164,7 +164,8 @@ class VLayer__pImpl
   VGG_DECL_API(VLayer);
 
 public:
-  std::unique_ptr<SkiaContext> skiaContext;
+  std::unique_ptr<SkiaContext>          skiaContext;
+  std::unique_ptr<SimpleRasterExecutor> simpleRasterExecutor;
 
   std::vector<std::shared_ptr<Renderable>> items;
 
@@ -205,6 +206,7 @@ public:
 
   void cleanup()
   {
+    simpleRasterExecutor = nullptr;
     skiaContext = nullptr;
   }
 
@@ -349,6 +351,7 @@ std::optional<ELayerError> VLayer::onInit()
     ASSERT(false && "Invalid Graphics API backend");
   }
   ASSERT(_->skiaContext);
+  _->simpleRasterExecutor = std::make_unique<SimpleRasterExecutor>(_->skiaContext->context());
   return std::nullopt;
 }
 void VLayer::beginFrame()
@@ -383,8 +386,11 @@ void VLayer::setRenderNode(Ref<RenderNode> node)
 
 void VLayer::setRenderNode(Ref<ZoomerNode> transform, Ref<RenderNode> node)
 {
-  static SimpleRasterExecutor s_e(d_ptr->skiaContext->context());
-  d_ptr->rasterNode = raster::make(&s_e, d_ptr->viewport, std::move(transform), std::move(node));
+  d_ptr->rasterNode = raster::make(
+    d_ptr->simpleRasterExecutor.get(),
+    d_ptr->viewport,
+    std::move(transform),
+    std::move(node));
 }
 
 } // namespace VGG::layer

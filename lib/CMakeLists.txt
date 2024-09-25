@@ -236,6 +236,7 @@ if(VGG_VAR_TARGET MATCHES "^iOS")
   )
 elseif(VGG_VAR_TARGET MATCHES "^Android")
   target_link_directories(vgg_libnode PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NODE_FOLDER}/bin)
+  target_link_directories(vgg_libnode PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NODE_FOLDER}/bin/${ANDROID_ABI})
 elseif(APPLE)
   target_link_directories(vgg_libnode PUBLIC ${NODE_FOLDER}/out/Release)
   if (VGG_VAR_TARGET_ARCH STREQUAL "ARM")
@@ -322,3 +323,11 @@ if(VGG_CONTAINER_FOR_QT)
     )
   endif()
 endif()
+
+if(VGG_VAR_TARGET MATCHES "^Android")
+  # install libnode.so
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NODE_FOLDER}/bin/${ANDROID_ABI}/libnode.so
+        COMPONENT container
+        DESTINATION lib
+    )
+endif ()

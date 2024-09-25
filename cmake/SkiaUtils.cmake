@@ -235,6 +235,7 @@ skia_use_expat=true
 skia_use_freetype=true
 skia_use_system_expat=false
 skia_use_system_icu=false
+skia_use_egl=true
 skia_use_vulkan=${VULKAN_AVAILABLE}")
 
 cmake_minimum_required(VERSION 3.19) # for string(JSON ...)

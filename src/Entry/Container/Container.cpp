@@ -114,6 +114,10 @@ public:
     const char*        designDocSchemaFilePath = nullptr,
     const char*        layoutDocSchemaFilePath = nullptr) override
   {
+    INFO("ContainerImpl::load, filePath: %s, designDocSchemaFilePath: %s, layoutDocSchemaFilePath: %s",
+         filePath.c_str(),
+         designDocSchemaFilePath ? designDocSchemaFilePath : "<null>",
+         layoutDocSchemaFilePath ? layoutDocSchemaFilePath : "<null>");
     return m_mainComposer->controller()->start(
       filePath,
       designDocSchemaFilePath,

@@ -43,6 +43,11 @@
 #define MOD4 KMOD_CTRL
 #endif
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#include <android/set_abort_message.h>
+#endif
+
 /**************************************************************************************************/
 /* Common                                                                                         */
 /**************************************************************************************************/
@@ -159,7 +164,7 @@ inline std::string scalarfmt(double v, size_t maxFractionalDigitNums = 2)
 #define _BG_WHITE_ "47"
 
 /// Common formatters
-#if !defined(EMSCRIPTEN) && !defined(VGG_TARGET_PLATFORM_iOS)
+#if !defined(EMSCRIPTEN) && !defined(VGG_TARGET_PLATFORM_iOS) && !defined(VGG_TARGET_PLATFORM_Android)
 #define FAIL_COLOR(X) "\x1b[" _FMT_BRIGHT_ ";" _FG_RED_ "m" X "\x1b[" _FMT_RESET_ "m"
 #define WARN_COLOR(X) "\x1b[" _FMT_BRIGHT_ ";" _FG_YELLOW_ "m" X "\x1b[" _FMT_RESET_ "m"
 #define INFO_COLOR(X) "\x1b[" _FMT_BRIGHT_ ";" _FG_BLUE_ "m" X "\x1b[" _FMT_RESET_ "m"
@@ -198,6 +203,36 @@ static inline FILE* _log_file_()
 } // namespace LOG
 
 /// Private logging macros
+
+#if defined(__ANDROID__)
+
+// Android don't use stdout, stderr, use android log instead
+
+#define _MSG_(type, log, msg, ...)                                                                 \
+  do                                                                                               \
+  {                                                                                                \
+    constexpr auto _fnTypeToAndroidLevel = [](const char* _str_type) constexpr                     \
+    {                                                                                              \
+      char _c = _str_type[0];                                                                      \
+      switch (_c)                                                                                  \
+      {                                                                                            \
+        case 'F':                                                                                  \
+          return ANDROID_LOG_ERROR;                                                                \
+        case 'W':                                                                                  \
+          return ANDROID_LOG_WARN;                                                                 \
+        case 'I':                                                                                  \
+          return ANDROID_LOG_INFO;                                                                 \
+        case 'D':                                                                                  \
+          return ANDROID_LOG_DEBUG;                                                                \
+        default:                                                                                   \
+          return ANDROID_LOG_VERBOSE;                                                              \
+      }                                                                                            \
+    };                                                                                             \
+    __android_log_print(_fnTypeToAndroidLevel(type), "VGG", "" msg, ##__VA_ARGS__);                \
+  } while (0)
+
+#else
+
 #define _MSG_(type, log, msg, ...)                                                                 \
   do                                                                                               \
   {                                                                                                \
@@ -205,12 +240,31 @@ static inline FILE* _log_file_()
     fflush((log));                                                                                 \
   } while (0)
 
+#endif
+
 /// Public logging macros
 #define FAIL(msg, ...)                                                                             \
   do                                                                                               \
   {                                                                                                \
     _MSG_("FAIL", LOG::_log_file_(), FAIL_COLOR(msg), ##__VA_ARGS__);                              \
   } while (0)
+
+#if defined(__ANDROID__)
+// make abort message on one line, a fatal log will implicitly call set_abort_message
+// format: ("%s:%d " msg, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define FAILED(msg, ...)                                                                           \
+  do                                                                                               \
+  {                                                                                                \
+    __android_log_print(                                                                           \
+      ANDROID_LOG_FATAL,                                                                           \
+      "VGG",                                                                                       \
+      "%s:%d " msg,                                                                                \
+      __FILENAME__,                                                                                \
+      __LINE__,                                                                                    \
+      ##__VA_ARGS__);                                                                              \
+    std::abort();                                                                                  \
+  } while (0)
+#else
 #define FAILED(msg, ...)                                                                           \
   do                                                                                               \
   {                                                                                                \
@@ -218,6 +272,8 @@ static inline FILE* _log_file_()
     FAIL(msg, ##__VA_ARGS__);                                                                      \
     std::abort();                                                                                  \
   } while (0)
+#endif
+
 #define WARN(msg, ...)                                                                             \
   do                                                                                               \
   {                                                                                                \
@@ -259,7 +315,7 @@ static inline FILE* _log_file_()
   {                                                                                                \
     if (!(x))                                                                                      \
     {                                                                                              \
-      if (strcmp((msg), ""))                                                                       \
+      if (strcmp((msg), "") != 0)                                                                       \
       {                                                                                            \
         FAILED(STR(x) " : " msg, ##__VA_ARGS__);                                                   \
       }                                                                                            \

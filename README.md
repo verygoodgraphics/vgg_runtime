@@ -115,14 +115,19 @@ You need to download Android NDK r27 from here: https://github.com/android/ndk/r
 Build & install `vgg_container` libraries for [vgg_android](https://github.com/verygoodgraphics/vgg_android).
 
 ```bash
-mkdir build.android
-cd build.android
 # For x86_64
-cmake .. -DCMAKE_TOOLCHAIN_FILE=<android_ndk_path>/build/cmake/android.toolchain.cmake -DVGG_VAR_TARGET="Android-x86_64" -DANDROID_NDK=<android_ndk_path> -DANDROID_PLATFORM=android-24
-# For arm64
-cmake .. -DCMAKE_TOOLCHAIN_FILE=<android_ndk_path>/build/cmake/android.toolchain.cmake -DVGG_VAR_TARGET="Android-arm64-v8a" -DANDROID_NDK=<android_ndk_path> -DANDROID_PLATFORM=android-24
+mkdir build.android.x86_64
+cd build.android.x86_64
+cmake .. -DCMAKE_TOOLCHAIN_FILE=<android_ndk_path>/build/cmake/android.toolchain.cmake -DVGG_VAR_TARGET="Android-x86_64" -DANDROID_NDK=<android_ndk_path> -DANDROID_PLATFORM=android-24 -DANDROID_ABI=x86_64
 cmake --build . --parallel
-cmake --install . --prefix <path/to/vgg_android/VggRuntime/external>
+cmake --install . --prefix <path/to/vgg_android>/VggRuntime/external/x86_64
+# For arm64
+cd ..
+mkdir build.android.arm64
+cd build.android.arm64
+cmake .. -DCMAKE_TOOLCHAIN_FILE=<android_ndk_path>/build/cmake/android.toolchain.cmake -DVGG_VAR_TARGET="Android-arm64-v8a" -DANDROID_NDK=<android_ndk_path> -DANDROID_PLATFORM=android-24 -DANDROID_ABI=arm64-v8a
+cmake --build . --parallel
+cmake --install . --prefix <path/to/vgg_android>/VggRuntime/external/arm64-v8a
 ```
 
 #### Qt building example

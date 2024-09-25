@@ -1,4 +1,4 @@
-if(VGG_CONTAINER_FOR_QT)
+if(VGG_CONTAINER_FOR_QT OR VGG_VAR_TARGET MATCHES "^Android")
   add_library(vgg_container SHARED
     Container.cpp
   )
@@ -11,6 +11,10 @@ endif()
 if(VGG_VAR_TARGET MATCHES "^iOS")
   target_sources(vgg_container PRIVATE
     MetalContainer.cpp
+  )
+elseif(VGG_VAR_TARGET MATCHES "^Android")
+  target_sources(vgg_container PRIVATE
+    AndroidContainer.cpp
   )
 elseif(VGG_CONTAINER_FOR_QT)
   target_sources(vgg_container PRIVATE
@@ -45,6 +49,21 @@ else()
     vgg_adapter
   )
 endif()
+
+if(VGG_VAR_TARGET MATCHES "^Android")
+  target_link_libraries(vgg_container PUBLIC
+    vgg_adapter
+    vgg_application
+    vgg_libnode
+    node
+
+    android
+    GLESv2
+    EGL
+    log
+  )
+  target_link_options(vgg_container PRIVATE "-Bsymbolic")
+endif ()
 
 install(TARGETS vgg_container
   COMPONENT container
@@ -92,6 +111,11 @@ if(VGG_VAR_TARGET MATCHES "^iOS")
   install(DIRECTORY ${CMAKE_SOURCE_DIR}/lib/nodejs-mobile-ios/NodeMobile.xcframework
     COMPONENT container
     DESTINATION .)
+elseif(VGG_VAR_TARGET MATCHES "^Android")
+  install(FILES
+    ${CMAKE_SOURCE_DIR}/include/VGG/Container/AndroidContainer.hpp
+    COMPONENT container
+    DESTINATION VGG)
 elseif(VGG_CONTAINER_FOR_QT)
   install(FILES
     ${CMAKE_SOURCE_DIR}/include/VGG/Container/QtContainer.hpp

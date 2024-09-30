@@ -42,6 +42,14 @@ public:
     return container()->load(filePath, designDocSchemaFilePath, layoutDocSchemaFilePath);
   }
 
+  virtual bool load(
+    std::vector<char>& buffer,
+    const char*        designDocSchemaFilePath = nullptr,
+    const char*        layoutDocSchemaFilePath = nullptr)
+  {
+    return container()->load(buffer, designDocSchemaFilePath, layoutDocSchemaFilePath);
+  }
+
   void run()
   {
     container()->paint();

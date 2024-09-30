@@ -124,6 +124,20 @@ public:
       layoutDocSchemaFilePath);
   }
 
+  bool load(
+    std::vector<char>& buffer,
+    const char*        designDocSchemaFilePath = nullptr,
+    const char*        layoutDocSchemaFilePath = nullptr) override
+  {
+    INFO("ContainerImpl::load, buffer, designDocSchemaFilePath: %s, layoutDocSchemaFilePath: %s",
+         designDocSchemaFilePath ? designDocSchemaFilePath : "<null>",
+         layoutDocSchemaFilePath ? layoutDocSchemaFilePath : "<null>");
+    return m_mainComposer->controller()->start(
+      buffer,
+      designDocSchemaFilePath,
+      layoutDocSchemaFilePath);
+  }
+
   void setGraphicsContext(
     std::unique_ptr<layer::SkiaGraphicsContext>& context,
     int                                          w,

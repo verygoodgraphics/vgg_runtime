@@ -1066,11 +1066,15 @@ LayoutContext* Controller::layoutContext()
 
 void Controller::postFrame()
 {
-  auto context = layoutContext();
-  context->setLayerValid(true);
-  currentFrame()->layoutIfNeeded(context); // layout text if needed
-  if (!context->isLayerValid())            // paint node updated
-    m_presenter->setDirtry();
+  if (auto context = layoutContext())
+  {
+    context->setLayerValid(true);
+    currentFrame()->layoutIfNeeded(context); // layout text if needed
+    if (!context->isLayerValid())            // paint node updated
+    {
+      m_presenter->setDirtry();
+    }
+  }
 }
 
 std::shared_ptr<LayoutNode> Controller::currentFrame()

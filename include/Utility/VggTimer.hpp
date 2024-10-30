@@ -27,11 +27,14 @@ public:
   using TCallback = std::function<void()>;
 
 private:
+  double                        m_interval;
   TCallback                     m_callback;
+  bool                          m_repeats;
   rxcpp::composite_subscription m_timer;
 
 public:
   Timer(double interval, TCallback callback, bool repeats = false);
+  bool setup();
   void invalidate();
 };
 

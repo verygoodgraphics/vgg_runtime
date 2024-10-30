@@ -316,14 +316,19 @@ void UIScrollView::setScrollAnimation(std::shared_ptr<UIScrollViewAnimation> ani
 
   if (!m_scrollTimer)
   {
-    m_scrollTimer.reset(new Timer(
+    auto t = new Timer(
       1. / 60,
       [this]()
       {
         VERBOSE("UIScrollView: call updateScrollAnimation by timer");
         this->updateScrollAnimation();
       },
-      true));
+      true);
+    m_scrollTimer.reset(t);
+    if (!m_scrollTimer->setup())
+    {
+      WARN("Failed to setup scroll timer");
+    }
   }
 }
 

@@ -118,7 +118,12 @@ public:
 
   virtual int currentPageIndex()
   {
-    return m_view->currentPageIndex();
+    if (m_view)
+    {
+      return m_view->currentPageIndex();
+    }
+    WARN("Invalid view");
+    return 0;
   }
   bool setCurrentFrameIndex(const std::size_t index, const bool updateHistory);
   bool pushFrame(

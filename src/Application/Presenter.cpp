@@ -285,7 +285,10 @@ bool Presenter::dismissFrame(app::AnimationCompletion completion)
 
 void Presenter::initHistory()
 {
-  return m_view->initHistory();
+  if (m_view)
+  {
+    m_view->initHistory();
+  }
 }
 
 bool Presenter::popFrame(const app::PopOptions& opts, app::AnimationCompletion completion)
@@ -302,8 +305,14 @@ std::shared_ptr<StateTree> Presenter::savedState(const std::string& instanceDesc
 
 void Presenter::triggerMouseEnter()
 {
-  ASSERT(m_view);
-  m_view->triggerMouseEnter();
+  if (m_view)
+  {
+    m_view->triggerMouseEnter();
+  }
+  else
+  {
+    WARN("Presenter::triggerMouseEnter: Invalid view");
+  }
 }
 
 void Presenter::fitForRunning(const Layout::Size& pageSize)
@@ -391,6 +400,10 @@ void Presenter::fitForAspectScale(const Layout::Size& pageSize)
 
 bool Presenter::setCurrentFrameIndex(const std::size_t index, const bool updateHistory)
 {
+  if (!m_view)
+  {
+    return false;
+  }
   const auto success = m_view->setCurrentFrameIndex(index, updateHistory, {}, {});
   if (success && updateHistory)
     m_lastPushFrameAnimationOptions = {};
@@ -445,7 +458,11 @@ bool Presenter::presentInstanceState(
 
 std::unique_ptr<LayoutContext> Presenter::layoutContext()
 {
-  return m_view->layoutContext();
+  if (m_view)
+  {
+    return m_view->layoutContext();
+  }
+  return nullptr;
 }
 
 void Presenter::setBackgroundColor(uint32_t color)

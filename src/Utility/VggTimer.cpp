@@ -37,30 +37,40 @@ namespace VGG
 {
 
 Timer::Timer(double interval, TCallback callback, bool repeats)
-  : m_callback(callback)
+  : m_interval(interval)
+  , m_callback(callback)
+  , m_repeats(repeats)
 {
-  auto period = std::chrono::milliseconds(static_cast<int64_t>(interval * 1000));
+}
 
-  if (repeats)
+bool Timer::setup()
+{
+  auto period = std::chrono::milliseconds(static_cast<int64_t>(m_interval * 1000));
+
+  if (m_repeats)
   {
     auto values = rxcpp::observable<>::interval(period);
-    m_timer = values.observe_on(RunLoop::sharedInstance()->thread())
-                .subscribe([this](int v) { this->m_callback(); }, []() {});
+    auto observeTarget = RunLoop::sharedInstance()->thread();
+    auto s = values
+#if defined(__ANDROID__)
+      .subscribe_on(rxcpp::observe_on_new_thread())
+#endif
+      .observe_on(observeTarget);
+    m_timer = s.subscribe([this](int v) { if (this->m_callback) { this->m_callback(); } }, []() {});
   }
   else
   {
     auto values = rxcpp::observable<>::timer(period);
-    m_timer = values.observe_on(RunLoop::sharedInstance()->thread())
-                .subscribe(
-                  [this](int v)
-                  {
-                    if (this->m_callback)
-                    {
-                      this->m_callback();
-                    }
-                  },
-                  []() {});
+    auto observeTarget = RunLoop::sharedInstance()->thread();
+    auto s = values
+#if defined(__ANDROID__)
+      .subscribe_on(rxcpp::observe_on_new_thread())
+#endif
+      .observe_on(observeTarget);
+    m_timer = s.subscribe([this](int v) { if (this->m_callback) { this->m_callback(); } }, []() {});
   }
+
+  return true;
 }
 
 void Timer::invalidate()

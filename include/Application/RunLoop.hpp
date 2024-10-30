@@ -21,6 +21,12 @@
 #include <rxcpp/operators/rx-observe_on.hpp>
 #include <rxcpp/schedulers/rx-runloop.hpp>
 
+#if defined(__ANDROID__)
+#include <android/looper.h>
+#endif
+
+#include "Utility/Log.hpp"
+
 namespace VGG
 {
 
@@ -33,7 +39,15 @@ public:
 
   rxcpp::observe_on_one_worker thread()
   {
+#if defined(__ANDROID__)
+    ALooper* looper = ALooper_forThread();
+    if (looper == nullptr) {
+      looper = ALooper_prepare(ALOOPER_PREPARE_ALLOW_NON_CALLBACKS);
+    }
+    return rxcpp::observe_on_new_thread();
+#else
     return rxcpp::observe_on_run_loop(m_runLoop);
+#endif
   }
 
   bool empty() const
